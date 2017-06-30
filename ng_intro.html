@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Intro</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
+<script>                                                          
+	var app=angular.module("pracapp",[]);                         //app module
+	app.controller("pracappctrl",function($scope){                //controller
+		$scope.name="kapoorrakshit";
+		$scope.passw="temporary"                                 //these values are overwriiten by app ng-init values
+	});
+</script>
+
+</head>
+<body>
+
+<!--
+The ng-app directive tells AngularJS that the "<div>"" element is the "owner" of an AngularJS application.
+
+The ng-model directive binds the value of the "input" field to the application variable "name".
+
+The ng-bind directive binds the innerHTML of the "<p>" element to the application variable "name".
+
+The ng-init directive initializes AngularJS application variables.-->
+
+
+<div ng-app="pracapp" ng-controller="pracappctrl"  ng-init="passw='Your password will be shown !!';descr=2+' fields data';">
+	<DL>
+		<dt>Name
+		<dd><input type="text" ng-model="name"></dd>
+		</dt>
+		<dt>Password
+		<dd><input type="password" ng-model="passw"></dd>
+		</dt>		
+	</DL>
+	{{descr}}<br>
+	{{name + " is naam and " + passw}}                                 <!--Instead of using ng-bind, use flower brackets-->
+
+	<p ng-bind="name">Name will appear here</p>                                  <!--This text (Name will......here) is not displayed-->
+	<p ng-bind="passw">Password is shown...yes it's weird but True</p>
+
+{{(23+69*2)/2}}                                                                     <!--mathematical expressions are evaluated too {expr} -->
+
+</div>
+
+
+</body>
+</html>
