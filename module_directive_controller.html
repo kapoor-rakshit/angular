@@ -1,0 +1,88 @@
+<!--
+An AngularJS module defines an application.
+The module is a container for the different parts of an application.
+The module is a container for the application controllers. Controllers always belong to a module.-->
+
+<!--
+ng-app, ng-init, ng-model, ng-bind    are all directives
+Complete list of directives  : https://www.w3schools.com/angular/angular_ref_directives.asp-->
+
+<!--
+AngularJS controllers control the data of AngularJS applications.
+AngularJS will invoke the controller with a "$scope" object.
+In AngularJS, "$scope" is the application object (the owner of application variables and functions).
+-->
+
+<!--
+All applications have a $rootScope which is the scope created on the HTML element that contains the ng-app directive.
+The rootScope is available in the entire application.
+If a variable has the same name in both the current scope and in the rootScope, the application use the one in the current scope.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Modules Directives Controllers</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+
+	<script>
+		var app=angular.module("appmodule",[]);                         //module
+		app.controller("appcontroller",function($scope)                //controller for <div> with ng-controller="appcontroller" directive
+		{
+			$scope.naam="kapoor from ambarsar";
+			$scope.clkfunc=function(){                                //can handle functions as well
+				$scope.naam="kapoor from ambarsar pe click kiya !!";
+			};
+			$scope.listofcg=[8.65,8.74,8.59,8.54,8.51,8.48];          //data defined using controller 
+		});
+		app.run(function($rootScope){
+			$rootScope.naam="kapoor rootScope mein bhi hain"          //controller for elements outside all scopes
+		});
+		app.directive("appdirective",function()                       //user defined directive to add functinality
+			{
+				return{
+					template:"Content by a DIRECTIVE",
+					restrict:"EACM",
+					                                         //use replace=true in case invoked from a comment to prevent comment from being lost
+				};
+			});
+	</script>
+	                                          <!--"appmodule" parameter refers to an HTML element in which the application will run.
+
+	                                          The [] parameter in the module definition can be used to define dependent modules.
+	                                          Without the [] parameter, you are not creating a new module, but retrieving an existing one.
+
+	                                          We can invoke a directive by using:
+	                                          Element name   (E) == restrict values
+	                                          Attribute      (A)
+	                                          Class          (C)
+	                                          Comment        (M)         -->
+
+</head>
+
+<body ng-app="appmodule">
+
+<p>{{naam}}</p>                                      <!--variable outside controller, but same name as variable of controller-->
+
+<div ng-controller="appcontroller" ng-init="details=[{naam:'rakshit',shher:'amritsar',dob:'tithi'},{naam:'adhish',shher:'amritsar'}]">
+
+	<p ng-click="clkfunc()">{{naam}}</p>           <!--Click  DIRECTIVE-->
+
+	<ul>
+		<li ng-repeat="val in details">           <!--The ng-repeat DIRECTIVE actually clones HTML elements once for each item in a collection.-->
+            {{val}}<br>
+			Name : {{val.naam}} , DOB : {{val.dob}} , City : {{val.shher}}  
+		</li>
+	</ul>
+
+	<appdirective></appdirective>                                    <!--A DIRECTIVE from an element-->
+
+	<ul>
+		<li ng-repeat="val in listofcg">
+			{{val}}
+		</li>
+	</ul>
+</div>
+     {{naam}}                                                   
+</body>
+</html>
