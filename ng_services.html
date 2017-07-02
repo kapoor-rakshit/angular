@@ -1,0 +1,100 @@
+<!--
+In AngularJS, a service is a function, or object, that is available for, and limited to, your AngularJS application.
+AngularJS has about 30 built-in services. 
+-->
+
+<!--
+The $location service has methods which return information about the location of the current web page.
+The $location service is AngularJS' version of window.location
+
+The $timeout service runs a function after a specified number of milliseconds ie just once.
+The $timeout service is AngularJS' version of the window.setTimeout function.
+
+The $interval service runs a function every specified millisecond ie again and again.
+The $interval service is AngularJS' version of the window.setInterval function.
+
+
+The $http is an AngularJS service for reading data from remote servers.
+The AngularJS $http service makes a request to the server, and returns a response.
+
+Methods used are .get(), .post(), .jsonp(), ......
+
+The response from the server is an object with these properties:
+.config : the object used to generate the request.
+.data : a string, or an object, carrying the response from the server.
+.headers : a function to use to get header information.
+.status : a number defining the HTTP status.
+.statusText : a string defining the HTTP status.
+
+We can have our custom designed services as well.
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table, th , td  {
+  border: 1px solid grey;
+  border-collapse: collapse;
+  padding: 5px;
+}
+table tr:nth-child(odd) {                                       /*CSS Considers 1 based index*/
+  background-color: #f1f1f1;
+}
+table tr:nth-child(even) {
+  background-color: #ffffff;
+}
+</style>
+	<title>Services</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	<script>
+	        
+		var app=angular.module("app",[]);
+
+		app.service("baseconverter",function(){
+				this.convertfunc=function(val1,val2){
+					return val1.toString(val2);
+				}
+			});
+
+		app.controller("appcontroller",function($scope,$location,$timeout,$interval,$http,baseconverter){
+			$scope.pageaddr=$location.absUrl();
+
+			$scope.otherbase=baseconverter.convertfunc(255,6);
+
+			$timeout(function(){
+				$scope.pageaddr="Content has changed after 3000 ms";
+			},3000);
+
+			$scope.time=new Date().toLocaleTimeString();
+			$interval(function(){
+				$scope.time=new Date().toLocaleTimeString();
+			},1000);
+
+			$http.get("https://www.w3schools.com/angular/customers.php").then(function successfunc(response){     
+			                                                                  //First function of .then() handles success
+				$scope.messagefromserver=response.data;
+			},
+			function errorfunc(response){                                    //Second function of .then() handles error
+				$scope.messagefromserver="Something wrong !!";
+			});
+		});
+
+	</script>
+</head>
+<body ng-app="app" ng-controller="appcontroller">
+{{pageaddr}}<br>
+{{time}}<br>
+<input type="text" ng-model="frombase"> <input type="text" ng-model="tobase"> <br>     <!--Did'nt worked !!-->
+
+Converted value in {{tobase}} is : {{otherbase}}<br>
+<table>                                                                   <!--the data is in an array called "records" on the server-->
+	<tr ng-repeat="i in messagefromserver.records|orderBy:'City'">           <!--Filters applied to sort by City name-->
+	<td>{{$index}}</td>                                                      <!--get index of row (0 based)-->
+	<td>{{i.Name}}</td><td>{{i.City|uppercase}}</td><td>{{i.Country}}</td>   <!--and to display in uppercase-->
+                                                                             <!--$even and $odd gives the TRUE or FALSE based on index of row-->
+	</tr>
+</table>
+
+</body>
+</html>
