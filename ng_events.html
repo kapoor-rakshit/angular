@@ -1,0 +1,62 @@
+<!--
+The ng-disabled directive binds AngularJS application data to the disabled attribute of HTML elements.
+If the value evaluates to true, the (here textfield) will be disabled else enabled if evaluated to false.
+
+The ng-show directive shows or hides an HTML element.
+
+The ng-hide directive hides or shows an HTML element.
+
+NOTE : You can use any expression that evaluates to true or false in the events.   Example :  ng-show="hour > 12", where hour is a var
+
+########### EVENTS @ https://www.w3schools.com/angular/angular_events.asp ######
+ng-blur
+ng-change
+ng-click
+ng-copy
+ng-cut
+ng-dblclick
+ng-focus
+ng-keydown
+ng-keypress
+ng-keyup
+ng-mousedown
+ng-mouseenter
+ng-mouseleave
+ng-mousemove
+ng-mouseover
+ng-mouseup
+ng-paste
+
+NOTE : We can pass the $event object as an argument when calling the function. The "$event" object contains the browser's event object
+-->
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Events</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+	<script>
+		var app=angular.module("app",[]);
+		app.controller("appcontroller",function($scope){
+			$scope.showhidefunc=function(){
+				$scope.btctrl=!$scope.btctrl;                          //invert the current status of btctrl
+			}
+			$scope.eventfunc=function(eventname){
+				$scope.x=eventname.clientX;
+				$scope.y=eventname.clientY;
+			}
+		});
+	</script>
+</head>
+<body ng-app="app" ng-init="radiobtctrl=true;btctrl=true" ng-controller="appcontroller">
+
+<input type="text" ng-disabled="radiobtctrl" ng-show="btctrl" ng-mousemove="eventfunc($event)"><br>
+
+<input type="checkbox" ng-model="radiobtctrl">Textfield disabled : {{radiobtctrl}}</input><br>
+
+<button ng-click="showhidefunc()">Show/Hide</button><br>
+
+Coordinates hai : {{x+' te '+y}}
+
+</body>
+</html>
