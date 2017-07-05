@@ -1,0 +1,56 @@
+<!--
+The directives in AngularJS who add/remove classes are:
+
+ng-show
+ng-hide
+ng-class
+ng-view
+ng-include
+ng-repeat
+ng-if
+ng-switch
+
+
+CSS Animations
+
+CSS transition : https://www.w3schools.com/css/css3_transitions.asp
+CSS Animation  : https://www.w3schools.com/css/css3_animations.asp
+-->
+
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Animations</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-animate.js"></script>  <!--include this script to animate-->
+    
+    <script>
+    	var app=angular.module("app",["ngAnimate"]);              // ngAnimate is dependency added to module "app" 
+    </script>
+    <style>
+    div {
+  transition: all linear 500ms;
+  background-color: lightblue;
+  height: 100px;
+  width: 100%;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+  .ng-hide {
+  height: 0;                                                      /*Height parameter makes the elements height adjustment*/
+  width: 0;                                                        
+  background-color: transparent;
+  top:-200px;                                                    /*Make the element go up by 200px*/
+  left: 200px;
+}
+    </style>
+</head>
+<body ng-app="app">
+
+<input type="checkbox" ng-model="btctrl">
+<div ng-hide="btctrl">Hello Welcome to WIPRO </div>
+
+</body>
+</html>
