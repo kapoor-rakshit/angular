@@ -1,0 +1,57 @@
+<!-- with no page reloading, you can use the ngRoute module.-->
+
+
+<!DOCTYPE html>
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular-route.js"></script> <!--Script for routing-->
+<script>
+var app = angular.module("myApp", ["ngRoute"]);                             //routing dependency added
+                              //config method : Work registered in the config method will be performed when the application is loading.
+
+app.config(function($routeProvider) {    
+    $routeProvider
+    .when("/", {                                                         //$routeProvider to configure different routes in application
+        template : "<h1>Main Page hai</h1>"
+    })
+    .when("/london", {
+        template : "<h1>London hai PARIS nhi</h1><br>{{msg}}",            //template to include HTML code directly and not a page
+
+                                                                          //templateUrl to include a HTML page
+                                                                          //redirectTo  to redirect to HTML page
+
+        controller : "londonCtrl"                                         //added controller
+    })
+    .when("/paris", {
+        template : "<h1>Paris hai LONDON nhi</h1><br>{{msg}}",
+        controller : "parisCtrl"
+    })
+    .otherwise({
+    	template : "<h1>None</h1><p>Nothing has been selected</p>"    //default route when none of the others get a match.
+    });
+});
+app.controller("londonCtrl", function ($scope) {
+    $scope.msg = "I love London";
+});
+app.controller("parisCtrl", function ($scope) {
+    $scope.msg = "I love Paris";
+});
+</script>
+<body ng-app="myApp">
+
+<p><a href="#!/">Main</a></p>
+
+<a href="#!london">City 1</a>
+<a href="#!paris">City 2</a>
+
+<p>Click on the links to read about London and Paris.</p>
+                                                             
+<div ng-view></div>                                                <!--a container to put the content
+                           Applications can only have one ng-view directive, and this will be the placeholder for all views provided by the route.
+                                          ways to declare container :
+                                                                    <div ng-view></div>
+                                                                    <ng-view></ng-view>
+                                                                    <div class="ng-view"></div>-->
+
+</body>
+</html>
