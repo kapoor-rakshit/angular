@@ -1,0 +1,99 @@
+
+MEAN stack
+MongoDB , Express , Angular , Node
+
+MERN stack
+MongoDB , Express , React , Node
+
+
+
+FRONTEND CLIENT side FRAMEWORK(s) which use HTML, JS, TS, Dart for building application(s)
+Angular , React
+
+BACKEND SERVER(s)
+NodeJs , ExpressJs , ASP.NET , J2EE
+
+
+
+Traditional Web Application  |  Single Page Application
+                             -  Initial load (JS, CSS, HTML) on index.html (Single Page)
+                             -  Initally slow on index.html but subsequent requests are faster
+                             -  Client - Browser loads/remove/modify DOM coz they have ANGULAR/REACT libs
+Check reference screenshots too.
+
+
+AngularJs   --->   Angular 1.x
+Angular     --->   Angular 2 onwards
+
+
+
+METADATA
+Consists of decorators which will make normal functions act as ANGULAR
+
+NPM is a NODE PACKAGE MANAGER which gets installed with nodeJS   just  as  MAVEN, ANT, GRADLE  etc...
+
+
+
+SETUP
+Refer  SetupInstructions.docx  document
+
+
+node.js terminal is a CMD terminal with NODEJs and NPM path variables set for user automatically.
+
+
+ng serve [options]
+Reference : https://github.com/angular/angular-cli/wiki/serve
+
+--port portval     :  Port to listen on
+--host hostval     :  Host to listen on
+--open (alias: -o) : Opens the url in default browser
+--progress         : Log progress to the console while building.
+--optimization     : Enables optimization of the build output.   ..... etc.. more on above link
+
+
+"npm start"   command will work same as   "ng serve"    command.
+
+These commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
+
+index.html     loads   main.ts   loads   app.module.ts   .... so on as below
+
+index.html                --   defines the tag to be filled by BOOTSTRAPED ANGULAR component as defined in main.ts
+                               eg:- <app-root> DEFAULT text to be diplayed if ANGULAR component not found </app-root>
+
+main.ts                   --   defines AppModule (app.module file) in the bootstrapModule() 
+
+app.module.ts             --   defines @NgModule
+                               --   defines AppComponent (app.component file) ie register all components/modules here
+                               --   new components are declared in "declarations" and "imported" , 
+                                    provided they are EXPORTED in their respective ".component.ts" file
+NOTE : For a NEW COMPONENT
+mkdir component_dir under app (default) component
+      mk    comp.component.ts     file
+      mk    comp.component.html   file
+
+
+app.component.ts          --   defines @Component
+                               --   defines the name of selector tag to insert ANGULAR component in any .html
+                                    This <selector_name></> tag must be written in .html file of that COMPONENT/MODULE where it is REGISTERED
+                               --   defines TEMPLATE file to be displayed to BROWSER
+                               --   defines css file
+                          --   This class must be EXPORTED for ".module.ts" file to be able to IMPORT and REGISTER it
+                          --   defines variables of class AppComponent to be supplied to its respective TEMPLATE file
+                               This is called INTERPOLATION ie using  {{ var }} in .HTML values are supplied dynamically
+                                                                      {{'Title : '  + var}}          // hardcoded_str + var
+                                                                      {{'Title : '  + funccall()}}   //               + function_call()
+                                                                      {{mathematical_expressions}}   // eg:- 2*5+6
+                                                                      src={{ var }}                  // attribute values
+
+app.component.html        --   displayed to BROWSER
+
+
+
+ngDIRECTIVES
+Written in html files , works well with INTERPOLATION
+Reference : https://angular.io/guide/structural-directives
+
+*ngIf
+*ngFor
+[ngSwitch]    ,    *ngSwitchCase
+
