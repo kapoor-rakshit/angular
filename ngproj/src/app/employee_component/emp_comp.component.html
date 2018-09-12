@@ -1,1 +1,3 @@
-<input type="text" placeholder="{{placeval}}">
+<input type="text" placeholder="{{placeval}}" (input) = 'inputval($event.target.value)'>
+
+<p *ngIf='inputvalhere.length'>Text entered : {{inputvalhere}}</p>

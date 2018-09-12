@@ -74,26 +74,131 @@ mkdir component_dir under app (default) component
 
 app.component.ts          --   defines @Component
                                --   defines the name of selector tag to insert ANGULAR component in any .html
-                                    This <selector_name></> tag must be written in .html file of that COMPONENT/MODULE where it is REGISTERED
+                                    NOTE : This <selector_name></> tag must be written in .html file of that COMPONENT in whose MODULE.ts it is REGISTERED
                                --   defines TEMPLATE file to be displayed to BROWSER
                                --   defines css file
                           --   This class must be EXPORTED for ".module.ts" file to be able to IMPORT and REGISTER it
-                          --   defines variables of class AppComponent to be supplied to its respective TEMPLATE file
-                               This is called INTERPOLATION ie using  {{ var }} in .HTML values are supplied dynamically
+                          --   defines variables of class AppComponent to be supplied to its respective TEMPLATE file (.html)
+
+                                -- Done using INTERPOLATION ie using  {{ var }} in .HTML values are supplied dynamically
                                                                       {{'Title : '  + var}}          // hardcoded_str + var
                                                                       {{'Title : '  + funccall()}}   //               + function_call()
                                                                       {{mathematical_expressions}}   // eg:- 2*5+6
                                                                       src={{ var }}                  // attribute values
 
+                                --   NOTE : INTERPOLATION is only for STRINGs , for integer , boolean..use 
+                                     PROPERTY BINDING                 [disabled] = 'var'                       // NOTE : use of [] for attrib and ' ' for vals
+
+                                --   EVENT BINDING                    (click)    = 'funccall()'                // NOTE : use of () for event  and ' ' for func
+                                                                      (input)    = 'func($event.target.value)' //        send data from DOM to component
+                                --   TWO-WAY DATA BINDING
+                                     NOTE : Import FormsModule in "app.module.ts"    and   include  in  "imports" for two-way
+                                     -- No processing..               [(ngModel)]     = "var"                 // set value attribute's val of tag as var from DOM to COMPONENT and vice versa
+                                     -- Processing..                  (ngModelChange) = "func($event)"        // pass value to component , later used by [ngModel]
+                                                                      [ngModel]       = "var"                 // pass to DOM after processing
+
+
 app.component.html        --   displayed to BROWSER
+                      
+                          --   BUILTin PIPES    eg:- (var | uppercase)
+
+                          --   CUSTOM PIPES
+                               -- CREATE a ".pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
+                               -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value. 
+                               -- Import and include it in  "declarations"  of  "app.module.ts"
+                               -- Use in TEMPLATE .html with directives using pipe_symbol (|) and PIPENAME : NG_Model_Name_to-from_INPUT
 
 
 
 ngDIRECTIVES
-Written in html files , works well with INTERPOLATION
+Written in html files
+*ngIf is used for if logic while rendering HTML and *ngFor is used for loops in HTML rendering
+These are Structural directives and should be prefixed with *
+
 Reference : https://angular.io/guide/structural-directives
 
 *ngIf
 *ngFor
 [ngSwitch]    ,    *ngSwitchCase
 
+
+
+STYLE
+-- A global file "styles.css" exists for entire application.
+
+-- To force the app component's "app.component.css" effects to its child components use
+  /deep/   h1{    }
+  >>>      h1{    }
+
+-- For component specific style use  ".component.ts"  file
+   @Component
+           styleUrls:['firstcss', 'secondcss', 'thirdcss']
+
+-- CLASS BINDING
+   Binding a CSS class to events    eg:- [class.CLASS_NAME_CSS] = ' TRUE/FALSE '
+
+
+
+PASSING VARIABLES/VALUES
+
+-- OUTER COMPONENT to INNER COMPONENT
+   <new-component-selector-tag  [varName] = 'valuevar' > ... </new-component-selector-tag>
+
+   [varName] defined in new-component-component.ts   with   @Input() varName;
+           NOTE : varName defined with @Input must be same spell as of in <new-component-selector-tag  [varName]=''> ... </new-component-selector-tag>
+   'valuevar' comes from  ".component.ts"  file of component where <new-component-selector-tag> ... </new-component-selector-tag> is defined
+
+-- INNER COMPONENT to OUTER COMPONENT
+   
+   @Outer varName
+
+
+
+LIFECYCLE methods
+Written in  ".component.ts"  of  respective COMPONENT
+        export class COMPONENTNAME implements OnInit , OnChanges , OnDestroy{  }
+
+-- ngOnInit()
+   NOTE : ngOnInit() is ANGULAR concept , constructor() is JAVASCRIPT concept
+
+-- ngOnDestroy()
+
+-- ngOnChanges()
+
+
+
+SERVICE
+Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
+
+declare in  "providers"  of  "app.module.js"  this  service class
+
+inject in   ".component.ts"  file  using   constructor()
+
+
+COMMUNICATION with SERVICE
+Written in  ".service.ts"   file of COMPONENT
+            ".component.ts" file of COMPONENT to SUBSCRIBE
+
+-- Use of HttpClient
+
+-- PROMISE         (SUCCESS data , ERROR data)
+
+-- OBSERVABLES     (SUCCESS data , ERROR data , DONE)  these are required to be SUBSCRIBED
+
+-- JSON SERVER     (a .json file is to be added in src of PROJECT)
+
+
+
+CLIENT SIDE ROUTING
+Multiple routes... eg: localhost:4200/home/signup/
+
+Create file     "app.routing.ts"   in project's app component root dir , which contains urls/routes
+
+Import and write in "imports"   of   "app.module.ts"
+
+wherever define    <router-outlet></router-outlet>    routing urls output shown there
+
+
+. DYNAMIC ROUTING
+  using   /:varname in  "app.routing.ts"
+  config "component.ts"

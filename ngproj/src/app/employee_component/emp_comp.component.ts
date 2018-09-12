@@ -6,5 +6,13 @@ templateUrl : './emp_comp.component.html',
 })
 
 export class EmployeeComponent{
+    
 placeval="Placeholder here !! :)";
+
+inputvalhere="";
+
+inputval(value){
+this.inputvalhere = value;
+}
+
 }
