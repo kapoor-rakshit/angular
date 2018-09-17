@@ -1,3 +1,13 @@
 .clicked{
     color: red;
 }
+
+>>> p{
+    text-align: center;
+    color: blue;
+}
+
+a.active{
+    color: red;
+    font-weight: bold;
+}

@@ -1,3 +1,9 @@
+<nav>
+    <a routerLink="all" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">All</a>
+    <a routerLink="customers" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">Customers</a>
+    <a routerLink="employees" routerLinkActive="active">Employees</a>
+</nav>
+
 
 <div style="text-align:center">
   <h1>
@@ -24,5 +30,11 @@
 
 </div>
 
-<cust-comp>Not found CUSTOMERcomponent</cust-comp>
+<!--
+<cust-comp [working_at]="val">Not found CUSTOMERcomponent</cust-comp>
+<br><br>
 <emp-comp>Not found EMPLOYEEcomponent</emp-comp>
+<br><br>
+-->
+
+<disp-route>NOT FOUND</disp-route>

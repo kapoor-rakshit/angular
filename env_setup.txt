@@ -106,7 +106,8 @@ app.component.html        --   displayed to BROWSER
                                -- CREATE a ".pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
                                -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value. 
                                -- Import and include it in  "declarations"  of  "app.module.ts"
-                               -- Use in TEMPLATE .html with directives using pipe_symbol (|) and PIPENAME : NG_Model_Name_to-from_INPUT
+                               -- Use    [(ngModel)] = "filtervar"    in   <input>  tag.
+                               -- Use in TEMPLATE .html with directives using pipe_symbol (|) and PIPENAME : filtervar
 
 
 
@@ -125,10 +126,11 @@ Reference : https://angular.io/guide/structural-directives
 
 STYLE
 -- A global file "styles.css" exists for entire application.
+   eg:-  write   @import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
 
--- To force the app component's "app.component.css" effects to its child components use
-  /deep/   h1{    }
-  >>>      h1{    }
+-- To force the app component's "app.component.css" effects to its child components also use
+  /deep/   h1{  color:red;  }      OR
+  >>>      h1{  color:red;  }
 
 -- For component specific style use  ".component.ts"  file
    @Component
@@ -142,15 +144,32 @@ STYLE
 PASSING VARIABLES/VALUES
 
 -- OUTER COMPONENT to INNER COMPONENT
-   <new-component-selector-tag  [varName] = 'valuevar' > ... </new-component-selector-tag>
+   <new-component-selector-tag  [varName] = "valuevar" > ... </new-component-selector-tag>
 
-   [varName] defined in new-component-component.ts   with   @Input() varName;
+   [varName] defined in "new-component-component.ts" file   with   @Input() varName;
            NOTE : varName defined with @Input must be same spell as of in <new-component-selector-tag  [varName]=''> ... </new-component-selector-tag>
+
    'valuevar' comes from  ".component.ts"  file of component where <new-component-selector-tag> ... </new-component-selector-tag> is defined
 
+
 -- INNER COMPONENT to OUTER COMPONENT
-   
-   @Outer varName
+   in INNER "new-component-component.ts"  import {Output , Eventemitter}
+   @Output() outputvarName: EventEmitter<string> = new EventEmitter<string>();
+
+               in event_function
+                    clickfunc(valclicked)
+                 {
+                    this.outputvarName.emit(valclicked.name);
+                 }
+
+   in OUTER COMPONENT  (.html)
+   <new-component-selector-tag  (outputvarName) = "funcalledName($event)"></>
+   {{VARNAME}}
+
+                       (.component.ts)
+   funccalledName(varval){
+      this.VARNAME = varval;
+   }
 
 
 
@@ -172,12 +191,33 @@ Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decor
 
 declare in  "providers"  of  "app.module.js"  this  service class
 
-inject in   ".component.ts"  file  using   constructor()
+inject in   ".component.ts"  file  of COMPONENT using   constructor()
+                       pass values to .html var using   ngOnInit()
 
 
 COMMUNICATION with SERVICE
-Written in  ".service.ts"   file of COMPONENT
-            ".component.ts" file of COMPONENT to SUBSCRIBE
+NOTE      : MAKE sure to install JSON SERVER   "npm install -g json-server"
+Reference :                                    "https://github.com/typicode/json-server"
+
+NOTE : JSON-Server uses default KEYWORD  "id"
+Create a .JSON file under dir        "PROJ\src\"
+
+CHANGE DIR to your .JSON file's dir  "PROJ\src\"
+Start JSON SERVER                              "json-server -–watch filename.json"
+
+OPEN new TERMINAL window
+CHANGE DIR to "PROJ"  as it is where "package.json" is present
+Start ng      "ng serve"
+
+declare  "HttpClientModule" in  "imports"  of  "app.module.ts"
+
+configure ".service.ts"
+
+CREATE    "interface.ts"  file and export interface
+
+configure ".component.ts" file
+
+
 
 -- Use of HttpClient
 
@@ -192,13 +232,28 @@ Written in  ".service.ts"   file of COMPONENT
 CLIENT SIDE ROUTING
 Multiple routes... eg: localhost:4200/home/signup/
 
-Create file     "app.routing.ts"   in project's app component root dir , which contains urls/routes
+Create file         "app.routing.ts"   in project's app component root dir , which contains urls/routes
+                     NOTE : Do not put '/' in path , ANGULAR will put it automatically
 
-Import and write in "imports"   of   "app.module.ts"
+Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing.ts"
 
-wherever define    <router-outlet></router-outlet>    routing urls output shown there
+wherever define    <router-outlet></router-outlet>    routing module urls output shown there
+
+<a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule
+Set CSS class to active link using                               routerLinkAv=ctive="CSS_Class"
+For exact match of urls use                                      [routerLinkActiveoptions]="{exact:true}"
+For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
 
 
 . DYNAMIC ROUTING
-  using   /:varname in  "app.routing.ts"
-  config "component.ts"
+  using   path : "PARENT-URL/:varname" in  "app.routing.ts"  define a new component (DetailsComponent)
+  
+  config "DetailsComponent.component.ts"
+       -- constructor(ActivatedRoute , Location)    // ActivatedRoute : PARENT-URL  ,  Location : From where coming
+       -- ngOnInit()                                // Traverse the params of path  ie  /:varname1/:varname2
+
+  In .HTML define " routerLink='{{emp.id}}' " for the link. this value is the just the next value of PARENT-URL
+          
+  In     "app.module.ts"  declare  "DetailsComponent" in "declarations"
+                          import   'rxjs'
+

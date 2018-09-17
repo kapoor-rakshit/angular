@@ -9,7 +9,7 @@ export class EmployeeFilter implements PipeTransform{
         
         let searchfilter = args ? args.toLowerCase() : null;
 
-        return searchfilter ? value.filter(emp => emp.name.toLowerCase().startsWith(searchfilter)!=false):value;
+        return searchfilter ? value.filter(emp => emp.name.toLowerCase().indexOf(searchfilter)!=-1):value;
     }
 
 }

@@ -8,6 +8,7 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'ngproj';
   process_what_you_write = "";
+  val = "ThoughtWorks";
   employees = [
     {
         "empId": 1,
