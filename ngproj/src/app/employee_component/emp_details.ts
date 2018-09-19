@@ -9,7 +9,7 @@ import { EmployeeService } from './emp_service';
 })
 export class EmployeeDetailsComponent implements OnInit { 
     id: number;
-    employees: JSON;
+    employees: any;
 
 
     constructor(private route: ActivatedRoute, private location: Location, private _employeesService: EmployeeService){
@@ -20,15 +20,12 @@ export class EmployeeDetailsComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.getEmployeeDet(this.id);
+       this.employees = this._employeesService.getEmployeeDetails(this.id).subscribe(
+        (employees) =>  this.employees = employees,
+        err => console.log(err)
+      );
     }
 
-    getEmployeeDet(empid) {
-    this._employeesService.getEmployeeDetails(empid).subscribe(
-      (employees:JSON) =>  this.employees = employees,
-      err => console.log(err)
-    );
-    }
 
     goBack(): void {
         this.location.back();

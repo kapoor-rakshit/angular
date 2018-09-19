@@ -1,0 +1,33 @@
+<div class='panel panel-primary'>
+    <div class='panel-body'>
+        <div class='row'>
+            <div class='col-md-2'>Search: <input type='text' [(ngModel)]='descFilter' /></div>
+        </div>
+        <br>
+        <table class='table table-striped table-condensed' *ngIf='issues && issues.length'>
+            <thead>
+                <tr>
+                    <th style="min-width: 80px;">Description</th>
+                    <th style="min-width: 80px;">Severity</th>
+                    <th style="min-width: 100px;">Status</th>
+                    <th style="min-width: 100px;">Date Created</th>
+                    <th style="min-width: 100px;">Date Expected / Resolved</th>
+                    <th style="width:20px;"> </th>
+                    <th style="width:20px;"> </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor='let issue of issues | issueFilter: descFilter'>
+                    <td>{{ issue.desc}}</td>
+                    <td>{{ issue.severity}}</td>
+                    <td>{{ issue.status}}</td>
+                    <td>{{ issue.datecr}}</td>
+                    <td>{{ issue.daters}}</td>
+                    <td><a [routerLink]="['/issues/editissue',issue.id]" class="btn btn-xs btn-primary">Edit</a></td>
+                    <td><a (click)="deleteissue(issue.id)" class="btn btn-xs btn-danger">Delete</a></td>
+                </tr>
+            </tbody>
+        </table>
+        <a routerLink="/issues/addissue" class="btn btn-xs btn-primary">New Issue</a>
+    </div>
+</div>

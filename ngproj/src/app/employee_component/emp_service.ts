@@ -36,9 +36,8 @@ export class EmployeeService{
         return this._http.get(this._employeesUrl);
     }
 
-    getEmployeeDetails(idval){
-        let detailsurl = `${this._employeesUrl}/${idval}`;
-        return this._http.get(detailsurl);
+    getEmployeeDetails(idval:any){
+        return this._http.get(this._employeesUrl+"/"+idval);
     }
 
     addEmployee() {

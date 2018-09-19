@@ -1,0 +1,43 @@
+<div class="container">
+    <h1>Add Issue</h1>
+    <form #formRef="ngForm" (ngSubmit)="onSubmit(formRef.value)">
+      <div class="form-group">
+        <label for="desc">Description</label>
+        <input type="text" class="form-control" id="desc" name="desc" [(ngModel)]="desc" required minlength="3" #descRef="ngModel">
+        <div *ngIf="descRef.invalid && (descRef.dirty || descRef.touched)" class="alert alert-danger">
+          <div *ngIf="descRef.errors.required">
+            Description is required.
+          </div>
+          <div *ngIf="descRef.errors.minlength">
+            Description must be at least 3 characters long.
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="severity">Severity</label>
+        <select class="form-control" name="severity" [ngModel]="severity[0]">
+          <option *ngFor="let s of severity" [value]="s">
+            {{s}}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select class="form-control" name="status" [ngModel]="status[0]">
+            <option *ngFor="let s of status" [value]="s">
+              {{s}}
+            </option>
+          </select>
+      </div>
+      <div class="form-group">
+        <label for="datecr">Date Created</label>
+        <input class="form-control" type="date" name="datecr" [(ngModel)]="datecr" required>
+      </div>
+      <div class="form-group">
+        <label for="daters">Expected Resolution Date</label>
+        <input class="form-control" type="date" name="daters" [(ngModel)]="daters" required>
+      </div>
+      <button type="submit" class="btn btn-info" [disabled]="formRef.invalid">Submit</button>
+      <br><br>
+    </form>
+  </div>

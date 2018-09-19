@@ -255,5 +255,7 @@ For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
   In .HTML define " routerLink='{{emp.id}}' " for the link. this value is the just the next value of PARENT-URL
           
   In     "app.module.ts"  declare  "DetailsComponent" in "declarations"
-                          import   'rxjs'
+                          import   'rxjs'           // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
+
+
 
