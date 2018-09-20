@@ -1,3 +1,26 @@
+<html>
+  <head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  </head>
+  <body>
+
+      <script>
+          $(function() {
+            var now = new Date();
+          
+            var day = ("0" + now.getDate()).slice(-2);
+            var month = ("0" + (now.getMonth() + 1)).slice(-2);
+          
+            var today = now.getFullYear() + "-" + (month) + "-" + (day);
+          
+            $('#datecr').val(today);
+            $('#datecr').attr('min', today);
+            $('#datecr').attr('max', today);
+          
+            $('#daters').val(today);
+            $('#daters').attr('min', today); });
+       </script>
+
 <div class="container">
     <h1>Add Issue</h1>
     <form #formRef="ngForm" (ngSubmit)="onSubmit(formRef.value)">
@@ -15,7 +38,7 @@
       </div>
       <div class="form-group">
         <label for="severity">Severity</label>
-        <select class="form-control" name="severity" [ngModel]="severity[0]">
+        <select class="form-control" name="severity" [(ngModel)]="severity[0]">
           <option *ngFor="let s of severity" [value]="s">
             {{s}}
           </option>
@@ -23,7 +46,7 @@
       </div>
       <div class="form-group">
         <label for="status">Status</label>
-        <select class="form-control" name="status" [ngModel]="status[0]">
+        <select class="form-control" name="status" [(ngModel)]="status[0]">
             <option *ngFor="let s of status" [value]="s">
               {{s}}
             </option>
@@ -31,13 +54,15 @@
       </div>
       <div class="form-group">
         <label for="datecr">Date Created</label>
-        <input class="form-control" type="date" name="datecr" [(ngModel)]="datecr" required>
+        <input class="form-control" type="date" name="datecr" id="datecr" [(ngModel)]="datecr" required>
       </div>
       <div class="form-group">
         <label for="daters">Expected Resolution Date</label>
-        <input class="form-control" type="date" name="daters" [(ngModel)]="daters" required>
+        <input class="form-control" type="date" name="daters" id="daters" [(ngModel)]="daters" required>
       </div>
       <button type="submit" class="btn btn-info" [disabled]="formRef.invalid">Submit</button>
       <br><br>
     </form>
   </div>
+  </body>
+  </html>

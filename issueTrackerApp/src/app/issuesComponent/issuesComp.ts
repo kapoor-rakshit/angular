@@ -8,6 +8,8 @@ import { Issue } from './issueinterface';
 
 export class IssuesComponent implements OnInit{
 issues : Issue[];
+selectedissues : Issue[];
+selectAll : any;
 
 constructor(private _issueService: IssueService) {
   this.getIssues();               // for reloading page when navigated here from other component
@@ -28,5 +30,18 @@ ngOnInit() {
     this._issueService.deleteIssue(id).subscribe(
       (data:any) => this.getIssues()
     );
+  }
+
+  deletemultipleissue(){
+    this.selectedissues = this.issues.filter(issue => issue.selected);
+    for(let issue of this.selectedissues){
+      this._issueService.deleteIssue(issue.id).subscribe(
+        (data:any) => this.getIssues()
+      );
+    }
+  }
+
+  toggleChk(){
+    this.issues.forEach(issue => issue.selected = this.selectAll);
   }
 }

@@ -7,17 +7,19 @@
         <table class='table table-striped table-condensed' *ngIf='issues && issues.length'>
             <thead>
                 <tr>
+                    <th><input type="checkbox" name="delallchk" [(ngModel)]="selectAll" (change)="toggleChk()"></th>
                     <th style="min-width: 80px;">Description</th>
                     <th style="min-width: 80px;">Severity</th>
                     <th style="min-width: 100px;">Status</th>
                     <th style="min-width: 100px;">Date Created</th>
                     <th style="min-width: 100px;">Date Expected / Resolved</th>
                     <th style="width:20px;"> </th>
-                    <th style="width:20px;"> </th>
+                    <th style="width:20px;"><a (click)="deletemultipleissue()" class="btn btn-xs btn-danger">Delete selected</a></th>
                 </tr>
             </thead>
             <tbody>
                 <tr *ngFor='let issue of issues | issueFilter: descFilter'>
+                    <td><input type="checkbox" name="delchk" [(ngModel)]="issue.selected"></td>
                     <td>{{ issue.desc}}</td>
                     <td>{{ issue.severity}}</td>
                     <td>{{ issue.status}}</td>

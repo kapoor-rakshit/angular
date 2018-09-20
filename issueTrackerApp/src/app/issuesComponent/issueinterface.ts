@@ -5,4 +5,5 @@ export interface Issue {
     status: string;
     datecr: string;
     daters: string;
+    selected:boolean;
 }
