@@ -1,25 +1,3 @@
-<html>
-  <head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-  </head>
-  <body>
-
-      <script>
-          $(function() {
-            var now = new Date();
-          
-            var day = ("0" + now.getDate()).slice(-2);
-            var month = ("0" + (now.getMonth() + 1)).slice(-2);
-          
-            var today = now.getFullYear() + "-" + (month) + "-" + (day);
-          
-            $('#datecr').val(today);
-            $('#datecr').attr('min', today);
-            $('#datecr').attr('max', today);
-          
-            $('#daters').val(today);
-            $('#daters').attr('min', today); });
-       </script>
 
 <div class="container">
     <h1>Add Issue</h1>
@@ -64,5 +42,3 @@
       <br><br>
     </form>
   </div>
-  </body>
-  </html>

@@ -1,8 +1,5 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from "rxjs";
-import { Issue } from "./issueinterface";
-
 
 @Injectable()
 export class IssueService{
@@ -20,12 +17,12 @@ export class IssueService{
         return this._http.get(this._issuesUrl);
     }
 
-    getIssue(id): Observable<Issue[]>{
-        return this._http.get<Issue[]>(this._issuesUrl+"/"+id);
+    getIssue(id){
+        return this._http.get(this._issuesUrl+"/"+id);
     }
 
     addIssue(newIssue){
-        return this._http.post(this._issuesUrl, newIssue, this.httpOptions)
+        return this._http.post(this._issuesUrl, newIssue, this.httpOptions);
     }
 
     updateIssue(updatedissue, id){

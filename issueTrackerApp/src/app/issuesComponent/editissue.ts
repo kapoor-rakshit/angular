@@ -3,7 +3,6 @@ import { Router, ActivatedRoute, Params } from '@angular/router';
 
 import { IssueService } from "./issue_service";
 import { Issue } from './issueinterface';
-import { Observable } from 'rxjs';
 
 @Component({
     templateUrl: './editissue.html'
@@ -14,20 +13,44 @@ export class EditIssue implements OnInit{
     status: string[] = ["Open", "In Progress", "Closed"];
 
     id: any;
-    issue:Observable<Issue[]>;
+    issue:Issue[];
 
     constructor(private _issueService: IssueService, private route: ActivatedRoute, private router: Router) {
       this.route.params.forEach((params: Params) => {
         this.id = +params['id'];
     });
-    this.issue = this._issueService.getIssue(this.id);
+    this._issueService.getIssue(this.id).subscribe(      // pass values fetched from URL in subscribe()
+      (resp:any) => this.issue = resp,
+      err => console.log(err));
     }
 
   ngOnInit() {
       this.route.params.forEach((params: Params) => {
       this.id = +params['id'];
   });
-      this.issue = this._issueService.getIssue(this.id);
+      this._issueService.getIssue(this.id).subscribe(  // pass values fetched from URL in subscribe()
+        (resp:any) => this.issue = resp,
+        err => console.log(err));
+
+        var now = new Date();
+
+      var day = now.getDate();
+      var month = now.getMonth() + 1;
+
+      var dayval = "";
+      var monthval="";
+
+      if(day<10) dayval = "0" + day;
+      else dayval = day + "";
+
+      if(month<10) monthval = "0" + month;
+      else monthval = month + "";
+    
+      var today = now.getFullYear() + "-" + (monthval) + "-" + (dayval);
+    
+      document.getElementById("datecr").setAttribute('disabled','true');
+    
+      document.getElementById("daters").setAttribute('min',today);
   }
 
   onSubmit(formValue: any){

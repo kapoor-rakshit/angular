@@ -9,7 +9,13 @@ import { Issue } from './issueinterface';
 export class IssuesComponent implements OnInit{
 issues : Issue[];
 selectedissues : Issue[];
-selectAll : any;
+selectAll : boolean;
+descv:boolean = true;
+sevev:boolean = true;
+statv:boolean = true;
+datecrv:boolean = true;
+datersv:boolean = true;
+
 
 constructor(private _issueService: IssueService) {
   this.getIssues();               // for reloading page when navigated here from other component
