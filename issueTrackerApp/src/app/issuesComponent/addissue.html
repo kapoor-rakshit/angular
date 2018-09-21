@@ -16,7 +16,9 @@
       </div>
       <div class="form-group">
         <label for="severity">Severity</label>
-        <select class="form-control" name="severity" [(ngModel)]="severity[0]">
+        <select class="form-control" name="severity" [ngModel]="severity[0]">    
+                                                                    <!-- NOTE : use [ngModel] and not [(ngModel)] 
+                                                                    as we require to supply not get value selected and modify on array  -->
           <option *ngFor="let s of severity" [value]="s">
             {{s}}
           </option>
@@ -24,7 +26,7 @@
       </div>
       <div class="form-group">
         <label for="status">Status</label>
-        <select class="form-control" name="status" [(ngModel)]="status[0]">
+        <select class="form-control" name="status" [ngModel]="status[0]">
             <option *ngFor="let s of status" [value]="s">
               {{s}}
             </option>
@@ -32,11 +34,11 @@
       </div>
       <div class="form-group">
         <label for="datecr">Date Created</label>
-        <input class="form-control" type="date" name="datecr" id="datecr" [(ngModel)]="datecr" required>
+        <input class="form-control" type="date" name="datecr" id="datecr" [ngModel]="datecr" required>
       </div>
       <div class="form-group">
         <label for="daters">Expected Resolution Date</label>
-        <input class="form-control" type="date" name="daters" id="daters" [(ngModel)]="daters" required>
+        <input class="form-control" type="date" name="daters" id="daters" [ngModel]="daters" required>
       </div>
       <button type="submit" class="btn btn-info" [disabled]="formRef.invalid">Submit</button>
       <br><br>
