@@ -46,7 +46,10 @@ export class AddIssue implements OnInit{
               datecr: formValue.datecr,
               daters: formValue.daters
             };
-        this._issueService.addIssue(newIssue).subscribe();
-        this.router.navigate(['issues']);
+        this._issueService.addIssue(newIssue).subscribe(
+        	(data:any) => this.router.navigate(['issues']),
+        	err => console.log(err)
+        );
+        
       }
 }

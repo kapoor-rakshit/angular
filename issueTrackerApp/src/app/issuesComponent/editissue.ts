@@ -13,7 +13,7 @@ export class EditIssue implements OnInit{
     status: string[] = ["Open", "In Progress", "Closed"];
 
     id: any;
-    issue:Issue[];
+    issue:any = {};                                     // important for avoiding RUNTIME / BUILD error(s)
 
     constructor(private _issueService: IssueService, private route: ActivatedRoute, private router: Router) {
       this.route.params.forEach((params: Params) => {
@@ -62,7 +62,10 @@ export class EditIssue implements OnInit{
           datecr: formValue.datecr,
           daters: formValue.daters
         };
-    this._issueService.updateIssue(updatedissue, this.id).subscribe();
-    this.router.navigate(['issues']);
+    this._issueService.updateIssue(updatedissue, this.id).subscribe(
+    	(data:any) => this.router.navigate(['issues']),
+    	err => console.log(err)
+    );
+    
   }
 }
