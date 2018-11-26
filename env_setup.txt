@@ -111,6 +111,18 @@ app.component.html        --   displayed to BROWSER
 
 
 
+constructor() {  }
+The constructor method is not actually an Angular 2 method. 
+It is a predefined method in a TypeScript class which is called when the class is instantiated. 
+The constructor’s purpose is to help prepare the creation of a new instance of the class. In the context of Angular 2 it can be used to properly initialize fields.
+Angular 2’s DI (dependency injection) also tries to find providers that match the types of the constructor’s parameters, resolves them, and passes them to the constructor as arguments.
+
+ngOnInit()    {  }
+The ngOnInit method runs after the constructor method, meaning that all of the injected dependencies will be resolved and all of the class members will be defined.
+This makes it the perfect place to do any of the initialization work/logic for the component.
+
+
+
 ngDIRECTIVES
 Written in html files
 *ngIf is used for if logic while rendering HTML and *ngFor is used for loops in HTML rendering
