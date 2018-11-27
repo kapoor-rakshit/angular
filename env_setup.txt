@@ -270,4 +270,38 @@ For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
                           import   'rxjs'           // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
 
 
+LocationStrategies
+=====================
+REFERENCE   :   https://codecraft.tv/courses/angular/routing/routing-strategies/
+
+we have two strategies we can use to implement client side routing,
+one is called the HashLocationStrategy and the other is called the PathLocationStrategy.
+
+The default in Angular is the PathLocationStrategy, if we do nothing that is the strategy Angular will employ.
+
+
+HashLocationStrategy
+---------------------
+To enable HashLocationStrategy in an Angular application we pass {useHash: true} when we are providing our routes with RouterModule
+eg:-  RouterModule.forRoot(routes, {useHash: true})
+
+URL can contain some data prepended with a # character.
+
+The # part of the url is called the hash fragment.
+
+It’s normally used so that people can link to a particular section in a HTML page, specifically anchor tags,
+for example if there is an anchor tag with an name attribute of routing-strategies like so:
+
+<a name="routing-strategies"></a>
+
+Then if you created a bookmark of   http://somedomain.com/page#routing-strategies
+Then the browser would open somedomain.com/page and then scroll down so that the <a name="routing-strategies"></a> tag is at the top of the page.
+
+Also anything past the # in a URL never gets sent to the server.
+So if your URL was   https://codecraft.tv/contact/#/foo/moo/loo   then the browser makes a GET request to https://codecraft.tv/contact/ only.
+The #/foo/moo/loo part of the URL is never sent.
+
+It preserves a state of page and so on RELOADING a page , the UI state is maintained.
+
+
 
