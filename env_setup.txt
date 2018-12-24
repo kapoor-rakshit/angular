@@ -70,6 +70,10 @@ NOTE : For a NEW COMPONENT
 mkdir component_dir under app (default) component
       mk    comp.component.ts     file
       mk    comp.component.html   file
+      
+      ------OR------
+      
+      > ng generate component COMPONENT_NAME
 
 
 app.component.ts          --   defines @Component
@@ -114,8 +118,8 @@ app.component.html        --   displayed to BROWSER
 constructor() {  }
 The constructor method is not actually an Angular 2 method. 
 It is a predefined method in a TypeScript class which is called when the class is instantiated. 
-The constructor’s purpose is to help prepare the creation of a new instance of the class. In the context of Angular 2 it can be used to properly initialize fields.
-Angular 2’s DI (dependency injection) also tries to find providers that match the types of the constructor’s parameters, resolves them, and passes them to the constructor as arguments.
+The constructorâ€™s purpose is to help prepare the creation of a new instance of the class. In the context of Angular 2 it can be used to properly initialize fields.
+Angular 2â€™s DI (dependency injection) also tries to find providers that match the types of the constructorâ€™s parameters, resolves them, and passes them to the constructor as arguments.
 
 ngOnInit()    {  }
 The ngOnInit method runs after the constructor method, meaning that all of the injected dependencies will be resolved and all of the class members will be defined.
@@ -215,7 +219,7 @@ NOTE : JSON-Server uses default KEYWORD  "id"
 Create a .JSON file under dir        "PROJ\src\"
 
 CHANGE DIR to your .JSON file's dir  "PROJ\src\"
-Start JSON SERVER                              "json-server -–watch filename.json"
+Start JSON SERVER                              "json-server -â€“watch filename.json"
 
 OPEN new TERMINAL window
 CHANGE DIR to "PROJ"  as it is where "package.json" is present
@@ -289,7 +293,7 @@ URL can contain some data prepended with a # character.
 
 The # part of the url is called the hash fragment.
 
-It’s normally used so that people can link to a particular section in a HTML page, specifically anchor tags,
+Itâ€™s normally used so that people can link to a particular section in a HTML page, specifically anchor tags,
 for example if there is an anchor tag with an name attribute of routing-strategies like so:
 
 <a name="routing-strategies"></a>
