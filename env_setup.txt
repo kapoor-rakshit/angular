@@ -26,15 +26,20 @@ AngularJs   --->   Angular 1.x
 Angular     --->   Angular 2 onwards
 
 
-
 METADATA
-Consists of decorators which will make normal functions act as ANGULAR
+Consists of decorators which will make normal functions act as ANGULAR.
+It tells Angular how that method should be processed. Eg: @Component, @Injectable, @NgModule
+
+
+Transpiler is used to convert TS to JS.
+This is done either by browser or before providng production build to browser for faster response.
+
 
 NPM is a NODE PACKAGE MANAGER which gets installed with nodeJS   just  as  MAVEN, ANT, GRADLE  etc...
 
 
-
 SETUP
+------
 Refer  SetupInstructions.docx  document
 
 
