@@ -22,8 +22,22 @@ Traditional Web Application  |  Single Page Application
 Check reference screenshots too.
 
 
+
+Angular Versioning
 AngularJs   --->   Angular 1.x
 Angular     --->   Angular 2 onwards
+Angular uses SEMVER (SEMANTIC VERSIONING) ie adding meaning to VERSION.
+eg: 2.5.8
+    2 --> Major Version   (Breaking Change , ie there is need to modify existing code , eg: AngularJS to Angular)
+    5 --> New Feature     (not breaking)
+    8 --> Patch, bugfixes (not breaking)
+
+Angular 3 does not exist
+Reason : angular/router module in core library of Angular v3.x.x was already present and ahead of v2.x.x. 
+So to avoid cofusion it was dropped and moved to v4.
+
+Every six months , one major release is made to Angular Version.
+
 
 
 METADATA
@@ -109,14 +123,20 @@ app.component.ts          --   defines @Component
 
 app.component.html        --   displayed to BROWSER
                       
-                          --   BUILTin PIPES    eg:- (var | uppercase)
+                          --   BUILTin PIPES    
+                              ----------------  eg:- {{ var | uppercase }} , {{ var | lowercase }} 
+                                                     {{ var | titleCase }}
+                                                     {{ var | date : "MM/dd/yy" }}
+                                                     {{ var | currency : 'EUR' : true }}
 
                           --   CUSTOM PIPES
+                              ----------------
                                -- CREATE a ".pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
-                               -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value. 
+                               -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value.
+                               -- multiple args can be passed to transform function using (colon) '' : '' : ''
                                -- Import and include it in  "declarations"  of  "app.module.ts"
                                -- Use    [(ngModel)] = "filtervar"    in   <input>  tag.
-                               -- Use in TEMPLATE .html with directives using pipe_symbol (|) and PIPENAME : filtervar
+                               -- Use in TEMPLATE .html with directives using pipe_symbol (|) PIPENAME : filtervar
 
 
 
