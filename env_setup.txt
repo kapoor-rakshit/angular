@@ -71,8 +71,10 @@ Reference : https://github.com/angular/angular-cli/wiki/serve
 
 
 "npm start"   command will work same as   "ng serve"    command.
+because the "start" key of package.json is having value "ng serve -o".
 
 These commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
+
 
 index.html     loads   main.ts   loads   app.module.ts   .... so on as below
 
@@ -86,13 +88,16 @@ app.module.ts             --   defines @NgModule
                                --   new components are declared in "declarations" and "imported" , 
                                     provided they are EXPORTED in their respective ".component.ts" file
 NOTE : For a NEW COMPONENT
-mkdir component_dir under app (default) component
+mkdir component_dir under app dir (default) component  OR  give path to COMPONENT_NAME
       mk    comp.component.ts     file
       mk    comp.component.html   file
+      manually declare new component in app.module.ts "declarations"
       
       ------OR------
       
-      > ng generate component COMPONENT_NAME
+      > ng generate component DIR/COMPONENT_NAME/              // this will create a COMPONENT_NAME dir under DIR dir with required files .html, .ts, .css
+      > ng g c DIR/COMPONENT_NAME/
+      automatically update app.module.ts declare new component in "declarations"
 
 
 app.component.ts          --   defines @Component
@@ -131,7 +136,13 @@ app.component.html        --   displayed to BROWSER
 
                           --   CUSTOM PIPES
                               ----------------
-                               -- CREATE a ".pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
+NOTE : For creating NEW PIPE
+      manually
+
+          ----- OR -----
+
+    > ng generate pipe PIPENAME
+                               -- CREATE a "PIPENAME.pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
                                -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value.
                                -- multiple args can be passed to transform function using (colon) '' : '' : ''
                                -- Import and include it in  "declarations"  of  "app.module.ts"
@@ -147,9 +158,29 @@ These are Structural directives and should be prefixed with *
 
 Reference : https://angular.io/guide/structural-directives
 
-*ngIf
+*ngIf                            // *ngIf="isValid; else other_content;"      <ng-template #other_content>isValid is false</ng-template>
+                                 // *ngIf="num>10;then greater else smaller;" <ng-template #greater>num Greater 10</ng-template>
+                                 //                                           <ng-template #smaller>num Smaller 10</ng-template>
+                                 // *ngIf="time$ | async as current_time; else loadingIdNgTemplate;" 
 *ngFor
 [ngSwitch]    ,    *ngSwitchCase
+
+
+
+Angular Animations
+From Angular 4 , animations are part of separate animations library and not part of angular core library as it was earlier.
+inside app.module.ts             import BrowserAnimationsModule and write it in imports[] array
+inside component's .ts file      animations: [] ,this contains animationName and it's properties, just like template and css properties given.
+                                 stateVar: string = "small";                            // this variable change will trigger animation
+                                 animateFunc(){
+                                    this.stateVar=(this.stateVar=="small"?"large":"small");
+                                 }
+inside component's .html file    <p [@animationName]="stateVar" (click)="animateFunc()">some random text</p>
+
+
+
+Angular Forms
+
 
 
 
