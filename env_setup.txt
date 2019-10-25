@@ -180,7 +180,18 @@ inside component's .html file    <p [@animationName]="stateVar" (click)="animate
 
 
 Angular Forms
-
+- These forms should support Two way data binding.
+- Keep track of form state, current state is valid or not, display validation errors, enable/disable form based on validation criteria.
+1. Template driven forms
+   - import FormsModules from "@angular/forms" to app.module.ts imports[] array
+   - create .ts class and .html template for it.
+   - use of directives ngModel, ngForm, ngModelGroup, ngSubmit.
+   - display validation errors.
+2. Model driven forms (Reactive forms)
+   - create and initialize Form Control Objects in .ts class which are intermediate objects that hold state of form.
+   - Bind these objects to form control elements in .html template.
+   - import ReactiveFormsModule from "@angular/forms" to app.module.ts imports[] array
+   - 
 
 
 
