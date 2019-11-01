@@ -45,11 +45,14 @@ Consists of decorators which will make normal functions act as ANGULAR.
 It tells Angular how that method should be processed. Eg: @Component, @Injectable, @NgModule
 
 
+
 Transpiler is used to convert TS to JS.
 This is done either by browser or before providng production build to browser for faster response.
 
 
+
 NPM is a NODE PACKAGE MANAGER which gets installed with nodeJS   just  as  MAVEN, ANT, GRADLE  etc...
+
 
 
 SETUP
@@ -57,7 +60,9 @@ SETUP
 Refer  SetupInstructions.docx  document
 
 
+
 node.js terminal is a CMD terminal with NODEJs and NPM path variables set for user automatically.
+
 
 
 ng serve [options]
@@ -69,13 +74,12 @@ Reference : https://github.com/angular/angular-cli/wiki/serve
 --progress         : Log progress to the console while building.
 --optimization     : Enables optimization of the build output.   ..... etc.. more on above link
 
-
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
 
+
+
 These commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
-
-
 index.html     loads   main.ts   loads   app.module.ts   .... so on as below
 
 index.html                --   defines the tag to be filled by BOOTSTRAPED ANGULAR component as defined in main.ts
@@ -92,13 +96,10 @@ mkdir component_dir under app dir (default) component  OR  give path to COMPONEN
       mk    comp.component.ts     file
       mk    comp.component.html   file
       manually declare new component in app.module.ts "declarations"
-      
       ------OR------
-      
-      > ng generate component DIR/COMPONENT_NAME/              // this will create a COMPONENT_NAME dir under DIR dir with required files .html, .ts, .css
+      > ng generate component DIR/COMPONENT_NAME/            // this will create a COMPONENT_NAME dir under DIR dir with required files .html, .ts, .css
       > ng g c DIR/COMPONENT_NAME/
-      automatically update app.module.ts declare new component in "declarations"
-
+      automatically updates app.module.ts declare new component in "declarations"
 
 app.component.ts          --   defines @Component
                                --   defines the name of selector tag to insert ANGULAR component in any .html
@@ -125,7 +126,6 @@ app.component.ts          --   defines @Component
                                      -- Processing..                  (ngModelChange) = "func($event)"        // pass value to component , later used by [ngModel]
                                                                       [ngModel]       = "var"                 // pass to DOM after processing
 
-
 app.component.html        --   displayed to BROWSER
                       
                           --   BUILTin PIPES    
@@ -133,14 +133,11 @@ app.component.html        --   displayed to BROWSER
                                                      {{ var | titleCase }}
                                                      {{ var | date : "MM/dd/yy" }}
                                                      {{ var | currency : 'EUR' : true }}
-
                           --   CUSTOM PIPES
                               ----------------
 NOTE : For creating NEW PIPE
       manually
-
-          ----- OR -----
-
+      ----- OR -----
     > ng generate pipe PIPENAME
                                -- CREATE a "PIPENAME.pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
                                -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value.
@@ -155,15 +152,14 @@ ngDIRECTIVES
 Written in html files
 *ngIf is used for if logic while rendering HTML and *ngFor is used for loops in HTML rendering
 These are Structural directives and should be prefixed with *
-
 Reference : https://angular.io/guide/structural-directives
 
-*ngIf                            // *ngIf="isValid; else other_content;"      <ng-template #other_content>isValid is false</ng-template>
+1. *ngIf                         // *ngIf="isValid; else other_content;"      <ng-template #other_content>isValid is false</ng-template>
                                  // *ngIf="num>10;then greater else smaller;" <ng-template #greater>num Greater 10</ng-template>
                                  //                                           <ng-template #smaller>num Smaller 10</ng-template>
                                  // *ngIf="time$ | async as current_time; else loadingIdNgTemplate;" 
-*ngFor
-[ngSwitch]    ,    *ngSwitchCase
+2. *ngFor
+3. [ngSwitch]    ,    *ngSwitchCase
 
 
 
@@ -186,12 +182,12 @@ Angular Forms
    - import FormsModules from "@angular/forms" to app.module.ts imports[] array
    - create .ts class and .html template for it.
    - use of directives ngModel, ngForm, ngModelGroup, ngSubmit.
-   - display validation errors.
+   - validations are part of template (.html)
 2. Model driven forms (Reactive forms)
-   - create and initialize Form Control Objects in .ts class which are intermediate objects that hold state of form.
-   - Bind these objects to form control elements in .html template.
    - import ReactiveFormsModule from "@angular/forms" to app.module.ts imports[] array
-   - 
+   - create and initialize Form Control Objects in .ts class which are intermediate objects that hold state of form using FormGroup, FormControl, Validators, FormBuilder (formbuilder prevents use of formcontrol)
+   - bind these objects to form control elements in .html template using [formGroup]="" property, formGroupName="" directive, formControlName="" directive
+   - validations logic are part of class (.ts) however rules (.invalid && .touched) are defined inside template (.html)
 
 
 
@@ -213,7 +209,6 @@ STYLE
 
 
 PASSING VARIABLES/VALUES
-
 -- OUTER COMPONENT to INNER COMPONENT
    <new-component-selector-tag  [varName] = "valuevar" > ... </new-component-selector-tag>
 
@@ -221,7 +216,6 @@ PASSING VARIABLES/VALUES
            NOTE : varName defined with @Input must be same spell as of in <new-component-selector-tag  [varName]=''> ... </new-component-selector-tag>
 
    'valuevar' comes from  ".component.ts"  file of component where <new-component-selector-tag> ... </new-component-selector-tag> is defined
-
 
 -- INNER COMPONENT to OUTER COMPONENT
    in INNER "new-component-component.ts"  import {Output , Eventemitter}
@@ -297,7 +291,6 @@ Written in  ".component.ts"  of  respective COMPONENT
 
 
 
-
 SERVICE
 --------
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
@@ -306,7 +299,6 @@ declare in  "providers"  of  "app.module.js"  this  service class
 
 inject in   ".component.ts"  file  of COMPONENT using   constructor()
                        pass values to .html var using   ngOnInit()
-
 
 COMMUNICATION with SERVICE
 ---------------------------
@@ -333,13 +325,23 @@ configure ".component.ts" file
 
 
 
--- Use of HttpClient
-
+Use of HttpClientModule
+------------------------
+HTTP request is made in browser using either XMLHttpRequest or fetch().
+import {HttpClientModule} from "@angular/common/http" and included in imports[] array.
+HttpClientModule provides testability features, typed request and response objects, request and response interception, Observable APIs, Streamlined error handling.
 -- PROMISE         (SUCCESS data , ERROR data)
-
--- OBSERVABLES     (SUCCESS data , ERROR data , DONE)  these are required to be SUBSCRIBED
-
+-- OBSERVABLES     (SUCCESS data , ERROR data , DONE)  these are required to be SUBSCRIBED , .subscribe() triggers execution of  OBSERVABLES and causes HttpClient to compose and send request to server.
 -- JSON SERVER     (a .json file is to be added in src of PROJECT)
+
+import {HttpHeaders} from "@angular/common/http"
+const httpOptions = {
+  headers: new HttpHeaders({
+    'content-type' : 'application/json',
+    'authorization' : 'tokenValue'
+  })
+}
+import 'rxjs' in app.module.ts     // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
 
 
 
@@ -373,7 +375,8 @@ For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
                           import   'rxjs'           // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
 
 
-LocationStrategies
+
+LOCATION STRATEGIES
 =====================
 REFERENCE   :   https://codecraft.tv/courses/angular/routing/routing-strategies/
 
