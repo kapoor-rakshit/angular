@@ -9,6 +9,8 @@ MongoDB , Express , React , Node
 
 FRONTEND CLIENT side FRAMEWORK(s) which use HTML, JS, TS, Dart for building application(s)
 Angular , React
+Angular works on REAL DOM.
+React works on VIRTUAL DOM , better performance as compared to Angular.
 
 BACKEND SERVER(s)
 NodeJs , ExpressJs , ASP.NET , J2EE
@@ -33,17 +35,18 @@ eg: 2.5.8
     8 --> Patch, bugfixes (not breaking)
 
 Angular 3 does not exist
-Reason : angular/router module in core library of Angular v3.x.x was already present and ahead of v2.x.x. 
-So to avoid cofusion it was dropped and moved to v4.
+Reason : angular/router module in core library of Angular was at v3.x.x plus ahead of v2.x.x for other modules.
+         Now if Angular v3 is released , angular/router module will be at v4.x.x while others will be at v3.x.x
+         So to avoid cofusion it was dropped and moved to v4 directly.
 
 Every six months , one major release is made to Angular Version.
 
 
 
 METADATA
-Consists of decorators which will make normal functions act as ANGULAR.
-It tells Angular how that method should be processed. Eg: @Component, @Injectable, @NgModule
-
+Tells angular how to process a class ie qualifying a class with the attributes which angular framework can understand.
+Consists of decorators. Eg: @Component, @Injectable, @NgModule, @Pipe.
+NOTE : a class immediately succeeded by METADATA decorator will only act as ANGULAR specific.
 
 
 Transpiler is used to convert TS to JS.
@@ -52,6 +55,25 @@ This is done either by browser or before providng production build to browser fo
 
 
 NPM is a NODE PACKAGE MANAGER which gets installed with nodeJS   just  as  MAVEN, ANT, GRADLE  etc...
+NPM is used to install a package, and any packages that it depends on.
+> npm install
+If the package has a 'package-lock' or 'shrinkwrap file', installation of dependencies will be driven by that else from 'package.json'
+
+> npm install --save <PACKAGE_NAME>
+Install the dependencies in the local node_modules folder.
+
+> npm install -g --save <PACKAGE_NAME>
+(--global), installs the current package context (ie, the current working directory) as a global package in NodeJS's 'node_modules' dir
+
+> npm update --save
+npm checks if there exist newer versions in repository that satisfy specified semantic versioning ranges as in package.json and installs them.
+but leaves package.json untouched (you can change this by passing --save option).
+
+> npm outdated
+> npm install <PACKAGE_NAME>@latest --save
+Updating a version that is beyond semantic versioning range requires two parts. 
+First, you ask npm to list which packages have newer versions available using `npm outdated`.
+Then you ask npm to install the latest (@latest) version or specific version (@4.1.6) of a package.
 
 
 
@@ -60,14 +82,25 @@ SETUP
 Refer  SetupInstructions.docx  document
 
 
-
 node.js terminal is a CMD terminal with NODEJs and NPM path variables set for user automatically.
 
 
+(MULTI-REPO)  :  every new angular project created will have its own node_modules, files (angular.json, package.json), folders.
+> ng new <APP_NAME> 
 
-ng serve [options]
+(MONO-REPO)   :  only one node_modules and common files which can be shared by all angular projects inside working directory <my-workspace>
+> ng new <my-workspace> --create-application=false --defaults
+> ng generate application <my-app>
+--create-application : tells the Angular CLI not to generate an initial application.
+--defaults           : tells the Angular CLI not to prompt you about routing and CSS preprocessor.
+NOTE : application <my-app> and its corresponding <my-app>-e2e application are in the 'projects' folder.
+
+> ng update
+Perform a basic update to the current stable release of the core framework and CLI.
+--all=true | flase   ,  Whether to update all packages in package.json. (default=false)
+
+> ng serve [options]
 Reference : https://github.com/angular/angular-cli/wiki/serve
-
 --port portval     :  Port to listen on
 --host hostval     :  Host to listen on
 --open (alias: -o) : Opens the url in default browser
@@ -77,6 +110,57 @@ Reference : https://github.com/angular/angular-cli/wiki/serve
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
 
+
+
+JIT / AOT
+--------------------
+- In the beginning, a compiler was responsible for turning a high-level language into object code (machine instructions), 
+  which would then be linked into an executable.
+  
+- just-in-time (JIT) compilation (also dynamic translation or run-time compilations) is a way of executing computer code 
+  that involves  compilation during execution of a program — at run time — rather than prior to execution.
+  Or stated more simply, it is that the code gets compiled when it is needed, not before runtime.
+  
+  A just-in-time (JIT) compiler is a feature of the run-time interpreter, that instead of interpreting bytecode every time a method is invoked, 
+  will compile the bytecode into the machine code instructions of the running machine, and then invoke this object code instead.
+  
+  In JIT, not all the code is converted into machine code initially. Only code that is necessary (used immediately) will be converted into machine code. 
+  Then if a method or functionality called and is not in machine code, then that will also be turned into machine code. 
+  This reduces the burden on the CPU and makes the app render faster because it only uses what is needed.
+  
+- ahead-of-time compilation (AOT compilation) is the act of compiling a higher-level programming language such as C or C++, or an 
+  intermediate representation such as Java bytecode or .NET Framework Common Intermediate Language (CIL) code, 
+  into a native (system-dependent) machine code so that the resulting binary file can execute natively.
+  
+  An ahead-of-time (AOT) compiler converts your code during the build time before the browser downloads and runs that code. 
+  Compiling your application during the build process provides a faster rendering in the browser.
+  
+  Benefits
+  Faster rendering, Fewer asynchronous requests, Smaller Angular framework download size, Detect template errors earlier, Better security
+  
+- JIT compilation is the default when you run the `ng build` or `ng serve` CLI commands. This is for development.
+  For AOT compilation, include the `--prod` or `--aot` option with the `ng build` or `ng serve` command, 
+  NOTE : this parameter is configured in 'angular.json' with `AOT`.
+
+
+
+Structure of Angular Application
+------------------------------------
+e2e               : end to end tests
+node_modules      : contains node nodules used by angular application (MULTI-REPO) or provides packages to your workspace (MONO-REPO).
+src/app           : contains components (.html, .ts, .css, -spec.ts)
+src/polyfills     : compatibility for different browsers.
+src/styles.css    : define styling classes which can be used by all components in app, like defining global styles.
+src/index.html    : the starting point, the page which browser reads and loads when running angular app. (contains <selector></selector> for bootstrap component)
+src/main.ts       :	the entry point from a code perpective for your angular app. (contains  platformBrowserDynamic().bootstrapModule(AppModule))
+angular.json      : CLI configuration defaults
+tsconfig.json     : typescript configuration
+package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
+                    ~version : “Approximately equivalent to version”
+                    ^version : “Compatible with version”
+package-lock.json : a derivative of package.json which has exact library version(s) you are using for this app.
+                    `npm install` uses 'package-lock.json' (if available) else 'package.json' to install required dependencies.
+                    
 
 
 These commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
@@ -117,11 +201,12 @@ app.component.ts          --   defines @Component
 
                                 --   NOTE : INTERPOLATION is only for STRINGs , for integer , boolean..use 
                                      PROPERTY BINDING                 [disabled] = 'var'                       // NOTE : use of [] for attrib and ' ' for vals
+                                     CSS_CLASS BINDING                [class.CLASS_NAME_CSS] = "booleanVAR"
 
                                 --   EVENT BINDING                    (click)    = 'funccall()'                // NOTE : use of () for event  and ' ' for func
                                                                       (input)    = 'func($event.target.value)' //        send data from DOM to component
                                 --   TWO-WAY DATA BINDING
-                                     NOTE : Import FormsModule in "app.module.ts"    and   include  in  "imports" for two-way
+                                     NOTE : Import { FormsModule } in "app.module.ts"    and   include  in  "imports" for two-way
                                      -- No processing..               [(ngModel)]     = "var"                 // set value attribute's val of tag as var from DOM to COMPONENT and vice versa
                                      -- Processing..                  (ngModelChange) = "func($event)"        // pass value to component , later used by [ngModel]
                                                                       [ngModel]       = "var"                 // pass to DOM after processing
@@ -294,6 +379,7 @@ Written in  ".component.ts"  of  respective COMPONENT
 SERVICE
 --------
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
+            > ng generate service <SERVICE_NAME>
 
 declare in  "providers"  of  "app.module.js"  this  service class
 
@@ -320,6 +406,7 @@ declare  "HttpClientModule" in  "imports"  of  "app.module.ts"
 configure ".service.ts"
 
 CREATE    "interface.ts"  file and export interface
+           > ng generate interface <INTERFACE_NAME>
 
 configure ".component.ts" file
 
