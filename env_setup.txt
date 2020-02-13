@@ -88,12 +88,14 @@ node.js terminal is a CMD terminal with NODEJs and NPM path variables set for us
 (MULTI-REPO)  :  every new angular project created will have its own node_modules, files (angular.json, package.json), folders.
 > ng new <APP_NAME> 
 
-(MONO-REPO)   :  only one node_modules and common files which can be shared by all angular projects inside working directory <my-workspace>
+(MONO-REPO)   :  only one node_modules and common files which can be shared by all angular applications inside working directory <my-workspace>
 > ng new <my-workspace> --create-application=false --defaults
 > ng generate application <my-app>
+> ng serve <my-app>
 --create-application : tells the Angular CLI not to generate an initial application.
 --defaults           : tells the Angular CLI not to prompt you about routing and CSS preprocessor.
 NOTE : application <my-app> and its corresponding <my-app>-e2e application are in the 'projects' folder.
+     : ng s <my-app> [options]    or    ng serve <my-app> [options]           will start the application
 
 > ng update
 Perform a basic update to the current stable release of the core framework and CLI.
