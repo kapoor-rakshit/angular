@@ -203,7 +203,10 @@ app.component.ts          --   defines @Component
 
                                 --   NOTE : INTERPOLATION is only for STRINGs , for integer , boolean..use 
                                      PROPERTY BINDING                 [disabled] = 'var'                       // NOTE : use of [] for attrib and ' ' for vals
-                                     CSS_CLASS BINDING                [class.CLASS_NAME_CSS] = "booleanVAR"
+                                     CSS_CLASS BINDING                [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
+                                                                      [ngClass] = "'firstCSSClass secondCSSClass'"
+                                                                      [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
+                                                                      [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
 
                                 --   EVENT BINDING                    (click)    = 'funccall()'                // NOTE : use of () for event  and ' ' for func
                                                                       (input)    = 'func($event.target.value)' //        send data from DOM to component
@@ -215,11 +218,19 @@ app.component.ts          --   defines @Component
 
 app.component.html        --   displayed to BROWSER
                       
-                          --   BUILTin PIPES    
-                              ----------------  eg:- {{ var | uppercase }} , {{ var | lowercase }} 
+                          --   BUILTIN PIPES    
+                              ----------------  eg:- {{ var | uppercase }}
+                                                     {{ var | lowercase }}
                                                      {{ var | titleCase }}
-                                                     {{ var | date : "MM/dd/yy" }}
-                                                     {{ var | currency : 'EUR' : true }}
+                                                     {{ var | date : "dd/mm/yyyy" }}               // var = new Date();
+                                                     {{ var | date : "shortTime" }}
+                                                     {{ var | currency : 'EUR' : true }}           // show euro symbol
+                                                     {{ var | currency : 'EUR' : false }}          // donot show euro symbol , shows EUR
+                                                     {{ var | json }}                              // converts JS object to JSON {"" : ""}
+                                                     {{ var | percent }}                           // var = 00.54534 , output = 55%
+                                                     {{ var | slice : <start> : <end> }}           // var = ARRAY , [start_index,end_index)
+                                                     {{ var | number : '<minDigitsBeforeDecimal>.<minDigitsAfterDecimal>-<maxDigitsAfterDecimal>' }}
+                                                     
                           --   CUSTOM PIPES
                               ----------------
 NOTE : For creating NEW PIPE
@@ -227,12 +238,12 @@ NOTE : For creating NEW PIPE
       ----- OR -----
     > ng generate pipe PIPENAME
                                -- CREATE a "PIPENAME.pipe.ts" under it's component dir , use @Pipe and implement PipeTransform with pipeClass , export this class
-                               -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by optional parameters and returns transformed value.
+                               -- pipeClass implements PipeTransform interface's transform method that accepts input value followed by parameters and returns transformed value.
                                -- multiple args can be passed to transform function using (colon) '' : '' : ''
                                -- Import and include it in  "declarations"  of  "app.module.ts"
                                -- Use    [(ngModel)] = "filtervar"    in   <input>  tag.
                                -- Use in TEMPLATE .html with directives using pipe_symbol (|) PIPENAME : filtervar
-
+                               -- Example : {{ var | CUSTOM_PIPE : <arg1> : <arg2> | uppercase }}
 
 
 ngDIRECTIVES
@@ -244,8 +255,9 @@ Reference : https://angular.io/guide/structural-directives
 1. *ngIf                         // *ngIf="isValid; else other_content;"      <ng-template #other_content>isValid is false</ng-template>
                                  // *ngIf="num>10;then greater else smaller;" <ng-template #greater>num Greater 10</ng-template>
                                  //                                           <ng-template #smaller>num Smaller 10</ng-template>
-                                 // *ngIf="time$ | async as current_time; else loadingIdNgTemplate;" 
-2. *ngFor
+                                 
+2. *ngFor                        // *ngFor="let item of items; let i = index"        // index of <item> in <items> array
+
 3. [ngSwitch]    ,    *ngSwitchCase
 
 
@@ -287,40 +299,54 @@ STYLE
   >>>      h1{  color:red;  }
 
 -- For component specific style use  ".component.ts"  file
-   @Component
+   @Component({
            styleUrls:['firstcss', 'secondcss', 'thirdcss']
+   })
 
 -- CLASS BINDING
-   Binding a CSS class to events    eg:- [class.CLASS_NAME_CSS] = ' TRUE/FALSE '
+   Binding a CSS class to elements    eg:- [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
+                                           [ngClass] = "'firstCSSClass secondCSSClass'"
+                                           [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
+                                           [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
 
 
 
-PASSING VARIABLES/VALUES
--- OUTER COMPONENT to INNER COMPONENT
-   <new-component-selector-tag  [varName] = "valuevar" > ... </new-component-selector-tag>
+PASSING VARIABLES/VALUES TO and FROM COMPONENTS
+=================================================
+This concept is used when we have a common class for data that can be used by multiple components (child components)
+-- OUTER COMPONENT (parent) to INNER COMPONENT (child)
+   In child-comp.ts
+   --------------------
+   @Input('EXTERNAL_VAR_NAME') INTERNAL_VAR_NAME: string = "DefaultValue";
+   
+   In child-comp.html
+   ---------------------
+   {{INTERNAL_VAR_NAME}}
+   
+   In parent-comp.html
+   ---------------------
+   <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts" > default text if child component not available </child-selector-tag>
 
-   [varName] defined in "new-component-component.ts" file   with   @Input() varName;
-           NOTE : varName defined with @Input must be same spell as of in <new-component-selector-tag  [varName]=''> ... </new-component-selector-tag>
 
-   'valuevar' comes from  ".component.ts"  file of component where <new-component-selector-tag> ... </new-component-selector-tag> is defined
-
--- INNER COMPONENT to OUTER COMPONENT
-   in INNER "new-component-component.ts"  import {Output , Eventemitter}
-   @Output() outputvarName: EventEmitter<string> = new EventEmitter<string>();
-
-               in event_function
-                    clickfunc(valclicked)
-                 {
-                    this.outputvarName.emit(valclicked.name);
-                 }
-
-   in OUTER COMPONENT  (.html)
-   <new-component-selector-tag  (outputvarName) = "funcalledName($event)"></>
-   {{VARNAME}}
-
-                       (.component.ts)
-   funccalledName(varval){
-      this.VARNAME = varval;
+-- INNER COMPONENT (child) to OUTER COMPONENT (parent)
+   this is used to receive a message in parent based on an event triggered in child
+   in INNER COMPONENT                    import {EventEmitter} from '@angular/core'
+   In child-comp.ts
+   ----------------------
+   @Output() outputVarName: EventEmitter<string> = new EventEmitter<string>();
+   
+   functionOnEvent() {
+       this.outputVarName.emit(dataToEmit);
+   }
+   
+   In parent-comp.html
+   ----------------------
+   <child-selector-tag  (outputVarName)='functionReceiveMessage($event)' > default text if child component not available </child-selector-tag>
+   
+   In parent-comp.ts
+   ----------------------
+   functionReceiveMessage($event): void {
+       this.DATA = $event;
    }
 
 
@@ -383,10 +409,12 @@ SERVICE
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
             > ng generate service <SERVICE_NAME>
 
-declare in  "providers"  of  "app.module.js"  this  service class
+declare in  "providers" array  of  "app.module.ts"  this  service class
+            OR
+if metadata providedIn: 'root' is given in @Injectable({}) decorator , it prevents need to write in "providers" array of app.module.ts
 
 inject in   ".component.ts"  file  of COMPONENT using   constructor()
-                       pass values to .html var using   ngOnInit()
+                          pass values to .html var using   ngOnInit()
 
 COMMUNICATION with SERVICE
 ---------------------------
@@ -397,7 +425,7 @@ NOTE : JSON-Server uses default KEYWORD  "id"
 Create a .JSON file under dir        "PROJ\src\"
 
 CHANGE DIR to your .JSON file's dir  "PROJ\src\"
-Start JSON SERVER                              "json-server -–watch filename.json"
+Start JSON SERVER                              "json-server -–watch filename.json"       // --watch keeps check over any changes made
 
 OPEN new TERMINAL window
 CHANGE DIR to "PROJ"  as it is where "package.json" is present
