@@ -26,6 +26,7 @@ Check reference screenshots too.
 
 
 Angular Versioning
+================================
 AngularJs   --->   Angular 1.x
 Angular     --->   Angular 2 onwards
 Angular uses SEMVER (SEMANTIC VERSIONING) ie adding meaning to VERSION.
@@ -44,6 +45,7 @@ Every six months , one major release is made to Angular Version.
 
 
 METADATA
+===============
 Tells angular how to process a class ie qualifying a class with the attributes which angular framework can understand.
 Consists of decorators. Eg: @Component, @Injectable, @NgModule, @Pipe.
 NOTE : a class immediately succeeded by METADATA decorator will only act as ANGULAR specific.
@@ -53,7 +55,8 @@ Transpiler is used to convert TS to JS.
 This is done either by browser or before providng production build to browser for faster response.
 
 
-
+NPM
+================
 NPM is a NODE PACKAGE MANAGER which gets installed with nodeJS   just  as  MAVEN, ANT, GRADLE  etc...
 NPM is used to install a package, and any packages that it depends on.
 > npm install
@@ -78,7 +81,7 @@ Then you ask npm to install the latest (@latest) version or specific version (@4
 
 
 SETUP
-------
+================
 Refer  SetupInstructions.docx  document
 
 
@@ -115,7 +118,7 @@ because the "start" key of package.json is having value "ng serve -o".
 
 
 JIT / AOT
---------------------
+===================
 - In the beginning, a compiler was responsible for turning a high-level language into object code (machine instructions), 
   which would then be linked into an executable.
   
@@ -147,7 +150,7 @@ JIT / AOT
 
 
 Structure of Angular Application
-------------------------------------
+==========================================
 e2e               : end to end tests
 node_modules      : contains node nodules used by angular application (MULTI-REPO) or provides packages to your workspace (MONO-REPO).
 src/app           : contains components (.html, .ts, .css, -spec.ts)
@@ -165,7 +168,7 @@ package-lock.json : a derivative of package.json which has exact library version
                     
 
 
-These commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
+commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
 index.html     loads   main.ts   loads   app.module.ts   .... so on as below
 
 index.html                --   defines the tag to be filled by BOOTSTRAPED ANGULAR component as defined in main.ts
@@ -217,7 +220,10 @@ app.component.ts          --   defines @Component
                                                                       [ngModel]       = "var"                 // pass to DOM after processing
 
 app.component.html        --   displayed to BROWSER
-                      
+     
+     
+PIPES
+==================
                           --   BUILTIN PIPES    
                               ----------------  eg:- {{ var | uppercase }}
                                                      {{ var | lowercase }}
@@ -285,7 +291,25 @@ NOTE : For creating NEW PIPE
 
 
 ngDIRECTIVES
+=====================
 Written in html files
+Three types of directives:
+ Custom Attribute Directives
+ -----------------------------
+ 
+ 
+ Component Directive
+ -----------------------------
+ Each component is itself a directive too with selector metadata provided with @Component decorator
+ @Component({
+    templateUrl: "",
+    styleUrls: [],
+    selector: "comp-selector"
+ })
+                                USAGE : <comp-selector> Component not available </comp-selector>
+ 
+ Structural Directives
+ -----------------------------
 *ngIf is used for if logic while rendering HTML and *ngFor is used for loops in HTML rendering
 These are Structural directives and should be prefixed with *
 Reference : https://angular.io/guide/structural-directives
@@ -301,6 +325,7 @@ Reference : https://angular.io/guide/structural-directives
 
 
 Angular Animations
+=========================
 From Angular 4 , animations are part of separate animations library and not part of angular core library as it was earlier.
 inside app.module.ts             import BrowserAnimationsModule and write it in imports[] array
 inside component's .ts file      animations: [] ,this contains animationName and it's properties, just like template and css properties given.
@@ -313,7 +338,7 @@ inside component's .html file    <p [@animationName]="stateVar" (click)="animate
 
 
 Angular FORMS
-================
+===================
 - These forms should support Two way data binding.
 - Keep track of form state, current state is valid or not, display validation errors, enable/disable form based on validation criteria.
 1. Template driven forms
@@ -325,9 +350,9 @@ Angular FORMS
    
    - states of form input  ,  example : 1. <input #INPUT_REF="ngModel" /> 
                                         2. <form #FORM_REF="ngForm" (ngSubmit)="submitFunction(FORM_REF.value)"></form>
-     INPUT_REF.pristine | INPUT_REF.dirty             // value modified   or not
-     INPUT_REF.touched  | INPUT_REF.untouched         // field is focused or not
-     INPUT_REF.valid    | INPUT_REF.invalid           // value is invlaid or not as per constraints like (required, minlength, pattern)
+     INPUT_REF.pristine | INPUT_REF.dirty             // value modified    or not
+     INPUT_REF.touched  | INPUT_REF.untouched         // widget is focused or not
+     INPUT_REF.valid    | INPUT_REF.invalid           // value is invlaid  or not as per constraints like (required, minlength, pattern)
    
 2. Model driven forms (Reactive forms)
    - These are dynamic in nature , JS intensive and less HTML.
@@ -339,6 +364,7 @@ Angular FORMS
 
 
 STYLE
+=================
 -- A global file "styles.css" exists for entire application.
    eg:-  write   @import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
 
@@ -400,7 +426,7 @@ This concept is used when we have a common class for data that can be used by mu
 
 
 LIFECYCLE methods
-------------------
+==========================
 After creating a component/directive by calling its constructor,
 Angular calls the lifecycle hook methods in the following sequence at specific moments
 
@@ -453,7 +479,7 @@ Written in  ".component.ts"  of  respective COMPONENT
 
 
 SERVICE
---------
+====================
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
             > ng generate service <SERVICE_NAME>
 
@@ -511,7 +537,7 @@ import 'rxjs' in app.module.ts     // RxJS is a library for reactive programming
 
 
 CLIENT SIDE ROUTING
-----------------------
+=============================
 Multiple routes... eg: localhost:4200/home/signup/
 
 Create file         "app.routing.ts"   in project's app component root dir , which contains urls/routes
@@ -522,15 +548,31 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                      {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
                      {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
                      {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
-                     {path: 'URL', component: '', canActivate: [ServiceClassName]}           // to restrict access to a URL/Component
-                                                                                             // this concept is callled RouterGuards
-                      @Injectable()
-                      export class CanActivateViaAuthGuard implements CanActivate {
-                          constructor(private authService: AuthService) {}
-                          canActivate() {
-                             return this.authService.isLoggedIn();
-                          }
-                      }
+                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName, canDeactivate: [RouteAuthServiceName]]}       // to restrict access to a URL/Component
+                           // There are 4 types of route guards :-
+                           // CanActivate: Controls if a route can be activated.
+                              CanActivateChild: Controls if children of a route can be activated.
+                              CanLoad: Controls if a route can even be loaded. This becomes useful for feature modules that are lazy loaded. 
+                                       They won’t even load if the guard returns false.
+                              CanDeactivate: Controls if the user can leave a route. 
+                                             NOTE : this guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
+                                             It only prevents actions from within the application itself.
+                           // we could specify multiple guards service for a single route, and they’ll be evaluated in the order in which they are specified in array for that route guard.
+                           // NOTE : declare route authentication service(s) name(s) in 'providers' array of 'app.module.ts'
+                           @Injectable()
+                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate> {
+                              constructor() {}
+                              canActivate(): boolean {
+                                 return this.METHOD_VAR_IN_SERVICE;                         // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
+                              }
+                              
+                              canDeactivate(component: ComponentNameToDeactivate): boolean {
+                                 if (component.METHOD_VAR_IN_COMPONENT) {                   // returns true/false from a method/variable in component to be deactivated
+                                    return confirm('Are you sure?');
+                                 }
+                                 return true;
+                              }
+                            }
 
 Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing.ts"
 
@@ -539,7 +581,7 @@ NOTE : wherever define    <router-outlet></router-outlet>    routing module urls
 <a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule
 If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
 If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['staticURLArg', dynamicArgVar, 'staticURLArg']"></a>
-Set CSS class to active link using                               routerLinkActive="CSS_Class"
+Set single CSS class to active link using                        routerLinkActive="CSS_Class"
 Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="'CSS_CLASS_1 CSS_CLASS_2'"
 For exact match of urls use                                      [routerLinkActiveoptions]="{exact:true}"
 For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
