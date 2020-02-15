@@ -204,7 +204,7 @@ app.component.ts          --   defines @Component
                                 --   NOTE : INTERPOLATION is only for STRINGs , for integer , boolean..use 
                                      PROPERTY BINDING                 [disabled] = 'var'                       // NOTE : use of [] for attrib and ' ' for vals
                                      CSS_CLASS BINDING                [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
-                                                                      [ngClass] = "'firstCSSClass secondCSSClass'"
+                                                                      [ngClass] = "'firstCSSClass secondCSSClass'"                 // NOTE : use of '' over class names
                                                                       [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
                                                                       [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
 
@@ -244,6 +244,44 @@ NOTE : For creating NEW PIPE
                                -- Use    [(ngModel)] = "filtervar"    in   <input>  tag.
                                -- Use in TEMPLATE .html with directives using pipe_symbol (|) PIPENAME : filtervar
                                -- Example : {{ var | CUSTOM_PIPE : <arg1> : <arg2> | uppercase }}
+                               
+                           --  PURE / IMPURE PIPES
+                              -----------------------
+                               -- Pure
+                                  - This is DEFAULT pipe , if 'pure' metadata is not specified in @Pipe decorator({})
+                                  - BUILTIN pipes are PURE.
+                                  - input parameters value determine the output , if input parameters don’t change , output doesn’t change
+                                  - can be shared across many usages without affecting the output result
+                                  - there’s no internal state , Even though there are two usages in the example template , 
+                                    Angular can create only one pipe instance which can be shared between the usages.
+                                    
+                               -- Impure
+                                  - cannot use the input value to determine if the output will change
+                                  - cannot be shared because the internal state can be affected from outside
+                                  - the same parameters do not guarantee that same output , 
+                                    It means that Angular is forced to trigger transform function on a pipe instance on every digest (change detection cycle)
+                                    <span>{{v1 | customPipe}}</span>
+                                    <span>{{v2 | customPipe}}</span>
+                                  - example
+                                    @Pipe({
+                                      name: 'customPipe', 
+                                      pure: true
+                                    })
+                                    
+                                  - example
+                                    @Pipe({
+                                      name: 'customPipe',
+                                      pure: false
+                                    })
+                                    
+                                  -- Async pipe
+                                  - It is an example of impure pipe , 
+                                    This pipe has internal state that holds an underlying subscription created by subscribing to the observable passed to the pipe as a parameter
+                                  - Because of that Angular has to create a new instance for each pipe usage to prevent different observables affecting each other. 
+                                    And also has to call transform method on each digest 
+                                    because even thought the observable parameter may not change the new value may arrive through this observable that needs to be processed by change detection.
+                                  - However async pipe unsubscribes itself from observables on 'ngOnDestroy()'
+                                    
 
 
 ngDIRECTIVES
@@ -274,16 +312,26 @@ inside component's .html file    <p [@animationName]="stateVar" (click)="animate
 
 
 
-Angular Forms
+Angular FORMS
+================
 - These forms should support Two way data binding.
 - Keep track of form state, current state is valid or not, display validation errors, enable/disable form based on validation criteria.
 1. Template driven forms
-   - import FormsModules from "@angular/forms" to app.module.ts imports[] array
+   - These are used if we have fixed template to render , we already know fields that are going to be part of form.
+   - import 'FormsModules' from "@angular/forms" to app.module.ts imports[] array
    - create .ts class and .html template for it.
    - use of directives ngModel, ngForm, ngModelGroup, ngSubmit.
    - validations are part of template (.html)
+   
+   - states of form input  ,  example : 1. <input #INPUT_REF="ngModel" /> 
+                                        2. <form #FORM_REF="ngForm" (ngSubmit)="submitFunction(FORM_REF.value)"></form>
+     INPUT_REF.pristine | INPUT_REF.dirty             // value modified   or not
+     INPUT_REF.touched  | INPUT_REF.untouched         // field is focused or not
+     INPUT_REF.valid    | INPUT_REF.invalid           // value is invlaid or not as per constraints like (required, minlength, pattern)
+   
 2. Model driven forms (Reactive forms)
-   - import ReactiveFormsModule from "@angular/forms" to app.module.ts imports[] array
+   - These are dynamic in nature , JS intensive and less HTML.
+   - import 'ReactiveFormsModule' from "@angular/forms" to app.module.ts imports[] array
    - create and initialize Form Control Objects in .ts class which are intermediate objects that hold state of form using FormGroup, FormControl, Validators, FormBuilder (formbuilder prevents use of formcontrol)
    - bind these objects to form control elements in .html template using [formGroup]="" property, formGroupName="" directive, formControlName="" directive
    - validations logic are part of class (.ts) however rules (.invalid && .touched) are defined inside template (.html)
@@ -305,7 +353,7 @@ STYLE
 
 -- CLASS BINDING
    Binding a CSS class to elements    eg:- [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
-                                           [ngClass] = "'firstCSSClass secondCSSClass'"
+                                           [ngClass] = "'firstCSSClass secondCSSClass'"                          // NOTE : use of '' over class names
                                            [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
                                            [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
 
@@ -468,13 +516,31 @@ Multiple routes... eg: localhost:4200/home/signup/
 
 Create file         "app.routing.ts"   in project's app component root dir , which contains urls/routes
                      NOTE : Do not put '/' in path , ANGULAR will put it automatically
+                     - examples
+                     {path: 'URL', component: 'NameOfComponentClass', data: {varInComponentTS: 'dataPassedToComponent'}}
+                     {path: '**', component: 'NoneOfAboveURLMatchRequest'}                   // when none of URLs match request it comes here
+                     {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
+                     {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
+                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
+                     {path: 'URL', component: '', canActivate: [ServiceClassName]}           // to restrict access to a URL/Component
+                                                                                             // this concept is callled RouterGuards
+                      @Injectable()
+                      export class CanActivateViaAuthGuard implements CanActivate {
+                          constructor(private authService: AuthService) {}
+                          canActivate() {
+                             return this.authService.isLoggedIn();
+                          }
+                      }
 
 Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing.ts"
 
-wherever define    <router-outlet></router-outlet>    routing module urls output shown there
+NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
 
 <a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule
+If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
+If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['staticURLArg', dynamicArgVar, 'staticURLArg']"></a>
 Set CSS class to active link using                               routerLinkActive="CSS_Class"
+Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="'CSS_CLASS_1 CSS_CLASS_2'"
 For exact match of urls use                                      [routerLinkActiveoptions]="{exact:true}"
 For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
 
