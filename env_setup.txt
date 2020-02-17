@@ -294,11 +294,44 @@ ngDIRECTIVES
 =====================
 Written in html files
 Three types of directives:
- Custom Attribute Directives
+ 1. Custom Attribute Directives
  -----------------------------
+ - using a @Directive decorator we can make custom attribute directive which can change appearances such as 
+   text color, background color and font size of the body of an HTML element that can be called host element. 
+   To change appearance angular provides ElementRef class that can directly access DOM.
+ - Benefits of using custom directive
+   - It is vulnerable to XSS (cross site scripting) attacks when we directly use ElementRef in our application. 
+   - It is better to create a custom directive and use ElementRef inside directive to change appearance or behavior of the host element.
+ - Steps
+   - Create a class decorated with @Directive.
+   - Assign the attribute directive name to the selector metadata of @Directive decorator, enclosed within bracket [], ex: [colorChange]
+   - Create constructor of class to get instance of ElementRef by dependency injection, which can access DOM to change host element appearance and behavior
+   - Use @Input() decorator to accept user input in our custom directive.
+   - Use @HostListener() decorator to listen to events in custom attribute directive.
+   - Configure custom attribute directive class (ex: MyDirective) in app.module.ts in the 'declarations' array metadata of @NgModule.
+   // example
+      @Directive({
+         selector: '[colorChangeDirective]'
+      })  
+      export class MyDirective {
+         @Input('colorChangeVAR') dynamicColor: string;
+         @Input() defaultValueVAR: string; 
+         
+         constructor(private elRef: ElementRef) { this.defaultValueVAR = "white"; }
+         
+         @HostListener('mouseenter') onMouseEnterEventFunctionName() {
+            this.changeBackgroundColor(this.dynamicColor || this.defaultValueVAR);
+         }
+         @HostListener('mouseleave') onMouseLeaveEventFunctionName() {
+            this.changeBackgroundColor('white');
+         }
+         private changeBackgroundColor(color: string) {
+            this.elRef.nativeElement.style.backgroundColor = color;
+         }    
+      }
+      <p colorChangeDirective colorChangeVAR="yellow" defaultValueVAR="red">....Test text....</p>
  
- 
- Component Directive
+ 2. Component Directive
  -----------------------------
  Each component is itself a directive too with selector metadata provided with @Component decorator
  @Component({
@@ -308,7 +341,7 @@ Three types of directives:
  })
                                 USAGE : <comp-selector> Component not available </comp-selector>
  
- Structural Directives
+ 3. Structural Directives
  -----------------------------
 *ngIf is used for if logic while rendering HTML and *ngFor is used for loops in HTML rendering
 These are Structural directives and should be prefixed with *
