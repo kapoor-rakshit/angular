@@ -637,7 +637,7 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                      {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
                      {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
                      {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
-                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName, canDeactivate: [RouteAuthServiceName]]}       // to restrict access to a URL/Component
+                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName]}       // to restrict access to a URL/Component
                            // There are 4 types of route guards :-
                            // CanActivate: Controls if a route can be activated.
                               CanActivateChild: Controls if children of a route can be activated.
