@@ -358,9 +358,59 @@ Reference : https://angular.io/guide/structural-directives
 
 
 @VIEWCHILD / @VIEWCHILDREN
-=============================
+================================
+It provides reference to HTML DOM.
+This concept can be used in following 3 ways
+1. Native HTML Element Reference              (Component .TS ==> <== Component .HTML)
+// used ngAfterViewInit and not ngOnInit() in example as this is called when DOM/template is constructed.
+// example
+// component.html
+   <input type='text' #nameElementReference [(ngModel)]='nameFilter' />
+   <input type='text' #locationElementReference [(ngModel)]='locationFilter' />
+// component.ts
+   @ViewChild("nameElementReference", {static: false}) nameElementRefVAR: ElementRef;
+   @ViewChildren("nameElementReference, locationElementReference") filterElementRefsVARLIST: QueryList<ElementRef>;
+   ngAfterViewInit() {
+      console.log(this.nameElementRefVAR);
+      console.log(this.filterElementRefsVARLIST);
+      this.nameElementRefVAR.nativeElement.focus();
+    }
 
+2. Angular Form/Model Reference               (Component .TS ==> <== Component .HTML)
+// used for reference to form having ngForm/ngModel reference
+// example
+// component.ts
+   @ViewChild(NgForm, {static: false}) addUserFormReferenceVAR: NgForm;
+   @ViewChild(NgModel, {static: false}) ngmodelRefVAR: NgModel;                      // 1. Only the first ng-model is returned.
+   @ViewChildren(NgModel) ngmodelsRefVARLIST: QueryList<NgModel>;                    // 2. Returns all the ng-models.
+   onSubmit(formValue: any) {
+      this.addUserFormReferenceVAR.reset({<NAME_ATTR_VALUE_WIDGET> : "GNDC"});       // reset is angular method , fields not specified will be set to empty
+    }
+    ngAfterViewInit() {
+       if(this.ngmodelRefVAR.invalid) {
+          if(this.ngmodelRefVAR.errors.required)  console.log("Name is required...");
+          else if (this.ngmodelRefVAR.errors.minlength)  console.log(`Name must be at least 3 characters long...`);
+        }
+        else {
+          console.log(`Current name value: ${this.ngmodelRefVAR.value} ...`);
+        }
+     }
 
+3. Variable/Method Reference                  (Child Component ==> Parent Component)
+// this concept is similar to @Output
+// example
+A) parent.html
+   <p>{{employeesRefTEMPLATE.METHOD()_OR_VAR}}</p>
+   <employees #employeesRefTEMPLATE></employees>
+ 
+B) parent.ts
+   @ViewChild('employeesRefTEMPLATE', {static: false}) employeesComponentRefVAR: EmployeesComponent;
+C) @ViewChild(EmployeesComponent, {static: false}) employeesComponentRefVAR: EmployeesComponent;
+    ngAfterViewInit(): void {
+       console.log(`Logging through template reference => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
+       console.log(`Logging through Child Component => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
+    }
+   
 
 
 Angular Animations
