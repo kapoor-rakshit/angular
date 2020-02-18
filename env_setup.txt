@@ -357,6 +357,12 @@ Reference : https://angular.io/guide/structural-directives
 
 
 
+@VIEWCHILD / @VIEWCHILDREN
+=============================
+
+
+
+
 Angular Animations
 =========================
 From Angular 4 , animations are part of separate animations library and not part of angular core library as it was earlier.
@@ -666,6 +672,66 @@ So if your URL was   https://codecraft.tv/contact/#/foo/moo/loo   then the brows
 The #/foo/moo/loo part of the URL is never sent.
 
 It preserves a state of page and so on RELOADING a page , the UI state is maintained.
+
+
+
+HTTP INTERCEPTORS
+========================
+- Interceptors allow to inspect & transform Http requests before it goes to the server ie act as gate between outgoing requests or incoming responses.
+  Multiple interceptors can be chained, NOTE : The interceptors will be called in the order in which they were provided.
+  It is useful for logging, authentication etc.
+  If interceptor was not there, the code has to be duplicated in each HttpClient method call.
+  
+- Steps
+  1) Create an Injectable class for each type of interceptor implementing interface HttpInterceptor
+  2) In the interface method, intercept, handle the request appropriately and call next so that the next interceptor in the chain can handle until the last interceptor
+     The intercept method takes two arguments, req and next, and returns an observable of type HttpEvent.
+          req is the request object itself and is of type HttpRequest.
+          next is the http handler, of type HttpHandler. The handler has a handle method that returns our desired HttpEvent observable.
+     HttpRequest objects are immutable, The request object’s clone method is used to first make a copy, then modify the copy and call handle on the modified copy.
+  3) The class implementing HttpInterceptor should be mentioned in 'providers' array in AppModule.ts.
+     multi: true option tells Angular that HTTP_INTERCEPTORS is a token for a multiprovider that injects an array of values, rather than a single value.
+  // example
+  // 1. log-interceptor.ts
+  @Injectable()
+  export class LogRequestInterceptor implements HttpInterceptor {
+    intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+       console.log(`**** LogRequestInterceptor => url = ${req.url}, method = ${req.method}`);
+       req.headers.keys().map((key) => {console.log(`${key}=${req.headers.get(key)}`)});
+       return next.handle(req);
+     }
+   }
+   
+   // 2. auth-interceptor.ts
+   @Injectable()
+   export class AuthInterceptor implements HttpInterceptor {
+     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+       console.log("**** AuthInterceptor ...");
+       if(req.body && req.headers && req.params){
+          duplicate = req.clone({
+            headers: req.headers.set('Authorization', "mytoken"),
+            params: req.params.set('filter', 'completed'),
+            body: req.body.replace(/pizza/gi, 'desi_bread')
+          });
+          return next.handle(duplicate);
+       }
+       return next.handle(req);
+     }
+    }
+    
+    // 3. httpInterceptorsProvider.ts
+    import { HTTP_INTERCEPTORS } from '@angular/common/http';
+    import { LogRequestInterceptor } from './log-request-interceptor';
+    import { AuthInterceptor } from './auth-interceptor';
+    export const httpInterceptorProviders = [
+      { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },                // order matters of providing interceptors
+      { provide: HTTP_INTERCEPTORS, useClass: LogRequestInterceptor, multi: true }
+    ];
+    
+    // 4. app.module.ts
+   providers : [httpInterceptorProviders]
+
+
 
 
 
