@@ -360,7 +360,7 @@ Reference : https://angular.io/guide/structural-directives
 
 @VIEWCHILD / @VIEWCHILDREN
 ================================
-It provides reference to HTML DOM.
+It provides reference to HTML DOM, similar to "document.getElementById()" in core JS.
 This concept can be used in following 3 ways
 1. Native HTML Element Reference              (Component .TS ==> <== Component .HTML)
 // used ngAfterViewInit and not ngOnInit() in example as this is called when DOM/template is constructed.
@@ -767,14 +767,14 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                      {path: '**', component: 'NoneOfAboveURLMatchRequest'}                   // when none of URLs match request it comes here
                      {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
                      {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
-                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, 
-                                                                                                but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
-                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName]}       // to restrict access to a URL/Component
-                           // There are 5 types of route guards :-
+                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen
+                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName], canLoad: [RouteAuthServiceName], resolve: { dataVAR_IN_ROUTE: RouteAuthServiceName }}
+                           // To restrict access to a URL/Component , there are 5 types of route guards :-
                            // CanActivate     : Controls if route can be activated.
                               CanActivateChild: Controls if children of a route can be activated.
                               CanLoad         : Controls if route can even be loaded. 
-                                                This becomes useful for feature modules that are lazy loaded. They won’t even load if the guard returns false.
+                                                This becomes useful for feature modules that are lazy loaded. 
+                                                They won’t even load if the guard returns false, thus cannot even see the source code of the module.
                                                 It must be used with canActivate, because once loaded and user logged out, it will still be present in browser cache, guard will return true.
                               CanDeactivate   : Controls if the user can leave a route. 
                                                 NOTE : This guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
@@ -782,9 +782,11 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                               Resolve         : To complete data retrieval before navigating to a route
                                                 Refer : loading.io    for loader's HTML + CSS
                                                 NOTE : it uses NAVIGATION instance as written in app.component.ts (ROOT component)
-                                                // app.component.ts
+                                                       plus get snapshot of data in component where the data is shown after retrieval
+                                                // 1. app.component.ts
                                                 export class AppComponent {
                                                    isLoading: boolean = true;        // variable for loader i.e.   *ngIf="isLoading"
+                                                   
                                                    constructor(private _authService: AuthService, private _router: Router) {
                                                       this._router.events.subscribe((event: Event) => {
                                                           if (event instanceof NavigationStart) {
@@ -796,10 +798,15 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                                                        }) 
                                                     }
                                                  }
+                                                 // 2. component.ts
+                                                 constructor(private _route: ActivatedRoute) { 
+                                                    this.dataVAR_IN_COMPONENT = this._route.snapshot.data['dataVAR_IN_ROUTE'];
+                                                 }
                            // we could specify multiple guards service for a route guard in a route, and they’ll be evaluated in the order in array for that route guard.
                            // NOTE : Declare route authentication service(s) name(s) in 'providers' array of respective '.module.ts'
+                           // example - RouteAuthServiceName.ts
                            @Injectable()
-                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve< <TYPE_OF_DATA>[] > {
+                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve< <TYPE_OF_DATA_RETURN>[] > {
                               constructor() {}
                               canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
                                  if(this.METHOD_VAR_IN_SERVICE) {                   // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
@@ -812,7 +819,8 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                               }
                               
                               canDeactivate(component: ComponentNameToDeactivate): boolean {
-                                 if (component.METHOD_VAR_IN_COMPONENT) {                   // returns true/false from a method/variable in component to be deactivated
+                                 if (component.METHOD_VAR_IN_COMPONENT) {                   // returns true/false from a method/variable in component to be deactivated, 
+                                                                                               we can make use of @ViewChild variables in component.ts
                                     return confirm('Are you sure?');
                                  }
                                  return true;
@@ -820,7 +828,7 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                               
                               canLoad(route: Route): boolean { }
                               
-                              resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise< <TYPE_OF_DATA>[] > {
+                              resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise< <TYPE_OF_DATA_RETURN>[] > {
                                  return this._customersService.getCustomers();
                               }
                             }
