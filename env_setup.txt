@@ -295,12 +295,13 @@ ngDIRECTIVES
 Written in html files
 Three types of directives:
  1. Custom Attribute Directives
- -----------------------------
+ --------------------------------
+ > ng generate directive <directive_name>
  - using a @Directive decorator we can make custom attribute directive which can change appearances such as 
    text color, background color and font size of the body of an HTML element that can be called host element. 
    To change appearance angular provides ElementRef class that can directly access DOM.
  - Benefits of using custom directive
-   - It is vulnerable to XSS (cross site scripting) attacks when we directly use ElementRef in our application. 
+   - When we directly use ElementRef in our application, it is vulnerable to XSS (cross site scripting) attacks.
    - It is better to create a custom directive and use ElementRef inside directive to change appearance or behavior of the host element.
  - Steps
    - Create a class decorated with @Directive.
@@ -380,7 +381,9 @@ This concept can be used in following 3 ways
 // used for reference to form having ngForm/ngModel reference
 // example
 // component.ts
-   @ViewChild(NgForm, {static: false}) addUserFormReferenceVAR: NgForm;
+   @ViewChild(NgForm, {static: false}) addUserFormReferenceVAR: NgForm;              // 1. Only the first ngForm is returned.
+   @ViewChild("formRef", {static: false}) addUserFormReferenceVAR: NgForm;           // specific ngForm i.e.    <form #formRef="ngForm">
+                                                                                     // usage eg:- addUserFormReferenceVAR.submitted | addUserFormReferenceVAR.dirty
    @ViewChild(NgModel, {static: false}) ngmodelRefVAR: NgModel;                      // 1. Only the first ng-model is returned.
    @ViewChildren(NgModel) ngmodelsRefVARLIST: QueryList<NgModel>;                    // 2. Returns all the ng-models.
    onSubmit(formValue: any) {
@@ -564,6 +567,129 @@ Called just before Angular destroys the directive/component.
 Example:
 Written in  ".component.ts"  of  respective COMPONENT
         export class COMPONENTNAME implements OnInit , OnChanges , OnDestroy{  }
+        
+        
+        
+Feature MODULES
+=====================
+> ng generate module <module_name>
+- Having all (say 100s) components in one module (root module, app.module.ts) might make it difficult to debug
+  plus it might make initial loading slower as all modules are to be loaded, if not used lazy loading, which is possible via submodules
+- // example
+  // 1. app-module.ts (ROOT module imports submodules)
+  @NgModule({
+     declarations: [AppComponent, AboutComponent, PageNotFoundComponent],
+     imports: [ BrowserModule, EmployeesModule, CustomersModule, AppRoutingModule ],       // NOTE : root routing module must be after feature module ie at last, else it will load page not found component
+                                                                                           // 'FormsModule' is not written as 'EmployeesModule' already imported it via 'SharedModule'
+     bootstrap: [ AppComponent ]
+  })
+  export class AppModule { }
+  
+  // 2. app-routing-module.ts
+  @NgModule({
+     imports: [
+       RouterModule.forRoot(appRoutes)                                                     // NOTE : use of 'RouterModule.forRoot()'
+     ],
+     exports: [ RouterModule ]
+   })
+   export class AppRoutingModule { }
+
+  // 3. customer-module.ts
+  @NgModule({
+     declarations: [CustomersComponent, CustomerComponent],
+     imports: [SharedModule, CustomersRoutingModule]
+   })
+   export class CustomersModule { }
+   
+   // 4. customer-routing-module.ts
+   {path:'', component: CustomersComponent, canActivate: [CustomersLoadGuardService], resolve: {customers: CustomersResolverService}},
+   {path:'customers/<COMPONENT_NAME>/edit/:id', component: CustomerDetailComponent }
+   @NgModule({
+      imports: [
+        RouterModule.forChild(custRoutes)                                       // NOTE : use of 'RouterModule.forChild()' in submodules
+      ],
+      exports: [ RouterModule ]
+   })
+   export class CustomersRoutingModule { }
+   
+   // 5. employee-module.ts
+   @NgModule({
+      declarations: [EmployeesComponent, EmployeeComponent],
+      imports: [SharedModule, EmployeesRoutingModule]
+   })
+   export class EmployeesModule { }
+   
+   // 6. employee-routing-module.ts
+   {path:'', component: EmployeeComponent, canActivate: [EmployeeLoadGuardService], resolve: {employees: EmployeeResolverService}},
+   {path:'employees/<COMPONENT_NAME>/edit/:id', component: EmployeeDetailComponent }
+   @NgModule({
+      imports: [
+        RouterModule.forChild(empRoutes)                                        // NOTE : use of 'RouterModule.forChild()' in submodules
+      ],
+      exports: [ RouterModule ]
+   })
+   export class EmployeesRoutingModule { }
+   
+   // 7. shared-module.ts
+   @NgModule({
+      declarations: [],
+      imports: [],
+      exports: [                                                // Being a shared module , it has common functionality required for all modules and export them
+                                                                // NOTE : shared module cannot have 'providers' ie we cannot include @Injectable class (service class)
+                                                                          because services which act as singletons, could end up being provided multiple times, especially for lazy-loaded modules.
+        CommonModule,                                           // since 'CommonModule', 'FormsModule', 'SearchFilterPipe' is exported here and
+        FormsModule,                                               we imported 'shared-module' in 'customer-module' which is in turn is imported in app-module (root)                   
+        SearchFilterPipe
+      ]
+    })
+    export class SharedModule { }
+    
+    // 8. searchfilterpipe.ts
+    @Pipe({name: 'searchFilter'})
+    export class SearchFilterPipe implements PipeTransform{
+       transform(items: any[], args: string): any[] {
+          let searchFilter: string = args ? args.toLocaleLowerCase() : null;
+          return searchFilter ? items.filter((item) => {item.name.toLocaleLowerCase().startsWith(searchFilter) != false}) : items;
+    }}
+
+
+LAZY LOADING
+===================
+- NOTE :  Creating submodules / feature modules do not ensure lazy loading. We need to configure routing module for same.
+- There are three types of module loading
+  - Eager loading                        (default)                                   (all modules loaded initially)
+  - Lazy Loading without Pre-Loading     (default, when configured for lazy loading) (modules loaded only when required)
+  - Lazy Loading with Pre-Loading                                                    (modules loaded by browser in background when it is not involved in any other activity)
+  // example
+  // 1. app-routing-module.ts     (ROOT routing module)
+  // this will make modules to be lazy loaded
+  { path: 'employees', loadChildren: () => import('./employees/employees.module').then(m => m.EmployeesModule) },
+  { path: 'customers', loadChildren: () => import('./customers/customers.module').then(m => m.CustomersModule) },
+  
+  // this will enable/disable preloading
+  @NgModule({
+    imports: [
+     RouterModule.forRoot(appRoutes)                                                   // default,       no preloading
+  // RouterModule.forRoot(appRoutes, {preloadingStrategy: NoPreloading})               // same as above, no preloading
+  // RouterModule.forRoot(appRoutes, {preloadingStrategy: PreloadAllModules})          // preload modules when browser is idle
+    ],
+    exports: [ RouterModule ]
+  })
+  export class AppRoutingModule { }
+  
+  // 2. customers/employees-routing-module.ts
+  // NOTE : do not specify name of modules in url i.e. {path: 'customers/<COMPONENT_NAME>/:id'} because it is already specified in root i.e. {path:'customers'}
+  {path:'', component: CustomersComponent, canActivate: [CustomersLoadGuardService], resolve: {customers: CustomersResolverService}},
+  {path:'<COMPONENT_NAME>/edit/:id', component: CustomerDetailComponent }
+  
+  // 3. app-module.ts
+  @NgModule({
+     declarations: [AppComponent, AboutComponent, PageNotFoundComponent],
+     imports: [ BrowserModule, AppRoutingModule ],                          // NOTE : Do not include feature modules i.e. 'CustomersModule', 'EmployeesModule' here as they are to be lazy loaded
+     bootstrap: [ AppComponent ]
+  })
+  export class AppModule { }
+
 
 
 
@@ -633,26 +759,56 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                      NOTE : Do not put '/' in path , ANGULAR will put it automatically
                      - examples
                      {path: 'URL', component: 'NameOfComponentClass', data: {varInComponentTS: 'dataPassedToComponent'}}
+                     {path: 'employees', children: [
+                                  { path: '', component: EmployeesComponent },
+                                  { path: 'add', component: AddEmployeeFormComponent, canDeactivate: [AddEmployeeGuardService]},
+                                  { path: ':id', component: EmployeeDetailComponent, canActivate: [EmployeeDetailGuardService]}]
+                     }                                                                       // specify children path to avoid writing parent-'employees/' again and again
                      {path: '**', component: 'NoneOfAboveURLMatchRequest'}                   // when none of URLs match request it comes here
                      {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
                      {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
-                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
+                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen, 
+                                                                                                but then the route matching algorithm is continuing searching for matching child routes where the rest of the URL matches.
                      {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName]}       // to restrict access to a URL/Component
-                           // There are 4 types of route guards :-
-                           // CanActivate: Controls if a route can be activated.
+                           // There are 5 types of route guards :-
+                           // CanActivate     : Controls if route can be activated.
                               CanActivateChild: Controls if children of a route can be activated.
-                              CanLoad: Controls if a route can even be loaded. This becomes useful for feature modules that are lazy loaded. 
-                                       They won’t even load if the guard returns false.
-                              CanDeactivate: Controls if the user can leave a route. 
-                                             NOTE : this guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
-                                             It only prevents actions from within the application itself.
-                           // we could specify multiple guards service for a single route, and they’ll be evaluated in the order in which they are specified in array for that route guard.
-                           // NOTE : declare route authentication service(s) name(s) in 'providers' array of 'app.module.ts'
+                              CanLoad         : Controls if route can even be loaded. 
+                                                This becomes useful for feature modules that are lazy loaded. They won’t even load if the guard returns false.
+                                                It must be used with canActivate, because once loaded and user logged out, it will still be present in browser cache, guard will return true.
+                              CanDeactivate   : Controls if the user can leave a route. 
+                                                NOTE : This guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
+                                                       It only prevents actions from within the application itself.
+                              Resolve         : To complete data retrieval before navigating to a route
+                                                Refer : loading.io    for loader's HTML + CSS
+                                                NOTE : it uses NAVIGATION instance as written in app.component.ts (ROOT component)
+                                                // app.component.ts
+                                                export class AppComponent {
+                                                   isLoading: boolean = true;        // variable for loader i.e.   *ngIf="isLoading"
+                                                   constructor(private _authService: AuthService, private _router: Router) {
+                                                      this._router.events.subscribe((event: Event) => {
+                                                          if (event instanceof NavigationStart) {
+                                                             this.isLoading = true;
+                                                          }
+                                                          else if (event instanceof NavigationEnd || event instanceof NavigationError || event instanceof NavigationCancel) {
+                                                             this.isLoading = false;
+                                                          }
+                                                       }) 
+                                                    }
+                                                 }
+                           // we could specify multiple guards service for a route guard in a route, and they’ll be evaluated in the order in array for that route guard.
+                           // NOTE : Declare route authentication service(s) name(s) in 'providers' array of respective '.module.ts'
                            @Injectable()
-                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate> {
+                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve< <TYPE_OF_DATA>[] > {
                               constructor() {}
-                              canActivate(): boolean {
-                                 return this.METHOD_VAR_IN_SERVICE;                         // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
+                              canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+                                 if(this.METHOD_VAR_IN_SERVICE) {                   // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
+                                    return true;
+                                 }
+                                 else {
+                                    this._router.navigate(['login']);
+                                    return false;
+                                 }
                               }
                               
                               canDeactivate(component: ComponentNameToDeactivate): boolean {
@@ -660,6 +816,12 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                                     return confirm('Are you sure?');
                                  }
                                  return true;
+                              }
+                              
+                              canLoad(route: Route): boolean { }
+                              
+                              resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise< <TYPE_OF_DATA>[] > {
+                                 return this._customersService.getCustomers();
                               }
                             }
 
