@@ -780,12 +780,12 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                                                 NOTE : This guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
                                                        It only prevents actions from within the application itself.
                               Resolve         : To complete data retrieval before navigating to a route
-                                                Refer : loading.io    for loader's HTML + CSS
+                                                Refer: loading.io/css    for loader's HTML (app.component.html) + CSS (app.component.css)
                                                 NOTE : it uses NAVIGATION instance as written in app.component.ts (ROOT component)
                                                        plus get snapshot of data in component where the data is shown after retrieval
                                                 // 1. app.component.ts
                                                 export class AppComponent {
-                                                   isLoading: boolean = true;        // variable for loader i.e.   *ngIf="isLoading"
+                                                   isLoading: boolean = true;        // variable for loader <div> i.e.   *ngIf="isLoading"
                                                    
                                                    constructor(private _authService: AuthService, private _router: Router) {
                                                       this._router.events.subscribe((event: Event) => {
@@ -806,7 +806,7 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                            // NOTE : Declare route authentication service(s) name(s) in 'providers' array of respective '.module.ts'
                            // example - RouteAuthServiceName.ts
                            @Injectable()
-                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve< <TYPE_OF_DATA_RETURN>[] > {
+                           export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve<TYPE_OF_DATA_RETURN> {
                               constructor() {}
                               canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
                                  if(this.METHOD_VAR_IN_SERVICE) {                   // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
@@ -828,7 +828,7 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                               
                               canLoad(route: Route): boolean { }
                               
-                              resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise< <TYPE_OF_DATA_RETURN>[] > {
+                              resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<TYPE_OF_DATA_RETURN> | Observable<TYPE_OF_DATA_RETURN> | any {
                                  return this._customersService.getCustomers();
                               }
                             }
