@@ -135,6 +135,11 @@ It will update angular.json, package.json, app.module.ts, index.html plus create
 
 
 
+INTERNATIONALIZATION (i18n) | LOCALIZATION (l10n)
+=====================================================
+Refer : https://angular.io/guide/i18n
+
+
 
 JIT / AOT
 ===================
