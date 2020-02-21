@@ -112,6 +112,12 @@ Reference : https://github.com/angular/angular-cli/wiki/serve
 --progress         : Log progress to the console while building.
 --optimization     : Enables optimization of the build output.   ..... etc.. more on above link
 
+> ng add <package>                                (MULTI-REPO)
+> ng add <package> --project <projectname>        (MONO-REPO)
+ng add makes adding new capabilities to your project easy. ng add will use your package manager to download new dependencies and 
+invoke an installation script (implemented as a schematic) which can update your project with configuration changes, 
+add additional dependencies (e.g. polyfills), or scaffold package-specific initialization code
+
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
 
