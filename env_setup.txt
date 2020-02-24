@@ -50,9 +50,9 @@ Tells angular how to process a class ie qualifying a class with the attributes w
 Consists of decorators. Eg: @Component, @Injectable, @NgModule, @Pipe.
 NOTE : a class immediately succeeded by METADATA decorator will only act as ANGULAR specific.
 
-
 Transpiler is used to convert TS to JS.
 This is done either by browser or before providng production build to browser for faster response.
+
 
 
 NPM
@@ -135,9 +135,22 @@ It will update angular.json, package.json, app.module.ts, index.html plus create
 
 
 
+Angular Material
+================================
+REFER : https://material.angular.io/components/categories
+UI can be improved by using either Bootstrap or Angular Material.
+Angular material provides functionality for PAGINATION OF TABLES, SORTING OF TABLES via column clicks ... and much more.
+NOTE : @angular/material package has to be added, which will update angular.json, package.json, app.module.ts  .... etc.
+> ng add @angular/material                        (MULTI-REPO)
+> ng add @angular/material --project <my-app>     (MONO-REPO)
+
+NOTE : material to be used must be imported in imports [] of 'app.module.ts'
+
+
+
 INTERNATIONALIZATION (i18n) | LOCALIZATION (l10n)
 =====================================================
-Refer : https://angular.io/guide/i18n
+REFER : https://angular.io/guide/i18n
 
 
 
@@ -471,12 +484,73 @@ Angular FORMS
      INPUT_REF.valid    | INPUT_REF.invalid           // value is invlaid  or not as per constraints like (required, minlength, pattern)
    
 2. Model driven forms (Reactive forms)
-   - These are dynamic in nature , JS intensive and less HTML.
+   - These are dynamic in nature , JS/TS intensive and less HTML.
    - import 'ReactiveFormsModule' from "@angular/forms" to app.module.ts imports[] array
-   - create and initialize Form Control Objects in .ts class which are intermediate objects that hold state of form using FormGroup, FormControl, Validators, FormBuilder (formbuilder prevents use of formcontrol)
-   - bind these objects to form control elements in .html template using [formGroup]="" property, formGroupName="" directive, formControlName="" directive
-   - validations logic are part of class (.ts) however rules (.invalid && .touched) are defined inside template (.html)
-
+   - // 1. component.TS  ,   two ways of creating a formgroup
+     // 1. Using FormGroup
+     customerForm: FormGroup;                                      // create new FormGroup , similar to #formRef
+     ngOnInit() {
+        this.customerForm = new FormGroup({                        // create new FormControl for each widget in FormGroup , supports builtin validators
+            <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]),
+            <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required])
+        });
+        // dynamic setting/clearing of validators
+        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+        this.customerForm.updateValueAndValidity();
+     }
+     // ---- OR ----
+     // 2. Using FormBuilder service
+     customerForm: FormGroup;                                       // create new FormGroup , similar to #formRef
+     constructor(private _fb: FormBuilder) { }                      // inject FormBuilder service in class
+     ngOnInit() {
+        this.customerForm = this._fb.group({                        // .group method of FormBuilder service
+           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]],
+           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required]]
+        });
+        // dynamic setting/clearing of validators
+        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+        this.customerForm.updateValueAndValidity();
+     }
+     
+     // set/patch value to form widgets
+     this.customerForm.setValue({<formControlName_ATTR>: "Google", <formControlName_ATTR>: "Australia"});
+                                                                            // all widgets <> must be supplied , else error , similar to HTTP POST
+     this.customerForm.patchValue({<formControlName_ATTR>: "Google"});      // only desired <> can be supplied ,              similar to HTTP PATCH
+     
+     // function to retrieve HTML context
+     get naamValidAlertFunc() {
+         return this.customerForm.get('<formControlName_ATTR>'); 
+     }
+     
+     // submit method
+     onSubmit(){                                                        // onSubmit has no arg, as Reactive forms make use of formgroup
+        let newCustomer: Customer = {
+            name: this.customerForm.get('<formControlName_ATTR>').value,
+            location: this.customerForm.get('<formControlName_ATTR>').value,
+        };
+        this.customerForm.reset();                                                              // reset form
+        // dynamic setting/clearing of validators
+           this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+           this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+           this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+           this.customerForm.updateValueAndValidity();
+        
+        this._customersService.addCustomer(newCustomer); 
+     }
+     
+     // 2. component.HTML                                            // onSubmit() has no arg, as Reactive forms make use of formgroup
+     <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">       // [formGroup] , property binding for connecting TS form to HTML
+         <input type="text" formControlName="naam" />                // formControlName , NOTE : Donot use [] , similar to HTML 'name' attr
+         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched)" class="alert alert-danger">Naam Required</div>
+         <select            formControlName="location">
+            <option *ngFor="let location of locations" [value]="location">{{location}}</option>
+        </select>
+     </form>
+     
 
 
 STYLE
