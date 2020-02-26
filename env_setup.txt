@@ -1069,13 +1069,64 @@ ngrx   (angular + Redux + RxJs)
                            
 It uses an additional SELECTOR block in it's architetcure as compared to REDUX. It is somehow similar to `store.subscribe()` in REDUX.
 Here STORE sends all data to SELECTOR which then act as a pipe/filter for sending data to respective components ie Angular way.
-
 STEPS
+--------
+- For debugging purpose, install chrome extension - 'Redux Dev Tools' , used from tab that appears in developer mode.
 - Install ngrx store
-> npm install @ngrx/store
-> npm install @ngrx/store-devtools
+> npm install --save @ngrx/store
+> npm install --save @ngrx/store-devtools        // 'Redux Dev Tools' web extension work in sync from code using this library
 
-- 
+- IMPORTANT NOTE : Create new module other than root module 'app.module.TS'    i.e.    `ng generate module <FEATURE_MODULE>`
+                   To have different STATE for each module , say eg: PRODUCTS_MODULE, ORDERS_MODULE, CUSTOMERS_MODULE, EMPLOYEES_MODULE
+
+- In 'app.module.TS' , CREATE and INITIALIZE STORE
+  import { StoreModule } from '@ngrx/store';
+  import { StoreDevtoolsModule } from '@ngrx/store-devtools';   // plus declare these in imports[] array 
+         imports: [ StoreModule.forRoot({}),                    // create STORE, forRoot({}) required in root module ie 'app.module.ts'
+                    StoreDevtoolsModule.instrument({
+                       name: '<APPNAME_FOR_DEV_DEBUGGING_BROWSER>',
+                       maxAge: <MAX_NUMBER_OF_STATES_RECORDED_DEV_TOOL_FOR_UNDOING_REDOING>
+                     })
+                  ]
+                  
+- In '<FEATURE_MODULE>.module.TS' , CREATE and INITIALIZE STORE
+  import { StoreModule } from '@ngrx/store';                     
+  import { <NAME_OF_REDUCER> } from '<path>'                     // plus declare these in imports[] array
+         imports: [
+                    StoreModule.forFeature('<NAME_OF_STATE_VAR>', <NAME_OF_REDUCER_VAR>)
+                  ]
+                  
+- Create a DIR named as state (for convention) which will have following REDUCER and ACTION files:
+  - <FEATURE>.reducer.ts
+  const <initialStateVAR>: <FEATURE_STATE_INTERFACE_TYPE> = { 
+                                                              INTERFACEdata1: '', 
+                                                              INTERFACEdata2: [{id:1, name: ''}, {id:2, name: ''}] 
+                                                            }; 
+  export const <NAME_OF_REDUCER_VAR> = (stateDATA:<FEATURE_STATE_INTERFACE_TYPE>=<initialStateVAR>, actionDATA: <NAME_OF_ACTIONS_VAR>): <FEATURE_STATE_INTERFACE_TYPE> => {
+   switch (actionDATA.type) {
+    case <ENUM_FROM_ACTIONS>.<KEY>:            // TOGGLE ACTION
+      return {
+        ...stateDATA,                           // IMPORTANT NOTE : (...) spread operator inside {} will create a copy of it
+        INTERFACEdata1: actionDATA.<key>        // after a copy , the key(s) (<INTERFACEdata1>) written will be overwritten with new data (<actionDATA.<key>) specified
+    };
+    case <ENUM_FROM_ACTIONS>.<KEY>:            // ADD ACTION
+      return {
+        ...stateDATA,
+        INTERFACEdata2: [
+          ...stateDATA.INTERFACEdata2,         // However (...) spread operator inside [] , spreads array values
+          actionDATA.<key>,
+        ]
+     };
+     case <ENUM_FROM_ACTIONS>.<KEY>:           // DELETE ACTION
+       return {
+         ...stateDATA,
+         INTERFACEdata2: stateDATA.INTERFACEdata2.filter((tpVAR) => tpVAR.<key> !== actionDATA.<key>)
+     };
+     default:
+       return stateDATA;
+   }
+ }
+  
 
 
 ngrx-effects
