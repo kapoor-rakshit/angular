@@ -1096,36 +1096,104 @@ STEPS
                     StoreModule.forFeature('<NAME_OF_STATE_VAR>', <NAME_OF_REDUCER_VAR>)
                   ]
                   
-- Create a DIR named as state (for convention) which will have following REDUCER and ACTION files:
-  - <FEATURE>.reducer.ts
-  const <initialStateVAR>: <FEATURE_STATE_INTERFACE_TYPE> = { 
-                                                              INTERFACEdata1: '', 
-                                                              INTERFACEdata2: [{id:1, name: ''}, {id:2, name: ''}] 
-                                                            }; 
-  export const <NAME_OF_REDUCER_VAR> = (stateDATA:<FEATURE_STATE_INTERFACE_TYPE>=<initialStateVAR>, actionDATA: <NAME_OF_ACTIONS_VAR>): <FEATURE_STATE_INTERFACE_TYPE> => {
+- Create a DIR named as state (a good convention) which will have following REDUCER and ACTION files:
+  // 1. <FEATURE>.reducer.ts
+  import { createFeatureSelector, createSelector } from '@ngrx/store';
+  import { state } from '@angular/animations';
+  const <initialStateVAR>: <FEATURE_STATE_INTERFACE> = { 
+                                                          INTERFACEdata1: '', 
+                                                          INTERFACEdata2: [{id:1, name: ''}, {id:2, name: ''}] 
+                                                       };
+                                                       
+  const <getFeatureState> = createFeatureSelector< <FEATURE_STATE_INTERFACE> >('<NAME_OF_STATE_VAR>');   // entire STATE , <NAME_OF_STATE_VAR> same as defined in 'module.ts'
+  export const <TOGGLE_SELECTOR> = createSelector(
+      <getFeatureState>,                                             // create a sub selector from entire STATE
+      state => state.INTERFACEdata1
+  );
+  export const <GET_EMPLOYEES_SELECTOR> = createSelector(            // create a sub selector from entire STATE
+      <getFeatureState>,
+      state => state.INTERFACEdata2
+  );
+  
+  export const <NAME_OF_REDUCER_VAR> = (stateDATA:<FEATURE_STATE_INTERFACE>=<initialStateVAR>, actionDATA: <NAME_OF_ACTIONS_VAR>): <FEATURE_STATE_INTERFACE> => {
    switch (actionDATA.type) {
     case <ENUM_FROM_ACTIONS>.<KEY>:            // TOGGLE ACTION
       return {
-        ...stateDATA,                           // IMPORTANT NOTE : (...) spread operator inside {} will create a copy of it
-        INTERFACEdata1: actionDATA.<key>        // after a copy , the key(s) (<INTERFACEdata1>) written will be overwritten with new data (<actionDATA.<key>) specified
+        ...stateDATA,                           // IMPORTANT NOTE : (...) spread operator for {} will create a copy of it
+        INTERFACEdata1: actionDATA.<payload>    // after a copy , the key(s) (<INTERFACEdata1>) written will be overwritten with new data (<actionDATA.<key>) specified
     };
     case <ENUM_FROM_ACTIONS>.<KEY>:            // ADD ACTION
       return {
         ...stateDATA,
         INTERFACEdata2: [
-          ...stateDATA.INTERFACEdata2,         // However (...) spread operator inside [] , spreads array values
-          actionDATA.<key>,
+          ...stateDATA.INTERFACEdata2,         // However (...) spread operator for [] , spreads array values
+          actionDATA.<payload>,
         ]
      };
      case <ENUM_FROM_ACTIONS>.<KEY>:           // DELETE ACTION
        return {
          ...stateDATA,
-         INTERFACEdata2: stateDATA.INTERFACEdata2.filter((tpVAR) => tpVAR.<key> !== actionDATA.<key>)
+         INTERFACEdata2: stateDATA.INTERFACEdata2.filter((tpVAR) => tpVAR.<key> !== actionDATA.<payload>)
      };
      default:
        return stateDATA;
-   }
- }
+    }
+  }
+  
+  // 2. <FEATURE>.action.ts
+  export enum <ENUM_FROM_ACTIONS> {
+    <KEY> = '<VALUE_TOGGLE>',
+    <KEY> = '<VALUE_ADD>',
+    <KEY> = '<VALUE_DELETE>'
+  }
+  export class <TOGGLE_FUNC> implements Action {              // implement ACTION
+    readonly type = <ENUM_FROM_ACTIONS>.<KEY>;                // readonly type of ACTION
+    constructor(public <payload>: boolean) { 
+        console.log("ACTION => ShowCompanyName");
+    }
+  }
+  export class <ADD_FUNC> implements Action {
+    readonly type = <ENUM_FROM_ACTIONS>.<KEY>;
+    constructor(public <payload>: Employee) { 
+        console.log("ACTION => Add");
+    }
+  }
+  export class <DELETE_FUNC> implements Action {
+    readonly type = <ENUM_FROM_ACTIONS>.<KEY>;
+    constructor(public <payload>: string) { 
+        console.log("ACTION => Delete");
+    }
+  }
+  export type <NAME_OF_ACTIONS_VAR> = <TOGGLE_FUNC> | <ADD_FUNC> | <DELETE_FUNC>;        // export action types to be used for dispatch
+  
+- In 'ADD-component.ts' , DISPATCH ACTION
+  import { Store } from '@ngrx/store';
+  import * as <featureMethods> from '<FEATURE>.reducer.ts';
+  import * as <featureActions> from '<FEATURE>.action.ts';
+  constructor(private store: Store< <featureMethods>.<FEATURE_STATE_INTERFACE> >) { }
+  onSubmit(formValue: any){
+    let newEmployee = {
+      id: 2
+      name: formValue.name,
+      location: formValue.location,
+    };
+    this.store.dispatch(new <featureActions>.<ADD_FUNC>(newEmployee));
+  }
+  
+- In 'DISPLAY-component.ts' , SUBSCRIBE TO ACTION from corresponding MODULE only using SELECTOR
+  import { Store, select } from '@ngrx/store';
+  import * as <featureMethods> from '<FEATURE>.reducer.ts';
+  constructor(private store: Store< <featureMethods>.<FEATURE_STATE_INTERFACE> >) { }
+  ngOnInit() {
+    this.store.pipe(select(<featureMethods>.<TOGGLE_SELECTOR>)).subscribe(
+      (toggleVAR: boolean) => { this.VAR = toggleVAR; },
+      (err: any) => { console.log(`${err}`); }
+    );
+    this.store.pipe(select(<featureMethods>.<GET_EMPLOYEES_SELECTOR>)).subscribe(
+      (ARRVAR: Employee[]) => { this.VARARR = ARRVAR; },
+      (err: any) => { console.log(`${err}`); }
+    );
+  }
   
 
 
