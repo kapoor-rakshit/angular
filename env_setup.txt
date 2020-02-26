@@ -1051,5 +1051,35 @@ HTTP INTERCEPTORS
 
 
 
+Redux
+============
+A state management library.
+REFER : env_setup_REDUX.txt  --->  R (react) repo of kapoor-rakshit.
+
+
+ngrx   (angular + Redux + RxJs)
+=================================
+                           -----> ACTION
+                           |        |                         <----> REDUCER 1
+                           |      STORE <------> ROOT REDUCER <----> REDUCER 2
+                           |        |                         <----> REDUCER 3
+                           |     SELECTOR
+                           |        |
+                           <----- VIEW
+                           
+It uses an additional SELECTOR block in it's architetcure as compared to REDUX. It is somehow similar to `store.subscribe()` in REDUX.
+Here STORE sends all data to SELECTOR which then act as a pipe/filter for sending data to respective components ie Angular way.
+
+STEPS
+- Install ngrx store
+> npm install @ngrx/store
+> npm install @ngrx/store-devtools
+
+- 
+
+
+ngrx-effects
+=================================
+This is used with ngRx for connecting to asynchronous backend services ie http GET, POST, PUT, DELETE, PATCH  ... etc
 
 
