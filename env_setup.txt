@@ -1141,6 +1141,7 @@ STEPS
   }
   
   // 2. <FEATURE>.action.ts
+  import { Action } from '@ngrx/store';
   export enum <ENUM_FROM_ACTIONS> {
     <KEY> = '<VALUE_TOGGLE>',
     <KEY> = '<VALUE_ADD>',
@@ -1180,7 +1181,7 @@ STEPS
     this.store.dispatch(new <featureActions>.<ADD_FUNC>(newEmployee));
   }
   
-- In 'DISPLAY-component.ts' , SUBSCRIBE TO ACTION from corresponding MODULE only using SELECTOR
+- In 'DISPLAY-component.ts' , SUBSCRIBE TO ACTION in ngOnInit() from corresponding MODULE only using SELECTOR
   import { Store, select } from '@ngrx/store';
   import * as <featureMethods> from '<FEATURE>.reducer.ts';
   constructor(private store: Store< <featureMethods>.<FEATURE_STATE_INTERFACE> >) { }
@@ -1200,5 +1201,105 @@ STEPS
 ngrx-effects
 =================================
 This is used with ngRx for connecting to asynchronous backend services ie http GET, POST, PUT, DELETE, PATCH  ... etc
+
+                              -----> ACTION <-----> EFFECTS <----> SERVICE <----> SERVER
+                              |        |
+                              |      STORE  <-----> ROOT REDUCER <----> REDUCER 1
+                              |        |                         <----> REDUCER 2
+                              |     SELECTOR
+                              |         |
+                              <----- VIEW
+              
+IMPORTANT NOTE : ALL ACTIONS WILL GO TO ALL EFFECTS and ALL REDUCERS also.
+                 Effects accept action , perform activity (contact service/server to get data) , dispatch a new action (SUCCESS/ERROR)
+STEPS
+-----------
+- INSTALL ngrx-effects
+> npm install --save @ngrx/effects
+
+- In 'DISPLAY-component.ts' , DISPATCH ACTION to EFFECTS in ngOnInit() , although this will go to all REDUCERS as well
+  import { Store, select } from '@ngrx/store';
+  import * as <featureMethods> from '<FEATURE>.reducer';
+  import * as <featureActions> from '<FEATURE>.action';
+  import { Observable } from 'rxjs';
+  import { takeWhile } from 'rxjs/operators';
+                          // any subscribe must be unsubsribed (manually or automatic) on component's destroy , to prevent memory leaks
+                          // Angular automatically subscribes and unsubscribes if `async` pipe used in 'DISPLAY-component.html'
+                          // avoiding .subscribe() to be written in .ts , `$` is a convention to make it an Observable variable 
+  errMsgVAR$: Observable<string>;
+  displayCompanyNameVAR$: Observable<boolean>;
+  employeesVAR$: Observable<Employee[]>;
+  constructor(private store: Store< <featureMethods>.<FEATURE_STATE_INTERFACE> >) { }
+  ngOnInit() {
+     this.errMsgVAR$ = this.store.pipe(select(<featureMethods>.<METHOD>));
+     this.store.dispatch(new <featureActions>.<ACTION>());                              // NOTE : ACTION() to get data from service
+     this.displayCompanyNameVAR$ = this.store.pipe(select(<featureMethods>.<METHOD>));
+     this.employeesVAR$ = this.store.pipe(select(<featureMethods>.<METHOD>));
+  }
+  
+- In 'DISPLAY-component.html'
+  // 1
+  <tr *ngFor='let employee of employees$ | async'></tr>                     // `async` pipe will extract value from Observable variable
+  <div *ngIf="displayCompanyName$ | async"></div>
+  // 2
+  <div *ngIf="errMsg$ | async as errorMessageVAR" class="alert alert-danger">     // use of `as` with `async`, check not null, extract in VAR
+    Error: {{ errorMessageVAR }}
+  </div>
+  
+IMPORTANT NOTE : ACTIONS are declared in <FEATURE>.actions.ts
+                 ANY ACTION will go to all EFFECTS and all REDUCERS also.
+                 ACTIONS like ADD , LOAD , DELETE  etc... will be defined in <FEATURE>.effects.ts
+                 ACTIONS like ADD_SUCCESS|ADD_ERROR , LOAD_SUCCESS|LOAD_ERROR , DELETE_SUCCESS|DELETE_ERROR etc... will be defined in <FEATURE>.reducer.ts
+                 
+- In '<FEATURE>.effects.ts'
+  import { Actions, Effect, ofType } from '@ngrx/effects';
+  import { mergeMap, map, catchError, tap } from 'rxjs/operators';
+  import { of } from 'rxjs';
+  import * as <featureActions> from '<FEATURE>.action';
+  @Injectable()                                                                                // use of @Injectable()
+  export class <FEATURE_EFFECTS> {
+    constructor(private actions$: Actions, private employesService: <NAME_OF_SERVICE>) { }     // use actions$: Actions
+    @Effect()                                                                                  // use of @Effect()
+    loadEmployees$ = this.actions$.pipe(
+        ofType(<featureActions>.<ENUM_FROM_ACTIONS>.<KEY>),                                // ofType pipe - similar to switch/case
+        tap(val => console.log(`*** LOAD EFFECT ***`)),                                    // tap()  pipe - to log value from prev pipe
+        mergeMap((action: <featureActions>.<ACTION>) => this.employesService.getEmployees().pipe(    // mergeMap - used for merging multiple action requests
+            map((employees: Employee[]) => (new <featureActions>.<ACTION_SUCCESS>(employees))),      // dispatch new action
+            catchError(err => of(new <featureActions>.<ACTION_ERROR>(err)))                          // of() - converts to observable sequence
+        ))
+    )
+    @Effect()
+    addEmployees$ = this.actions$.pipe(
+        ofType(<featureActions>.<ENUM_FROM_ACTIONS>.<KEY>),
+        tap(val => console.log(`*** ADD EFFECT ***`)),
+        map((action: <featureActions>.<ACTION>) => { return action.payload }),
+        mergeMap((employee:Employee) => this.employesService.addEmployee(employee).pipe(
+            map((employee: Employee) => (new <featureActions>.<ACTION_SUCCESS>(employee))),
+            catchError(err => of(new <featureActions>.<ACTION_ERROR>(err)))
+        ))
+    )
+    @Effect()
+    deleteEmployees$ = this.actions$.pipe(
+        ofType(<featureActions>.<ENUM_FROM_ACTIONS>.<KEY>),
+        tap(val => console.log(`*** DELETE EFFECT ***`)),
+        map((action: <featureActions>.<ACTION>) => { return action.payload }),
+        mergeMap((id:string) => this.employesService.deleteEmployee(id).pipe(
+            map(() => (new <featureActions>.<ACTION_SUCCESS>(id))),
+            catchError(err => of(new <featureActions>.<ACTION_ERROR>(err)))
+        ))
+    )
+  }
+  
+- In '<FEATURE>.module.ts'
+  import { StoreModule } from '@ngrx/store';
+  import { EffectsModule } from '@ngrx/effects';
+  import { <FEATURE_EFFECTS> } from '<FEATURE>.effects';
+  import { <FEATURE_REDUCER> } from '<FEATURE>.reducer';
+  @NgModule({
+     imports: [
+                 StoreModule.forFeature('<NAME_OF_STATE_VAR>', <FEATURE_REDUCER>),
+                 EffectsModule.forFeature([FEATURE_EFFECTS])
+              ]
+  })
 
 
