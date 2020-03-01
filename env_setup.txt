@@ -1099,7 +1099,10 @@ STEPS
 - Create a DIR named as state (a good convention) which will have following REDUCER and ACTION files:
   // 1. <FEATURE>.reducer.ts
   import { createFeatureSelector, createSelector } from '@ngrx/store';
-  import { state } from '@angular/animations';
+  export interface <FEATURE_STATE_INTERFACE> {
+                                                 INTERFACEdata1: string;
+                                                 INTERFACEdata2: <INTERFACE>[];
+                                             }
   const <initialStateVAR>: <FEATURE_STATE_INTERFACE> = { 
                                                           INTERFACEdata1: '', 
                                                           INTERFACEdata2: [{id:1, name: ''}, {id:2, name: ''}] 
@@ -1300,6 +1303,21 @@ IMPORTANT NOTE : ACTIONS are declared in <FEATURE>.actions.ts
                  StoreModule.forFeature('<NAME_OF_STATE_VAR>', <FEATURE_REDUCER>),
                  EffectsModule.forFeature([FEATURE_EFFECTS])
               ]
+  })
+  
+- In 'app.module.ts'
+  import { StoreModule } from '@ngrx/store';
+  import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+  import { EffectsModule } from '@ngrx/effects';
+  @NgModule({
+      imports: [
+                  StoreModule.forRoot({}),
+                  StoreDevtoolsModule.instrument({
+                      name: 'Employees App Devtools',
+                      maxAge: 20
+                  }),
+                  EffectsModule.forRoot([])
+               ]
   })
 
 
