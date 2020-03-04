@@ -1078,6 +1078,7 @@ STEPS
 
 - IMPORTANT NOTE : Create new module other than root module 'app.module.TS'    i.e.    `ng generate module <FEATURE_MODULE>`
                    To have different STATE for each module , say eg: PRODUCTS_MODULE, ORDERS_MODULE, CUSTOMERS_MODULE, EMPLOYEES_MODULE
+                   LAZY LOADING with NGRX can also be achieved , it requires a different approach than this. REFER : official documentation :)
 
 - In 'app.module.TS' , CREATE and INITIALIZE STORE
   import { StoreModule } from '@ngrx/store';
