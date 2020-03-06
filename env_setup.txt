@@ -1322,3 +1322,69 @@ IMPORTANT NOTE : ACTIONS are declared in <FEATURE>.actions.ts
   })
 
 
+TESTING (TDD / BDD)
+========================
+TDD (TEST DRIVEN DEVELOPMENT)
+ - Test cases are to be written first , then code underlying those test cases.
+ - TDD focuses on HOW the functionality is implemented / tested.
+ - Test cases are written in a programming language.
+ - Collaboration is required only between the developers.
+ - Might be a better approach for projects which involve API and third-party tools.
+ - Tools which support TDD are JUnit, TestNG, NUnit, Karma/Jasmine etc.
+ 
+BDD (BEHAVIOR DRIVEN DEVELOPMENT)
+ - BDD is an extension to TDD where instead of writing the test cases, we start by writing a behavior (scenario).
+   Later, we develop the code which is required for our application to perform the behavior of evolving app.
+ - BDD focuses on the behavior of an application for the end user / WHAT to test.
+ - Scenarios are more readable when compared to TDD as they are written in simple English format.
+ - Collaboration is required between all the stakeholders.
+ - Might be a better approach for projects which are driven by user actions. For eg: e-commerce website, application system, etc.
+ - Tools which support BDD are SpecFlow, Cucumber, MSpec, Selenium etc.
+ - BDD tools use GHERKIN language to write files that contain FEATURES --> SCENARIOS --> STEPS (pre-condition | action | post-condition)
+   eg: Feature: "register new user"
+       Scenario: "sign-up form"
+        Given:
+        When:
+        Then:
+       Scenario: "credit card info"
+        Given:
+        When:
+        Then:
+ - Selenium comes with variants of:
+                          REFER : https://www.selenium.dev/
+   - SELENIUM IDE       : has a GUI | browser support : FIREFOX, CHROME | language support : JS
+   - SELENIUM RC        : (REMOTE CONTROL) requires RC server between AUT and Tool | browser support : any | language support : any
+   - SELENIUM WebDriver : no RC server required | browser support : any | language support : any
+   - SELENIUM GRID      : used for parallel testing (testing app on multiple browsers simultaneouly)
+   
+   
+Angular TDD
+================
+- Jasmine (Test Framework) , similar to javac which converts .java to .class
+- Karma   (Test Runner)    , similar to java  which runs .class files
+
+- comp.spec.ts file (SPECIFICATION file) is used for writing TEST SUITE which contains TEST CASES.
+- test cases can involve:
+  - COMPONENT CLASS testing    (variable/function of component)
+  - COMPONENT DOM testing      (html of component)
+  - COMPONENT SERVICE testing  (services used in component)
+- To run angular tests
+  > ng test --code-coverage            (MULTI-REPO)    // test: runs all .spec.ts in app | --code-coverage: generates report ( root/coverage dir)
+  > ng test <appName> --code-coverage  (MONO-REPO)
+- commonly used methods:
+  - TestBed()              : similar to app.module which will import the component
+  - describe()             : define a test suite
+  - it()                   : define a test case
+  - expect()               : call to variable/function/queryselector to be tested
+  - toBeTruthy()           : check for exist/present
+  - toContain()            : check for contains "string"
+  - toEqual()              : check for equals "string"
+  - toBe()                 : expected result
+  - beforeAll()            : called once at start of TEST SUITE (`describe`)
+  - beforeEach()           : called before every TEST CASE (`it`)
+  - afterEach()            : called after every TEST CASE (`it`)
+  - afterAll()             : called once at end of TEST SUITE (`describe`)
+  - xit()                  : prevents test case (`it`) from running , prepended with `x`
+- In component.spec.ts
+  
+
