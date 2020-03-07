@@ -1048,6 +1048,28 @@ HTTP INTERCEPTORS
     
     // 4. app.module.ts
    providers : [httpInterceptorProviders]
+   
+   
+PROXYING TO A BACKEND SERVER
+================================
+- Providing relative (`/products`) URL instead of absolute URL (`http://localhost:3000/products`) in service file.
+  eg:- divert all calls for `http://localhost:4200/products` to a server running on `http://localhost:3000/products`
+- Create a file 'proxy.conf.json' in your project's src/ folder
+  NOTE : if you edit the 'proxy configuration file', you must relaunch the `ng serve` process to make your changes effective.
+  {
+    "/products": {
+      "target": "http://localhost:3000",
+      "secure": false
+    }
+  }
+- In 'angular.json', add the "proxyConfig" option to the "serve" target
+  "architect": {
+    "serve": {
+      "builder": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "browserTarget": "your-application-name:build",
+        "proxyConfig": "src/proxy.conf.json"
+      },
 
 
 
@@ -1377,14 +1399,208 @@ Angular TDD
   - it()                   : define a test case
   - expect()               : call to variable/function/queryselector to be tested
   - toBeTruthy()           : check for exist/present
-  - toContain()            : check for contains "string"
-  - toEqual()              : check for equals "string"
-  - toBe()                 : expected result
+  - toBeFalsy()            : check for not exist/present
+  - toContain()            : check for contains substring
+  - toEqual(arg1, arg2)    : check for equals exact match
+  - toBe(arg1, arg2)       : arg1 is expected result, arg2 is a description of test if pass
   - beforeAll()            : called once at start of TEST SUITE (`describe`)
   - beforeEach()           : called before every TEST CASE (`it`)
   - afterEach()            : called after every TEST CASE (`it`)
   - afterAll()             : called once at end of TEST SUITE (`describe`)
   - xit()                  : prevents test case (`it`) from running , prepended with `x`
-- In component.spec.ts
+- In .component.spec.ts
+  import { TestBed, async } from '@angular/core/testing';
+  import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+  import { HttpClient, HttpResponse } from '@angular/common/http';
+  import { By } from '@angular/platform-browser';
+  import { DebugElement } from '@angular/core';
+  import { BehaviorSubject } from 'rxjs';
+  class MockEmployeesService {
+    employees: BehaviorSubject<Employee[]> = new BehaviorSubject<Employee[]>([      // BehaviorSubject : create a subscribable object
+      {
+        "name": "Emp1",
+        "location": "Loc1"
+      },
+      {
+        "name": "Emp2",
+        "location": "Loc2"
+      }
+    ]);
+    getEmployees(): BehaviorSubject<Employee[]> {
+      return this.employees;
+    }
+    addEmployee(employee: Employee) {
+      let tempEmployees = this.employees.getValue();
+      tempEmployees.push(employee);
+      this.employees.next(tempEmployees);                                   // .next() : subscribers will get new value <tempEmployees>
+    }
+  };
+  
+  describe('AppComponent', () => {                                         // TEST SUITE
+    beforeEach(async(() => {
+      TestBed.configureTestingModule({
+        declarations: [
+          AppComponent
+        ],
+      }).compileComponents();
+    }));
+    
+    it('should create the app', () => {
+      const fixture = TestBed.createComponent(AppComponent);
+      const app = fixture.componentInstance;
+      expect(app).toBeTruthy();
+    });
+    
+    // Component CLASS testing
+    describe('Component Class', () => {                                    // TEST SUITE inside another test suite
+      let component: AddemployeeFormComponent;
+      let fixture: ComponentFixture<AddemployeeFormComponent>;
+      let employeesService: EmployeesService;
+    
+      beforeEach(async(() => {
+        TestBed.configureTestingModule({
+          imports:      [ FormsModule ],
+          declarations: [ AddemployeeFormComponent ],
+          providers:    [ {provide: EmployeesService, useClass: MockEmployeesService } ]
+        }).compileComponents();
+        employeesService = TestBed.inject(EmployeesService);
+      }));
+
+      beforeEach(() => {
+        fixture = TestBed.createComponent(AddemployeeFormComponent);
+        comp = fixture.componentInstance;
+        fixture.detectChanges();
+        const deElem: DebugElement = fixture.debugElement;
+      });
+
+      it('should not have employees list after construction', () => {
+        expect(comp.<employeesARR_VAR>).toBeFalsy();
+      });
+
+      it('should have employees list after Angular calls ngOnInit', () => {
+        comp.ngOnInit();
+        expect(comp.<employeesARR_VAR>.length).toEqual(2);
+      });
+
+      it('should toggle company name display on checkbox event', () => {
+        expect(comp.<displayCompanyNameVAR>).toBe(true, 'display company name at first');
+        comp.<handleCheckEventFUNC>(false);
+        expect(comp.<displayCompanyNameVAR>).toBe(false, 'do not display company name');
+        comp.<handleCheckEventFUNC>(true);
+        expect(comp.<displayCompanyNameVAR>).toBe(true, 'display company name again');
+      })
+    });
+  
+      // Component DOM testing
+      describe('Component DOM', () => {                                             // TEST SUITE inside another test suite
+        let component: EmployeesComponent;
+        let fixture: ComponentFixture<EmployeesComponent>;
+        let employeesService: EmployeesService;
+
+        beforeEach(async(() => {
+          TestBed.configureTestingModule({
+            imports: [ FormsModule ],
+            declarations: [ EmployeesComponent ],
+            providers: [ { provide: EmployeesService, useClass: MockEmployeesService } ]
+          }).compileComponents();
+          employeesService = TestBed.inject(EmployeesService);
+        }));
+
+        beforeEach(() => {
+          fixture = TestBed.createComponent(EmployeesComponent);
+          component = fixture.componentInstance;
+          fixture.detectChanges();
+          const deElem: DebugElement = fixture.debugElement;
+        });
+
+        it(`check for contents of h1 tag`, () => {
+          const debugElem = deElem.query(By.css('h1'));                           // .query() : returns DebugElement , first occurrence of selector
+          const htmlElem: HTMLElement = debugElem.nativeElement;                  // .nativeElement : property of DebugElement
+          expect(htmlElem.textContent).toEqual('Angular TDD Demonstration');
+        });
+
+        it(`should render a table heading Location`, () => {
+          const debugElem = deElem.queryAll(By.css('th'));                        // .queryAll() : returns DebugElement[] , all occurrence of selector
+          const htmlElem: HTMLElement = debugElem.nativeElement[1];
+          expect(htmlElem.textContent).toEqual('Location');
+        });
+
+        it(`should render 2 rows of data`, () => {
+          const debugElem = deElem.query(By.css('tbody')).queryAll(By.css('tr'));    // .query() plus .queryAll()
+          const htmlElem: HTMLElement = debugElem.nativeElement;
+          expect(htmlElem.length).toEqual(2);
+        });
+
+        it(`should render first name as Emp1`, () => {
+          const debugElem = deElem.query(By.css('tbody')).queryAll(By.css('tr')).nativeElement[0].queryAll(By.css('td')).nativeElement[0];
+          expect(debugElem.textContent).toEqual('Emp1');
+        })
+      });
+      
+      // Component SERVICE testing                                         // TEST SUITE inside another test suite
+      describe('EmployeesService', () => {
+        let httpClient: HttpClient;
+        let httpTestingController: HttpTestingController;
+        let empService: EmployeesService;
+
+        beforeEach(() => {
+          TestBed.configureTestingModule({
+            imports: [ HttpClientTestingModule ],
+            providers: [EmployeesService]
+          });
+          httpClient = TestBed.inject(HttpClient);
+          httpTestingController = TestBed.inject(HttpTestingController);
+          empService = TestBed.inject(EmployeesService);
+        });
+
+        afterEach(() => {
+          // After every test, assert that there are no more pending requests.
+          httpTestingController.verify();
+        })
+        
+        describe('getEmployees', () => {                                                     // TEST SUITE for GET req
+          let expectedEmployees: Employee[];
+
+          beforeEach(() => {
+            expectedEmployees = [
+              { id: 1, name: 'Emp-1', location: 'Loc-1' },
+              { id: 2, name: 'Emp-2', location: 'Loc-2' }
+            ] as Employee[];
+          });
+
+          it('should return expected employees (called once)', () => {
+            empService.getEmployees().subscribe(
+              (employees) => { expect(employees).toEqual(expectedEmployees, 'should return expected employees') }, fail);
+
+            // EmployeesService should have made one request to GET employees from expected URL
+            const req = httpTestingController.expectOne(empService.employeesUrl);
+            expect(req.request.method).toEqual('GET');
+
+            // Respond with the mock employees
+            req.flush(expectedEmployees);
+          });
+        });
+
+        describe('addEmployee', () => {                                                      // TEST SUITE for POST
+          let expectedAddEmployee: Employee;
+          expectedAddEmployee = { id: 1, name: 'Emp-1', location: 'Loc-1' };
+
+          it('should add an employee and return with id inserted ', () => {
+            const employeeToAdd: Employee = { name: 'Emp-1', location: 'Loc-1' };
+            empService.addEmployee(employeeToAdd).subscribe(
+              data => expect(data).toEqual(expectedAddEmployee, 'should return the employee with id inserted'), fail);
+
+            // EmployeesService should have made one request to POST employee
+            const req = httpTestingController.expectOne(empService.employeesUrl);
+            expect(req.request.method).toEqual('POST');
+            expect(req.request.body).toEqual(employeeToAdd);
+
+            // Expect server to return the employee after POST
+            const expectedResponse = new HttpResponse({ status: 200, statusText: 'OK', body: expectedAddEmployee });
+            req.event(expectedResponse);
+          });
+        });
+      });
+    });
   
 
