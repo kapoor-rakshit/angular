@@ -1434,7 +1434,7 @@ Angular TDD
       tempEmployees.push(employee);
       this.employees.next(tempEmployees);                                   // .next() : subscribers will get new value <tempEmployees>
     }
-  };
+  }
   
   describe('AppComponent', () => {                                         // TEST SUITE
     beforeEach(async(() => {
@@ -1520,19 +1520,18 @@ Angular TDD
         });
 
         it(`should render a table heading Location`, () => {
-          const debugElem = deElem.queryAll(By.css('th'));                        // .queryAll() : returns DebugElement[] , all occurrence of selector
-          const htmlElem: HTMLElement = debugElem.nativeElement[1];
+          const debugElem = deElem.queryAll(By.css('th'))[0];                        // .queryAll() : returns DebugElement[] , all occurrence of selector
+          const htmlElem: HTMLElement = debugElem.nativeElement;
           expect(htmlElem.textContent).toEqual('Location');
         });
 
         it(`should render 2 rows of data`, () => {
           const debugElem = deElem.query(By.css('tbody')).queryAll(By.css('tr'));    // .query() plus .queryAll()
-          const htmlElem: HTMLElement = debugElem.nativeElement;
-          expect(htmlElem.length).toEqual(2);
+          expect(debugElem.length).toEqual(2);
         });
 
         it(`should render first name as Emp1`, () => {
-          const debugElem = deElem.query(By.css('tbody')).queryAll(By.css('tr')).nativeElement[0].queryAll(By.css('td')).nativeElement[0];
+          const debugElem = deElem.query(By.css('tbody')).queryAll(By.css('tr'))[0].nativeElement.queryAll(By.css('td'))[0].nativeElement;
           expect(debugElem.textContent).toEqual('Emp1');
         })
       });
@@ -1548,9 +1547,9 @@ Angular TDD
             imports: [ HttpClientTestingModule ],
             providers: [EmployeesService]
           });
-          httpClient = TestBed.inject(HttpClient);
-          httpTestingController = TestBed.inject(HttpTestingController);
-          empService = TestBed.inject(EmployeesService);
+          httpClient = TestBed.get(HttpClient);
+          httpTestingController = TestBed.get(HttpTestingController);
+          empService = TestBed.get(EmployeesService);
         });
 
         afterEach(() => {
@@ -1573,6 +1572,7 @@ Angular TDD
               (employees) => { expect(employees).toEqual(expectedEmployees, 'should return expected employees') }, fail);
 
             // EmployeesService should have made one request to GET employees from expected URL
+            // .expectOne() : Expect that a single request has been made which matches the given URL, and return its mock.
             const req = httpTestingController.expectOne(empService.employeesUrl);
             expect(req.request.method).toEqual('GET');
 
@@ -1591,12 +1591,13 @@ Angular TDD
               data => expect(data).toEqual(expectedAddEmployee, 'should return the employee with id inserted'), fail);
 
             // EmployeesService should have made one request to POST employee
+            // .expectOne() : Expect that a single request has been made which matches the given URL, and return its mock.
             const req = httpTestingController.expectOne(empService.employeesUrl);
             expect(req.request.method).toEqual('POST');
             expect(req.request.body).toEqual(employeeToAdd);
 
             // Expect server to return the employee after POST
-            const expectedResponse = new HttpResponse({ status: 200, statusText: 'OK', body: expectedAddEmployee });
+            const expectedResponse = new HttpResponse({ status: 200, statusText: 'OK', body: employeeToAdd });
             req.event(expectedResponse);
           });
         });
