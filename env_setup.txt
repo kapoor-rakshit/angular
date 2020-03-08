@@ -1426,7 +1426,7 @@ Angular TDD
         "location": "Loc2"
       }
     ]);
-    getEmployees(): BehaviorSubject<Employee[]> {
+    getEmployees(): BehaviorSubject<Employee[]> {                            // name of methods must be same as in actual service class
       return this.employees;
     }
     addEmployee(employee: Employee) {
@@ -1459,7 +1459,7 @@ Angular TDD
     
       beforeEach(async(() => {
         TestBed.configureTestingModule({
-          imports:      [ FormsModule ],
+          imports:      [ FormsModule, RouterTestingModule ],
           declarations: [ AddemployeeFormComponent ],
           providers:    [ {provide: EmployeesService, useClass: MockEmployeesService } ]
         }).compileComponents();
@@ -1499,7 +1499,7 @@ Angular TDD
 
         beforeEach(async(() => {
           TestBed.configureTestingModule({
-            imports: [ FormsModule ],
+            imports: [ FormsModule, RouterTestingModule ],
             declarations: [ EmployeesComponent ],
             providers: [ { provide: EmployeesService, useClass: MockEmployeesService } ]
           }).compileComponents();
