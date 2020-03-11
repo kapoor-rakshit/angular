@@ -508,15 +508,15 @@ Angular FORMS
         this.customerForm = this._fb.group({                        // .group method of FormBuilder service
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required]]
-        }, {validator: checkInputs});                                      // custom validations function defined outside @Component
-                                                                           // const checkInputs: ValidatorFn = (fg: FormGroup) => {
-                                                                                const password = fg.controls['passwordInput'];
-                                                                                const cnfpassword = fg.controls['cnfpasswordInput'];
+        }, {validator: checkInputs});                                     // custom validations function defined outside @Component
+                                                                          // const checkInputs: ValidatorFn = (fg: FormGroup) => {
+                                                                               const password = fg.controls['formControlName_ATTR'];
+                                                                               const cnfpassword = fg.controls['formControlName_ATTR'];
                                                                                 if(password.value.trim() == "") {
                                                                                     password.setErrors({required: true});
                                                                                 }
                                                                                 if(password.value.trim() != cnfpassword.value.trim()) {
-                                                                                    cnfpassword.setErrors({unequal: true});
+                                                                                    cnfpassword.setErrors({CUSTOM_ERROR: true});
                                                                                     return {'unequalpasswordsfunc': true};
                                                                                 }
                                                                                 return null;
@@ -557,9 +557,11 @@ Angular FORMS
      
      // 2. component.HTML                                            // onSubmit() has no arg, as Reactive forms make use of formgroup
      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">       // [formGroup] , property binding for connecting TS form to HTML
-         <input type="text" formControlName="naam" />                // formControlName , NOTE : Donot use [] , similar to HTML 'name' attr
-         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched)" class="alert alert-danger">Naam Required</div>
-         <select            formControlName="location">
+         <input type="text" formControlName="naam" />                // formControlName , similar to HTML 'name' attr
+         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors.required" class="alert alert-danger">Naam Required</div>
+         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors.CUSTOM_ERROR" class="alert alert-danger">CUSTOM ERROR</div>
+         
+         <select [formControlName]="['formControlName_ATTR']">
             <option *ngFor="let location of locations" [value]="location">{{location}}</option>
         </select>
      </form>
