@@ -508,7 +508,20 @@ Angular FORMS
         this.customerForm = this._fb.group({                        // .group method of FormBuilder service
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required]]
-        });
+        }, {validator: checkInputs});                                      // custom validations function defined outside @Component
+                                                                           // const checkInputs: ValidatorFn = (fg: FormGroup) => {
+                                                                                const password = fg.controls['passwordInput'];
+                                                                                const cnfpassword = fg.controls['cnfpasswordInput'];
+                                                                                if(password.value.trim() == "") {
+                                                                                    password.setErrors({required: true});
+                                                                                }
+                                                                                if(password.value.trim() != cnfpassword.value.trim()) {
+                                                                                    cnfpassword.setErrors({unequal: true});
+                                                                                    return {'unequalpasswordsfunc': true};
+                                                                                }
+                                                                                return null;
+                                                                              }
+        
         // dynamic setting/clearing of validators
         this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
         this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
