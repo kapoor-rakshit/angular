@@ -525,15 +525,14 @@ Angular FORMS
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>']
         }, {validator: CUSTOM_VALIDATOR_FUNCTION});
                                                                           // Custom Validator function for entire formGroup defined outside @Component
-                                                                             const CUSTOM_VALIDATOR_FUNCTION: ValidatorFn = (fg: FormGroup) => {
+                                                                             const CUSTOM_VALIDATOR_FUNCTION: ValidatorFn = (fg: FormGroup): ValidationErrors => {
                                                                                const password = fg.controls['formControlName_ATTR'];
                                                                                const cnfpassword = fg.controls['formControlName_ATTR'];
                                                                                 if(password.value.trim() == "") {
-                                                                                    password.setErrors({required: true});
+                                                                                    password.setErrors({'required': true});
                                                                                 }
                                                                                 if(password.value.trim() != cnfpassword.value.trim()) {
-                                                                                    cnfpassword.setErrors({CUSTOM_ERROR: true});
-                                                                                    return {'unequalpasswordsfunc': true};
+                                                                                    cnfpassword.setErrors({'CUSTOM_ERROR_NAME': true});
                                                                                 }
                                                                                 return null;
                                                                               }
@@ -574,8 +573,10 @@ Angular FORMS
      // 2. component.HTML                                            // onSubmit() has no arg, as Reactive forms make use of formgroup
      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">       // [formGroup] , property binding for connecting TS form to HTML
          <input type="text" formControlName="naam" />                // formControlName , similar to HTML 'name' attr
-         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors.required" class="alert alert-danger">Naam Required</div>
-         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors.CUSTOM_ERROR" class="alert alert-danger">CUSTOM ERROR</div>
+         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors?.required" class="alert alert-danger">Naam Required</div>
+         <div *ngIf="naamValidAlertFunc.invalid && (naamValidAlertFunc.dirty || naamValidAlertFunc.touched) && naamValidAlertFunc.errors?.CUSTOM_ERROR_NAME" class="alert alert-danger">CUSTOM ERROR</div>
+                                                                     // usage of angular material
+         <mat-error *ngIf="(customerNameInputRef.touched || customerNameInputRef.dirty) && customerNameInputRef.errors?.required">Customer name is <b>required</b></mat-error>
          
          <select [formControlName]="['formControlName_ATTR']">
             <option *ngFor="let location of locations" [value]="location">{{location}}</option>
