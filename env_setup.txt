@@ -144,7 +144,21 @@ NOTE : @angular/material package has to be added, which will update angular.json
 > ng add @angular/material                        (MULTI-REPO)
 > ng add @angular/material --project <my-app>     (MONO-REPO)
 
-NOTE : material to be used must be imported in imports [] of 'app.module.ts'
+NOTE : material to be used must be imported in imports [] of '.module.ts'
+
+
+
+jQuery in Angular
+================================
+> npm install jquery                                    // Install jQuery plugin
+
+NOTE : After installing jQuery we need to make it global. In the jQuery module (inside node_modules), jquery.min.js under ‘dist’ folder is not public.
+       To make jQuery global, 
+        - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.js" in scripts: [] property
+        - i.e.   "scripts" :["./node_modules/jquery/dist/jquery.min.js"]
+        
+To use jQuery insode a component
+        - import * as $ from 'jquery' 
 
 
 
