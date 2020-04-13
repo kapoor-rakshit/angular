@@ -153,12 +153,15 @@ jQuery in Angular
 > npm install jquery                                    // Install jQuery plugin
 
 NOTE : After installing jQuery we need to make it global. In the jQuery module (inside node_modules), jquery.min.js under ‘dist’ folder is not public.
-       To make jQuery global, 
+       To make jQuery global, add .min.js 
         - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.js" in scripts: [] property
         - i.e.   "scripts" :["./node_modules/jquery/dist/jquery.min.js"]
+       Similarly we can add .min.css
+        - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.css" in styles: [] property
+        - i.e.   "styles" :["./node_modules/jquery/dist/jquery.min.css"]
         
 To use jQuery insode a component
-        - import * as $ from 'jquery' 
+        - import * as $ from 'jquery'
 
 
 
