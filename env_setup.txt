@@ -274,6 +274,20 @@ app.component.ts          --   defines @Component
                                                                       [ngModel]       = "var"                 // pass to DOM after processing
 
 app.component.html        --   displayed to BROWSER
+
+
+
+Misc. Event binding example (similar to `this` in JS)
+=============================
+In '.comp.html'
+- <input matInput type="text" (keyup)="applyFilter($event)" placeholder="search">
+
+In '.comp.ts'
+-  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.products.filter = filterValue.trim().toLowerCase();
+   }
+
      
      
 PIPES
@@ -281,7 +295,7 @@ PIPES
                           --   BUILTIN PIPES    
                               ----------------  eg:- {{ var | uppercase }}
                                                      {{ var | lowercase }}
-                                                     {{ var | titleCase }}
+                                                     {{ var | titlecase }}
                                                      {{ var | date : "dd/mm/yyyy" }}               // var = new Date();
                                                      {{ var | date : "shortTime" }}
                                                      {{ var | currency : 'EUR' : true }}           // show euro symbol
