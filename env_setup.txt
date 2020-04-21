@@ -968,7 +968,8 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                            // example - RouteAuthServiceName.ts
                            @Injectable()
                            export class RouteAuthServiceName implements CanActivate, CanDeactivate<ComponentNameToDeactivate>, CanLoad, Resolve<TYPE_OF_DATA_RETURN> {
-                              constructor() {}
+                              constructor(private _productService: ProductService, private _router: Router) {}
+                              
                               canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
                                  if(this.METHOD_VAR_IN_SERVICE) {                   // returns true/false , can be from other service as well  eg: this.authService.METHOD_VAR_IN_SERVICE
                                     return true;
@@ -979,18 +980,31 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                                  }
                               }
                               
-                              canDeactivate(component: ComponentNameToDeactivate): boolean {
+                              canDeactivate(component: ComponentNameToDeactivate, route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
                                  if (component.METHOD_VAR_IN_COMPONENT) {                   // returns true/false from a method/variable in component to be deactivated, 
                                                                                                we can make use of @ViewChild variables in component.ts
                                     return confirm('Are you sure?');
                                  }
-                                 return true;
+                                 if(component.editProductForm.dirty && !component.formSubmitted) {
+                                    return confirm(`You have unsaved changes. Are you sure to leave ?`);
+                                 }
+                                 else {
+                                    return true;
+                                 }
                               }
                               
                               canLoad(route: Route): boolean { }
                               
                               resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<TYPE_OF_DATA_RETURN> | Observable<TYPE_OF_DATA_RETURN> | any {
-                                 return this._customersService.getCustomers();
+                                  if(state.url.indexOf("detail") != -1 || state.url.indexOf("edit") != -1) {
+                                      return this._productService.getProduct(route.params['id']);
+                                  }
+                                  else if(state.url.indexOf("topproducts") != -1) {
+                                      return this._productService.getTopProducts();
+                                  }
+                                  else {
+                                      return this._productService.getAllProducts();
+                                  }
                               }
                             }
 
