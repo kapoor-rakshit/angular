@@ -148,6 +148,176 @@ NOTE : material to be used must be imported in imports [] of '.module.ts'
 
 
 
+Session Timeout (i.e. track user inactivity)
+==============================================
+- npm install angular-user-idle
+
+- app.module.ts
+----------------------
+import { AppComponent, UserIdleDialog } from './app.component';
+import { UserIdleModule } from 'angular-user-idle';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+@NgModule({
+  declarations: [AppComponent, UserIdleDialog],
+  entryComponents: [UserIdleDialog],
+  imports: [UserIdleModule.forRoot({}), MatDialogModule, MatButtonModule],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+
+- app.component.ts
+------------------------
+import { Component, OnInit, Inject } from '@angular/core';
+import { UserIdleService } from 'angular-user-idle';
+import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
+@Component({
+  selector: 'app-root',
+  templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css']
+})
+export class AppComponent implements OnInit{
+  isDialogOpen: boolean = false;
+
+  // all times are in seconds
+  userIdleTime: number = 30;
+  dialogIdleTime: number = 10;
+
+  constructor(private userIdle: UserIdleService, public dialog: MatDialog, public route: ActivatedRoute) {}
+  
+  ngOnInit() {
+    // set config values
+    this.userIdle.setConfigValues({idle: this.userIdleTime, timeout: 5, ping: 120});
+
+    // use this activated route to check on which component to start watching idle service or not
+    // eg: this.route.snapshot.url[0] == "auth" , idleService should not watch on login/signup page
+    console.log(`${this.route.snapshot.url.length}`);
+
+    // Start watching for user inactivity, 
+    // and start timeout seconds timer after user is IDLE for idle seconds
+    this.userIdle.startWatching();
+    
+    // Start watching when timeout seconds timer is starting.
+    // called every second
+    this.userIdle.onTimerStart().subscribe(
+      (count) => {
+        if(!this.isDialogOpen){
+          //console.log(`Timer value USER IDLE ==> ${count}`);
+        }
+        else {
+          //console.log(`Timer value DIALOG IDLE ==> ${count}`);
+        }
+      },
+      (err: Error) => {
+        console.error(`TIMER START ERROR ==> ${err.message}`);
+      }
+    );
+    
+    // when timeout seconds timer is up.
+    // called after timer ends and internally calls stopWatching() on userIdleService
+    // i.e. userIdleService will not track user inactivity anymore now.
+    this.userIdle.onTimeout().subscribe(
+      (data) => {
+        if(!this.isDialogOpen) {
+          console.log(`Time is up USER IDLE ==> ${data}`);
+          this.openDialog();
+        }
+        else {
+          this.dialog.closeAll();
+          this.isDialogOpen = false;
+          this.userIdle.resetTimer();
+          this.userIdle.stopWatching();
+          console.log(`Time is up DIALOG IDLE ==> ${data}`);
+
+          // functionality as of logout button
+          console.log(`logging out...`);
+        }
+      },
+      (err: Error) => {
+        console.error(`TIMER END ERROR ==> ${err.message}`);
+      }
+    );
+  }
+  
+  openDialog(): void {
+    this.isDialogOpen = true;
+    this.userIdle.resetTimer();
+    this.userIdle.stopWatching();
+
+    this.userIdle.setConfigValues({idle: 1, timeout: this.dialogIdleTime, ping: 120});
+    this.userIdle.startWatching();
+
+    const dialogRef = this.dialog.open(UserIdleDialog, {
+      width: '50vw',
+      disableClose: true,
+      data: {}
+    });
+
+    dialogRef.afterClosed().subscribe(
+      (result) => {
+        if(result == "stayOnPage") {
+          this.isDialogOpen = false;
+          this.userIdle.resetTimer();
+          this.userIdle.stopWatching();
+
+          this.userIdle.setConfigValues({idle: this.userIdleTime, timeout: 5, ping: 120});
+          this.userIdle.startWatching();
+          console.log(`started watching USER IDLE again...`);
+        }
+        else if(result == "logout") {
+          this.isDialogOpen = false;
+          this.userIdle.resetTimer();
+          this.userIdle.stopWatching();
+
+          // functionality as of logout button
+          console.log(`logging out...`);
+        }
+        console.log('The dialog was closed');
+      },
+      (err: Error) => {
+        console.error(`DIALOG CLOSURE ERROR ==> ${err.message}`);
+      }
+    );
+  }
+}
+@Component({
+  selector: 'user-idle-dialog',
+  templateUrl: './userIdleDialog.html',
+  styleUrls: ['./app.component.css']
+})
+export class UserIdleDialog implements OnInit {
+
+  timeUntilLogout: number;
+  constructor(public dialogRef: MatDialogRef<UserIdleDialog>, @Inject(MAT_DIALOG_DATA) public data: any) {}
+
+  ngOnInit() {
+
+  }
+
+  stayOnPageFn() {
+    this.dialogRef.close("stayOnPage");
+  }
+
+  logoutFn() {
+    this.dialogRef.close("logout");
+  }
+}
+
+- Material Dialog HTML (userIdleDialog.html)
+------------------------------------------------
+<h1 mat-dialog-title>Session Timeout</h1>
+<mat-dialog-content>
+     You have been inactive and will be logged out. <b>Do you wish to stay on page ?</b>
+</mat-dialog-content>
+<mat-dialog-actions>
+    <button mat-raised-button color="primary" (click)="stayOnPageFn()">Yes</button>
+    <button mat-raised-button color="warn" (click)="logoutFn()">No</button>
+</mat-dialog-actions>
+
+
+
 jQuery in Angular
 ================================
 > npm install jquery                                    // Install jQuery plugin
