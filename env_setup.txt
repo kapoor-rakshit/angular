@@ -172,7 +172,7 @@ export class AppModule { }
 import { Component, OnInit, Inject } from '@angular/core';
 import { UserIdleService } from 'angular-user-idle';
 import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
-import { ActivatedRoute } from '@angular/router';
+import { Router, NavigationStart, NavigationEnd, NavigationError, NavigationCancel, Event } from '@angular/router';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -185,19 +185,36 @@ export class AppComponent implements OnInit{
   userIdleTime: number = 30;
   dialogIdleTime: number = 10;
 
-  constructor(private userIdle: UserIdleService, public dialog: MatDialog, public route: ActivatedRoute) {}
+  constructor(private userIdle: UserIdleService, public dialog: MatDialog, private _router: Router) {}
   
   ngOnInit() {
-    // set config values
-    this.userIdle.setConfigValues({idle: this.userIdleTime, timeout: 5, ping: 120});
+  
+    this._router.events.subscribe((event: Event) => {
+      if (event instanceof NavigationStart) {
+        let currentURL = this._router.routerState.snapshot.url;
+        console.log(`START ==> ${currentURL}`);
+        if(currentURL == "/") {
+          // set config values
+          this.userIdle.setConfigValues({idle: this.userIdleTime, timeout: 5, ping: 120});
 
-    // use this activated route to check on which component to start watching idle service or not
-    // eg: this.route.snapshot.url[0] == "auth" , idleService should not watch on login/signup page
-    console.log(`${this.route.snapshot.url.length}`);
-
-    // Start watching for user inactivity, 
-    // and start timeout seconds timer after user is IDLE for idle seconds
-    this.userIdle.startWatching();
+          // Start watching for user inactivity, 
+          // and start timeout seconds timer after user is IDLE for idle seconds
+          this.userIdle.startWatching();
+        }
+      }
+      else if (event instanceof NavigationEnd) {
+        let currentURL = this._router.routerState.snapshot.url;
+        console.log(`END ==> ${currentURL}`);
+        if(currentURL == "/") {
+          this.userIdle.resetTimer();
+          this.userIdle.stopWatching();
+        }
+      }
+      else if(event instanceof NavigationError || event instanceof NavigationCancel) {
+        this.userIdle.resetTimer();
+        this.userIdle.stopWatching();
+      }
+    }); 
     
     // Start watching when timeout seconds timer is starting.
     // called every second
