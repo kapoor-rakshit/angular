@@ -1098,15 +1098,43 @@ const httpOptions = {
 import 'rxjs' in app.module.ts     // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
 
 
+Difference between "ActivatedRoute" and "ActivatedRouteSnapshot"
+===================================================================
+NOTE : Generally speaking, subscribing is the safest i.e. use ActivatedRoute
+
+Use the Snapshot if you only need the initial value of the parameter once during the component's initialization, 
+and don't expect the URL to change while the user is still on that same component.
+Using snapshot will have two versions of ActivatedRouteSnapshot for the same ActivatedRoute with different params.
+Example : if on a `product/2` route, and the only way to get to `product/3` is by going back and then clicking a product detail 
+i.e. (leaving the detail component, then re-opening it with a new route param)
+
+Use the Observable if it's possible for the route to change while the user is still on the same component, 
+and hence Component's initialization would not be called again, but observable would call your subscribed logic when the URL changed.
+Example : if on a `product/2` route, and you have a "next" button to go to the next id record `product/3`.
+i.e. (did not leave/re-open the component but the URL did receive a new param)
+
 
 CLIENT SIDE ROUTING
 =============================
 Multiple routes... eg: localhost:4200/home/signup/
 
-Create file         "app.routing.ts"   in project's app component root dir , which contains urls/routes
+Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing-module.ts"
+
+NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
+
+NOTE : <a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule  
+If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
+If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['staticURLArg', dynamicArg_VAR, 'staticURLArg']"></a>
+Set single CSS class to active link using                        routerLinkActive="CSS_Class"
+Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="['CSS_CLASS_1', 'CSS_CLASS_2']"
+For exact match of urls use                                      [routerLinkActiveOptions]="{exact:true}"
+For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
+
+Create file         "app.routing-module.ts"   in project's app component root dir , which contains urls/routes
                      NOTE : Do not put '/' in path , ANGULAR will put it automatically
                      - examples
-                     {path: 'URL', component: 'NameOfComponentClass', data: {varInComponentTS: 'dataPassedToComponent'}}
+                     {path: 'URL', component: 'NameOfComponentClass', data: {dataVAR_IN_ROUTE: 'dataPassedToComponent'}
+                     }                                                                 // data accessed via ActivatedRoute in component
                      {path: 'employees', children: [
                                   { path: '', component: EmployeesComponent },
                                   { path: 'add', component: AddEmployeeFormComponent, canDeactivate: [AddEmployeeGuardService]},
@@ -1147,8 +1175,17 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                                                     }
                                                  }
                                                  // 2. component.ts
-                                                 constructor(private _route: ActivatedRoute) { 
+                                                 constructor(private _route: ActivatedRoute) {
+                                                    // a. Not Preferred , using "ActivatedRouteSnapshot"
                                                     this.dataVAR_IN_COMPONENT = this._route.snapshot.data['dataVAR_IN_ROUTE'];
+                                                    
+                                                    // b. Preferred , to use "ActivatedRoute" and SUBSCRIBE
+                                                    this._route.data.subscribe((data: Data) => {
+                                                        console.log(`${data['dataVAR_IN_ROUTE']}`);
+                                                    },
+                                                    (err: Error) => {
+                                                        console.error(`ERROR in DATA ==> ${err.message}`);
+                                                    });
                                                  }
                            // we could specify multiple guards service for a route guard in a route, and they’ll be evaluated in the order in array for that route guard.
                            // NOTE : Declare route authentication service(s) name(s) in 'providers' array of respective '.module.ts'
@@ -1195,33 +1232,74 @@ Create file         "app.routing.ts"   in project's app component root dir , whi
                               }
                             }
 
-Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing.ts"
+DYNAMIC ROUTING
+===================
+REST APIs have four types of parameters:
+ - Header parameters: Parameters included in the request header, usually related to authorization.
+ - Path parameters: Parameters within the path of the endpoint, before the query string (?).
+ - Query string parameters: Parameters in the query string of the endpoint, after the ?.
+ - Request body parameters: Parameters included in the request body. Usually submitted as JSON.
 
-NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
-
-<a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule
-If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
-If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['staticURLArg', dynamicArgVar, 'staticURLArg']"></a>
-Set single CSS class to active link using                        routerLinkActive="CSS_Class"
-Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="'CSS_CLASS_1 CSS_CLASS_2'"
-For exact match of urls use                                      [routerLinkActiveoptions]="{exact:true}"
-For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
-
-
-. DYNAMIC ROUTING
-  using   path : "PARENT-URL/:varname" in  "app.routing.ts"  define a new component (DetailsComponent)
-  
-  config "DetailsComponent.component.ts"
-       -- constructor(ActivatedRoute , Location)    // ActivatedRoute : PARENT-URL  ,  Location : From where coming
-       -- ngOnInit()                                // Traverse the params of path  ie  /:varname1/:varname2
-
-  In .HTML define " routerLink='{{emp.id}}' " for the link. this value is the just the next value of PARENT-URL
-          
-  In     "app.module.ts"  declare  "DetailsComponent" in "declarations"
-                          import   'rxjs'           // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
-
-
-
+ Path Parameters
+ --------------------
+  using colon (:) in path to attach path params with route.
+  Example : "app.routing-module.ts" , {path : "PARENT-URL/:varname_1/:varname_2"}
+            "component.html"        , <a routerLink="/dashboard/78990/kapoor">URL</a>
+            
+            "component.ts"          , constructor(private route: ActivatedRoute) {
+                                          // a. Not Preferred , using "ActivatedRouteSnapshot"
+                                          console.log(`${route.snapshot.params['varname_1']}`);           // 78990 i.e. value of varname_1 param
+                                          console.log(`${route.snapshot.paramMap.get('varname_2')}`);     // kapoor i.e. same as above , using ParamMap
+                                          console.log(`${route.snapshot.paramMap.keys}`);                 // ['varname_1', 'varname_2']
+                                          
+                                          // b. Preferred , using ActivatedRoute and SUBSCRIBE
+                                          route.params.subscribe((param: Params) => {
+                                              console.log(`${param['varname_1']}`);                      // 78990 i.e. value of varname_1 param
+                                          });
+                                          route.paramMap.subscribe((parammap: ParamMap) => {
+                                              console.log(`${parammap.get('varname_2')}`);               // kapoor i.e. same as above , using ParamMap
+                                              console.log(`${parammap.keys}`);                           // ['varname_1', 'varname_2']
+                                          });
+                                      }
+                                      
+ Query string parameters
+ ----------------------------
+  using [queryParams] in <a></a> OR in router.navigate([]) to attach Query string params with route.
+  Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
+            "component.ts"          , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]}});
+            "app.routing-module.ts" , {path : "targetComp/:varname_1/:varname_2", component: TargetComponent}
+            
+            "targetComponent.ts"    , constructor(private route: ActivatedRoute) {
+                                         // a. Not Preferred , using "ActivatedRouteSnapshot"
+                                         console.log(`${route.snapshot.queryParams['q1']}`);             // 'mapcolumns'
+                                         console.log(`${route.snapshot.queryParamMap.get('q2')}`);       // 163
+                                         console.log(`${route.snapshot.queryParamMap.getAll('q2')}`);    // [163, 592, 586]
+                                         console.log(`${route.snapshot.queryParamMap.keys}`);            // ['q1', 'q2']
+                                         
+                                         // b. Preferred , using ActivatedRoute and SUBSCRIBE
+                                         route.queryParams.subscribe((qparam: Params) => {
+                                             console.log(`${qparam['q1']}`);                            // 'mapcolumns'
+                                         });
+                                         route.queryParamMap.subscribe((qparammap: ParamMap) => {
+                                             console.log(`${qparammap.get('q2')}`);                     // 163
+                                             console.log(`${qparammap.getAll('q2')}`);                  // [163, 592, 586]
+                                             console.log(`${qparammap.keys}`);                          // ['q1', 'q2']
+                                         });
+                                      }
+ Request body parameters
+ ---------------------------
+ in ".service.ts"
+ private httpOptions = {
+    headers: new HttpHeaders({
+    'Content-Type':  'application/json'
+    })
+ };
+ constructor(private _http: HttpClient) { }
+ addProduct(newProductBODY) {
+    return this._http.post(this._productsUrl, newProductBODY, this.httpOptions).pipe(catchError((err: Error) => { 
+                                                                                                   return throwError(err.message) }));
+                                                                                                }
+ 
 LOCATION STRATEGIES
 =====================
 REFERENCE   :   https://codecraft.tv/courses/angular/routing/routing-strategies/
