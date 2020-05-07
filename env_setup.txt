@@ -1239,8 +1239,12 @@ REST APIs have four types of parameters:
  - Path parameters: Parameters within the path of the endpoint, before the query string (?).
  - Query string parameters: Parameters in the query string of the endpoint, after the ?.
  - Request body parameters: Parameters included in the request body. Usually submitted as JSON.
+ 
+ 1. Header parameters
+ --------------------
+ NOTE - To read http headers, use INTERCEPTORS.
 
- Path Parameters
+ 2. Path Parameters
  --------------------
   using colon (:) in path to attach path params with route.
   Example : "app.routing-module.ts" , {path : "PARENT-URL/:varname_1/:varname_2"}
@@ -1262,7 +1266,7 @@ REST APIs have four types of parameters:
                                           });
                                       }
                                       
- Query string parameters
+ 3. Query string parameters
  ----------------------------
   using [queryParams] in <a></a> OR in router.navigate([]) to attach Query string params with route.
   Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
@@ -1286,19 +1290,20 @@ REST APIs have four types of parameters:
                                              console.log(`${qparammap.keys}`);                          // ['q1', 'q2']
                                          });
                                       }
- Request body parameters
+ 4. Request body parameters
  ---------------------------
- in ".service.ts"
- private httpOptions = {
-    headers: new HttpHeaders({
-    'Content-Type':  'application/json'
-    })
- };
- constructor(private _http: HttpClient) { }
- addProduct(newProductBODY) {
-    return this._http.post(this._productsUrl, newProductBODY, this.httpOptions).pipe(catchError((err: Error) => { 
-                                                                                                   return throwError(err.message) }));
-                                                                                                }
+ Example : ".service.ts"           , private httpOptions = {
+                                         headers: new HttpHeaders({
+                                          'Content-Type':  'application/json'
+                                         })
+                                     };
+                                     constructor(private _http: HttpClient) { }
+                                     addProduct(newProductBODY) {
+                                         return this._http.post(this._productsUrl, newProductBODY, this.httpOptions)
+                                                          .pipe(catchError((err: Error) => { return throwError(err.message) })); }
+ NOTE - To read http response body, use INTERCEPTORS.
+ 
+ 
  
 LOCATION STRATEGIES
 =====================
@@ -1362,11 +1367,13 @@ HTTP INTERCEPTORS
      }
    }
    
-   // 2. auth-interceptor.ts
+   // 2A. auth-interceptor.ts
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-       console.log("**** AuthInterceptor ...");
+     
+       console.log("**** AuthInterceptor ***");
+       
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
             headers: req.headers.set('Authorization', "mytoken"),
@@ -1376,6 +1383,29 @@ HTTP INTERCEPTORS
           return next.handle(duplicate);
        }
        return next.handle(req);
+     }
+    }
+    
+   // 2B. Intercepting HTTP Response
+   @Injectable()
+   export class AuthInterceptor implements HttpInterceptor {
+     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+
+       console.log(`**** AuthInterceptor **** ==> ${req.url}`);
+
+       // specify url for whose RESPONSE headers required
+       if(req.url.toLowerCase().includes("filedata")) {
+        return next.handle(req).pipe(
+            // There may be other events besides the response
+            filter(event => event instanceof HttpResponse),
+            tap((event: HttpResponse<any>) => {
+                console.log(`BODY ==> ${JSON.stringify(event.body)}`);
+                console.log(`HEADERS ==> ${event.headers.keys()}`);
+            })
+        );
+       } else {
+           return next.handle(req);
+       }
      }
     }
     
