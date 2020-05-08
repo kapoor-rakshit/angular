@@ -284,6 +284,7 @@ export class AppComponent implements OnInit{
           console.log(`started watching USER IDLE again...`);
         }
         else if(result == "logout") {
+          this.dialog.closeAll();
           this.isDialogOpen = false;
           this.userIdle.resetTimer();
           this.userIdle.stopWatching();
