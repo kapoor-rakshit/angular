@@ -1242,7 +1242,20 @@ REST APIs have four types of parameters:
  
  1. Header parameters
  --------------------
- NOTE - To read http headers, use INTERCEPTORS.
+ Example : ".service.ts"           , private httpOptions = {
+                                        headers: new HttpHeaders({
+                                          'Content-Type':  'application/json'
+                                        }),
+                                        params: {
+                                          "chkP" : "namo ji",
+                                          "chkP1" : "PM"
+                                        }
+                                     };
+                                     constructor(private _http: HttpClient) { }
+                                     addProduct(HTTP_BODY) {
+                                         return this._http.post(this._productsUrl, HTTP_BODY, this.httpOptions)
+                                                          .pipe(catchError((err: Error) => { return throwError(err.message) })); }
+ NOTE - To read HTTP RESPONSE HEADERS, use INTERCEPTORS.
 
  2. Path Parameters
  --------------------
@@ -1293,15 +1306,19 @@ REST APIs have four types of parameters:
  4. Request body parameters
  ---------------------------
  Example : ".service.ts"           , private httpOptions = {
-                                         headers: new HttpHeaders({
+                                        headers: new HttpHeaders({
                                           'Content-Type':  'application/json'
-                                         })
+                                        }),
+                                        params: {
+                                          "chkP" : "namo ji",
+                                          "chkP1" : "PM"
+                                        }
                                      };
                                      constructor(private _http: HttpClient) { }
-                                     addProduct(newProductBODY) {
-                                         return this._http.post(this._productsUrl, newProductBODY, this.httpOptions)
+                                     addProduct(HTTP_BODY) {
+                                         return this._http.post(this._productsUrl, HTTP_BODY, this.httpOptions)
                                                           .pipe(catchError((err: Error) => { return throwError(err.message) })); }
- NOTE - To read http response body, use INTERCEPTORS.
+ NOTE - To read HTTP RESPONSE BODY, use INTERCEPTORS.
  
  
  
@@ -1368,11 +1385,15 @@ HTTP INTERCEPTORS
    }
    
    // 2A. auth-interceptor.ts
+   //     Intercepting HTTP Request
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
      
-       console.log("**** AuthInterceptor ***");
+       console.log(`**** REQUEST URL **** ==> ${req.url}`);
+       console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
+       console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);
        
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
@@ -1386,12 +1407,16 @@ HTTP INTERCEPTORS
      }
     }
     
-   // 2B. Intercepting HTTP Response
+   // 2B. auth-interceptor.ts
+   //     Intercepting HTTP Response
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-       console.log(`**** AuthInterceptor **** ==> ${req.url}`);
+       console.log(`**** REQUEST URL **** ==> ${req.url}`);
+       console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
+       console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);
 
        // specify url for whose RESPONSE headers required
        if(req.url.toLowerCase().includes("filedata")) {
@@ -1399,8 +1424,9 @@ HTTP INTERCEPTORS
             // There may be other events besides the response
             filter(event => event instanceof HttpResponse),
             tap((event: HttpResponse<any>) => {
-                console.log(`BODY ==> ${JSON.stringify(event.body)}`);
-                console.log(`HEADERS ==> ${event.headers.keys()}`);
+                console.log(`RESPONSE URL ==> ${event.url}`);
+                console.log(`RESPONSE BODY ==> ${JSON.stringify(event.body)}`);
+                console.log(`RESPONSE HEADERS ==> ${event.headers.keys()}`);
             })
         );
        } else {
