@@ -1247,7 +1247,7 @@ REST APIs have four types of parameters:
                                         headers: new HttpHeaders({
                                           'Content-Type':  'application/json'
                                         }),
-                                        params: {
+                                        params: {                                 // appended as query string parameters in request URL
                                           "chkP" : "namo ji",
                                           "chkP1" : "PM"
                                         }
@@ -1310,7 +1310,7 @@ REST APIs have four types of parameters:
                                         headers: new HttpHeaders({
                                           'Content-Type':  'application/json'
                                         }),
-                                        params: {
+                                        params: {                                 // appended as query string parameters in request URL
                                           "chkP" : "namo ji",
                                           "chkP1" : "PM"
                                         }
@@ -1392,9 +1392,10 @@ HTTP INTERCEPTORS
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
      
        console.log(`**** REQUEST URL **** ==> ${req.url}`);
+       console.log(`**** REQUEST PARAMETERS URL **** ==> ${req.urlWithParams}`);       // URL with all query string parameters (including those passed in HTTP options)
        console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
        console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
-       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options
        
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
@@ -1415,9 +1416,10 @@ HTTP INTERCEPTORS
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
        console.log(`**** REQUEST URL **** ==> ${req.url}`);
+       console.log(`**** REQUEST PARAMETERS URL **** ==> ${req.urlWithParams}`);       // URL with all query string parameters (including those passed in HTTP options)
        console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
        console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
-       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options
 
        // specify url for whose RESPONSE headers required
        if(req.url.toLowerCase().includes("filedata")) {
@@ -1425,7 +1427,7 @@ HTTP INTERCEPTORS
             // There may be other events besides the response
             filter(event => event instanceof HttpResponse),
             tap((event: HttpResponse<any>) => {
-                console.log(`RESPONSE URL ==> ${event.url}`);
+                console.log(`RESPONSE URL ==> ${event.url}`);                        // same as HTTPRequest.urlWithParams
                 console.log(`RESPONSE BODY ==> ${JSON.stringify(event.body)}`);
                 console.log(`RESPONSE HEADERS ==> ${event.headers.keys()}`);
             })
