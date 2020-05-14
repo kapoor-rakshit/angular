@@ -1282,9 +1282,12 @@ REST APIs have four types of parameters:
                                       
  3. Query string parameters
  ----------------------------
-  using [queryParams] in <a></a> OR in router.navigate([]) to attach Query string params with route.
+  using [queryParams] in <a></a> OR in router.navigate([]) OR in HTTP options in a ".service.ts" to attach Query string params with route.
   Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
+                                    OR
             "component.ts"          , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]}});
+                                    OR
+            ".service.ts"           , REFER passing header or body parameter example
             "app.routing-module.ts" , {path : "targetComp/:varname_1/:varname_2", component: TargetComponent}
             
             "targetComponent.ts"    , constructor(private route: ActivatedRoute) {
@@ -1395,7 +1398,7 @@ HTTP INTERCEPTORS
        console.log(`**** REQUEST PARAMETERS URL **** ==> ${req.urlWithParams}`);       // URL with all query string parameters (including those passed in HTTP options)
        console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
        console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
-       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options only
        
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
@@ -1419,7 +1422,7 @@ HTTP INTERCEPTORS
        console.log(`**** REQUEST PARAMETERS URL **** ==> ${req.urlWithParams}`);       // URL with all query string parameters (including those passed in HTTP options)
        console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
        console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
-       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options
+       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options only
 
        // specify url for whose RESPONSE headers required
        if(req.url.toLowerCase().includes("filedata")) {
