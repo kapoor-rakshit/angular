@@ -336,20 +336,165 @@ export class UserIdleDialog implements OnInit {
 
 
 
+Read (Uploaded) / Write (Download) EXCEL files
+=================================================
+Reference : https://javascript.info/file
+            https://www.npmjs.com/package/xlsx
+            https://github.com/SheetJS/sheetjs/tree/baea1798cf825a2cc8b1365cb7818605a8d4f464/demos/angular2
+            
+1. Install package 'XLSX'
+-----------------------------
+> npm install xlsx
+
+2. READ
+-------------
+HTML
+    <input type="file" (change)="fileChangeFn($event)" [(ngModel)]="filePath">
+TS
+    import * as XLSX from 'xlsx';
+   /**
+   * @param ev 
+   */
+  fileChangeFn(ev) {
+    console.log(`FILE NAME/PATH ==> ${this.filePath}`);
+
+    // create fileReader object
+    const reader = new FileReader();
+
+    //For Browsers other than IE.
+    if (reader.readAsBinaryString) {
+
+      // wire up file target
+      let target: DataTransfer = <DataTransfer>(ev.target);
+      if (target.files.length !== 1) throw new Error('Cannot use multiple files');
+
+      // call READ method of FileReader()
+      reader.readAsBinaryString(target.files[0]);
+
+      // cancel the operation
+      // reader.abort();
+
+      // loading started
+      reader.onloadstart = function() {
+        console.log(`READER LOADING STARTED`);
+      };
+
+      // occurs during reading
+      reader.onprogress = function() {
+        console.log(`READING ...`);
+      };
+
+      // no errors, reading complete
+      reader.onload = function() {
+          let data = reader.result;
+
+          //Read the Excel File data.
+            // XLSX Options
+            // type : Input data encoding
+            // password : If file is encrypted
+            // sheets : only parse specified sheets | default is parsing all Sheets in workbook
+          let workbook = XLSX.read(data, {type: 'binary', password: "", sheets: [0,1]});
+
+          //Fetch name of Sheet number as of actual physical workbook on disk, NOT as parsed
+          let firstSheet = workbook.SheetNames[0];
+          let worksheet = workbook.Sheets[firstSheet];
+
+          //Read all rows from First Sheet into an JSON array.
+          let excelRows = XLSX.utils.sheet_to_json(worksheet);
+
+          console.log(`${JSON.stringify(excelRows)}`);
+          console.log(`${JSON.stringify(excelRows.length)}`);
+      };
+
+      // abort() called
+      reader.onabort = function() {
+        console.log(`READER ABORTED`);
+      }
+
+      // error has occurred
+      reader.onerror = function() {
+        console.error(`READER ERROR ==> ${reader.error.message}`);
+      };
+
+      // reading finished with either success or failure
+      reader.onloadend = function() {
+        console.log(`READER LOADING ENDED`);
+      }
+
+    } else {
+      alert(`Your browser does not support this feature.`);
+    }
+  }
+  
+3. WRITE
+------------------
+HTML
+   <button mat-raised-button (click)="writeFileFn()">Download</button>
+TS
+   writeFileFn() {
+    let dataArr = [
+      {username: "kapoor", pass: "rakshit", date: "12-09-5678"},
+      {username: "adhish", pass: "kapoor", date: "10-02-9812"},
+      {username: "kapoor", pass: "palak", date: "02-09-1584"},
+      {username: "kaveri", pass: "kapoor", date: "11-01-8341"},
+      {username: "kapoor", pass: "Saab", date: "29-01-8341"}
+    ];
+
+    /* generate worksheet */
+      // Options
+      // header : Use specified column order
+      // skipHeader : If true, do not include header (keys of JSON Object) row in output
+    let worksheet = XLSX.utils.json_to_sheet(dataArr, {header: ["username", "date", "pass"], skipHeader: false});
+
+    /* add another json to sheet */
+      // Options
+      // origin	: Use specified cell as starting point
+          // NOTE : If not specified (default), it will overwrite starting from header (Row 0)
+          // { r: 1, c: 4 }  :  Row 1, Column 4 (includes header considering it as Row 0)
+          // -1	 : Append to bottom of worksheet starting on first column
+      // header : Use same order as used when creating sheet
+      // skipHeader : true (preferred) to prevent duplicacy of header (keys of JSON Object)
+    let anotherDataArr = [
+      {username: "kapoor", pass: "Palak Gupta", date: "17-09-5678"},
+      {username: "kapoor", pass: "Kaveri Khanna", date: "19-09-5678"},
+    ];
+    XLSX.utils.sheet_add_json(worksheet, anotherDataArr, {origin: -1, header: ["username", "date", "pass"], skipHeader: true});
+
+    /* generate workbook and add the worksheet */
+    let workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Sheet 1");
+
+    /* save to file and download */
+    XLSX.writeFile(workbook, 'DataSheetPrac.xlsx');
+  }
+
+
+
 jQuery in Angular
 ================================
 > npm install jquery                                    // Install jQuery plugin
+> npm install bootstrap                                 // Install Bootstrap plugin
 
-NOTE : After installing jQuery we need to make it global. In the jQuery module (inside node_modules), jquery.min.js under ‘dist’ folder is not public.
-       To make jQuery global, add .min.js 
+NOTE : After installing jQuery or bootstrap we need to make it global. 
+       In the module (inside node_modules), .min.js under ‘dist’ folder is not public.
+       To make them global, add .min.js 
         - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.js" in scripts: [] property
-        - i.e.   "scripts" :["./node_modules/jquery/dist/jquery.min.js"]
+        - i.e.   "scripts" :[
+                   "node_modules/jquery/dist/jquery.min.js",
+                   "node_modules/bootstrap/dist/js/bootstrap.min.js"
+                 ]
        Similarly we can add .min.css
         - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.css" in styles: [] property
-        - i.e.   "styles" :["./node_modules/jquery/dist/jquery.min.css"]
+        - i.e.   "styles" :[
+                   "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+                   "node_modules/bootstrap/dist/css/bootstrap.min.css",
+                   "src/styles.css"
+                 ]
         
 To use jQuery insode a component
         - import * as $ from 'jquery'
+        
+Now we can use Bootstrap as usual with class names in CSS files.
 
 
 
