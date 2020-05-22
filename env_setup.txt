@@ -470,7 +470,7 @@ TS
 
 
 
-jQuery in Angular
+jQuery / Bootstrap in Angular
 ================================
 > npm install jquery                                    // Install jQuery plugin
 > npm install bootstrap                                 // Install Bootstrap plugin
@@ -478,23 +478,23 @@ jQuery in Angular
 NOTE : After installing jQuery or bootstrap we need to make it global. 
        In the module (inside node_modules), .min.js under ‘dist’ folder is not public.
        To make them global, add .min.js 
-        - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.js" in scripts: [] property
+        - inside "angular-cli.json" or "angular.json"  add the path "node_modules/jquery/dist/jquery.min.js" in scripts: [] property
         - i.e.   "scripts" :[
                    "node_modules/jquery/dist/jquery.min.js",
                    "node_modules/bootstrap/dist/js/bootstrap.min.js"
                  ]
        Similarly we can add .min.css
-        - inside "angular-cli.json" or "angular.json"  add the path "./node_modules/jquery/dist/jquery.min.css" in styles: [] property
+        - inside "angular-cli.json" or "angular.json"  add the path "node_modules/jquery/dist/jquery.min.css" in styles: [] property
         - i.e.   "styles" :[
                    "node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
                    "node_modules/bootstrap/dist/css/bootstrap.min.css",
                    "src/styles.css"
                  ]
         
-To use jQuery insode a component
+To use jQuery inside a component
         - import * as $ from 'jquery'
         
-Now we can use Bootstrap as usual with class names in CSS files.
+Also now we can use Bootstrap as usual with class names in our CSS files.
 
 
 
