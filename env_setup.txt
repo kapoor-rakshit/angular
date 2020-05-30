@@ -469,6 +469,79 @@ TS
   }
 
 
+Drag / Drop file
+===================
+1. Create a directive and provide it in declarations array of corresponding .module.TS
+---------------------------------------------------------------------------------------
+import { Directive, Output, Input, EventEmitter, HostBinding, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[appDragDrop]';
+})
+export class DragDropDirective {
+	
+  @Output() onFileDropped = new EventEmitter<any>();
+	
+  @HostBinding('style.background-color') private background = '#f5fcff'
+  @HostBinding('style.opacity') private opacity = '1'
+	
+  //Dragover listener
+  @HostListener('dragover', ['$event']) onDragOver(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#9ecbec';
+    this.opacity = '0.8'
+  }
+	
+  //Dragleave listener
+  @HostListener('dragleave', ['$event']) public onDragLeave(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#f5fcff'
+    this.opacity = '1'
+  }
+	
+  //Drop listener
+  @HostListener('drop', ['$event']) public ondrop(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#f5fcff'
+    this.opacity = '1'
+    let files = evt.dataTransfer.files;
+    if (files.length > 0) {
+      this.onFileDropped.emit(files)
+    }
+  }
+}
+
+2. Attach this directive to HTML DOM
+--------------------------------------
+<div class="uploadfilecontainer" (click)="fileInput.click()" appDragDrop (onFileDropped)="uploadFile($event)">
+  <input hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
+</div>
+
+3. Define event handler in corresponding TS
+---------------------------------------------
+files: any = [];
+uploadFile(event) {                       // drop event passes  '$event.target.files'  as arg to event handler
+  let fileSize = event[0].size;
+  console.log(`FILE SIZE ==> ${fileSize}`);
+}
+
+4. Add some CSS
+--------------------
+.uploadfilecontainer {
+    background-image: url("/assets/cloud-2044823_960_720.png");
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: center;
+    height: 200px;
+    width: 80%;
+    margin: 20px auto;
+    border: 2px dashed #1C8ADB;
+    border-radius: 10px;
+}
+
 
 jQuery / Bootstrap in Angular
 ================================
@@ -708,9 +781,20 @@ Three types of directives:
    - Create a class decorated with @Directive.
    - Assign the attribute directive name to the selector metadata of @Directive decorator, enclosed within bracket [], ex: [colorChange]
    - Create constructor of class to get instance of ElementRef by dependency injection, which can access DOM to change host element appearance and behavior
-   - Use @Input() decorator to accept user input in our custom directive.
+     - we can also use @HostBinding, which allows to set properties of the host element from the directive class.
+     - example :  @HostBinding('style.background-color') private background = '#f5fcff';
+                  @HostBinding('style.opacity') private opacity = '1';
+                  @HostBinding('class.card-outline-primary') private ishovering: boolean = false;
+                  /* these can be used in @HostListener() */
+                  this.background = "#f00";
+                  this.opacity = "0.5";
+                  this.ishovering = true;
+   - Use @Input() / @Output() decorator to accept or attach event to user input in our custom directive.
    - Use @HostListener() decorator to listen to events in custom attribute directive.
-   - Configure custom attribute directive class (ex: MyDirective) in app.module.ts in the 'declarations' array metadata of @NgModule.
+     - It accepts DOM event to listen for and an array which is set of arguments to pass to handler method when the event occurs.
+     - example :  @HostListener('click', ['$event.target']) onClickFn(btn) { }
+               :  @HostListener('dragover', ['$event']) onDragOverFn(evt) { }
+   - Configure custom attribute directive class (ex: MyDirective) in respective .module.ts in the 'declarations' array metadata of @NgModule.
    // example
       @Directive({
          selector: '[colorChangeDirective]'
@@ -1024,9 +1108,23 @@ In the context of Angular 2 it can be used to properly initialize fields.
 Angular 2’s DI (dependency injection) also tries to find providers that match the types of the constructor’s parameters, resolves them, and passes them to the constructor as arguments.
 
 ngOnChanges()	 {  }
-Respond when Angular (re)sets data-bound input properties.
+Respond when Angular (re)sets data-bound @Input properties.
+Called before ngOnInit() and whenever one or more data-bound @Input properties change.
 The method receives a SimpleChanges object of current and previous property values.
-Called before ngOnInit() and whenever one or more data-bound input properties change.
+example:
+        TS  (child.comp.ts)
+        @Input() varOfChild: string;
+        
+        ngOnChanges(changes: SimpleChanges) {
+          for (let propName in changes) {
+            let chng = changes[propName];               // propName = varOfChild
+            let cur  = chng.currentValue;               // any
+            let prev = chng.previousValue;              // any
+            let firstChange = chng.isFirstChange();     // boolean
+          }
+        }
+        HTML  (parent.comp.html)
+        <childComp [varOfChild]="varFromParentTS"></childComp>
 
 ngOnInit()    {  }
 Called once, after the first ngOnChanges().
@@ -1035,7 +1133,7 @@ This makes it the perfect place to do any of the initialization work/logic for t
 
 ngDoCheck()	
 Detect and act upon changes that Angular can't or won't detect on its own.
-Called during every change detection run, immediately after ngOnChanges() and ngOnInit().
+Called during every change detection run, immediately after ngOnChanges() and after ngOnInit() on the first run.
 
 ngAfterContentInit()	
 Respond after Angular projects external content into the component's view / the view that a directive is in.
