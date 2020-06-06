@@ -543,6 +543,35 @@ uploadFile(event) {                       // drop event passes  '$event.target.f
 }
 
 
+
+Make Angular application compatible with Internet Explorer (IE)
+=================================================================
+REFERENCE : https://indepth.dev/angular-internet-explorer/
+FOR PRODUCTION BUILD   (ng build --prod)
+------------------------------------------
+1. Install a couple of npm packages
+>  npm install --save classlist.js
+>  npm install --save web-animations-js
+
+2. Edit `polyfills.ts`
+-  uncomment two commented out lines in   `APP_NAME\\src\\polyfills.ts`
+   import 'classlist.js';
+   import 'web-animations-js';
+   
+3. Edit `browserslist`
+-  remove not from   not IE 9-11   line in   `APP_NAME\\browserslist`
+   IE 9-11
+   
+FOR DEVELOPMENT   (ng serve)
+------------------------------
+1. Edit tsconfig.json
+-  change "target": "es2015"  to  "target": "es5"  in  `APP_NAME\\tsconfig.json`
+   "compilerOptions": {
+   	"target": "es5"
+   }
+
+
+
 jQuery / Bootstrap in Angular
 ================================
 > npm install jquery                                    // Install jQuery plugin
@@ -1294,8 +1323,12 @@ declare in  "providers" array  of  "app.module.ts"  this  service class
             OR
 if metadata providedIn: 'root' is given in @Injectable({}) decorator , it prevents need to write in "providers" array of app.module.ts
 
-inject in   ".component.ts"  file  of COMPONENT using   constructor()
-                          pass values to .html var using   ngOnInit()
+Write URL for ".servive.ts" in a global class (Global) i.e.   src > app > config > `www.service.ts` file.
+Inject in component/module  ".service.ts"  using  constructor()
+	example: constructor(private global: Global) { global.baseURL; }
+This will prevent need to change URL for each component/module ".service.ts" since it is available in a globally accessible file.
+
+Inject in     ".component.ts"  file  of COMPONENT using   constructor()
 
 COMMUNICATION with SERVICE
 ---------------------------
