@@ -78,6 +78,16 @@ Updating a version that is beyond semantic versioning range requires two parts.
 First, you ask npm to list which packages have newer versions available using `npm outdated`.
 Then you ask npm to install the latest (@latest) version or specific version (@4.1.6) of a package.
 
+> npm config set registry <NPM_REPO_URL>
+Set base url for npm package registry i.e. repo to download packages , Default is https://registry.npmjs.org/
+
+> npm config set proxy <PROXY_URL>
+> npm config set https-proxy <PROXY_URL>
+Set proxy for a network to allow download of packages
+
+> npm config delete <KEY>
+Delete a config setting <KEY> , it can be `proxy`, `https-proxy`    etc...
+
 
 
 SETUP
