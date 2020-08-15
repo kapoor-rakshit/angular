@@ -1087,10 +1087,13 @@ STYLE
    })
 
 -- CLASS BINDING
-   Binding a CSS class to elements    eg:- [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
+   Binding a CSS class to elements    eg:- [class.CLASS_NAME_CSS] = "Boolean_VAR_EXPRESSION"
                                            [ngClass] = "'firstCSSClass secondCSSClass'"                          // NOTE : use of '' over class names
                                            [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
                                            [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
+					   [style.left]="'15px'"
+					   [style.background-color]="'blue'"
+					   [style.font-size]="Boolean_VAR_EXPRESSION ? '20px' : '12px'"
 
 
 
