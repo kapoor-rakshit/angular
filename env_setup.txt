@@ -1,4 +1,4 @@
-
+﻿
 MEAN stack
 MongoDB , Express , Angular , Node
 
@@ -1612,9 +1612,22 @@ REST APIs have four types of parameters:
                                          return this._http.post(this._productsUrl, HTTP_BODY, this.httpOptions)
                                                           .pipe(catchError((err: Error) => { return throwError(err.message) })); }
  NOTE - To read HTTP RESPONSE BODY, use INTERCEPTORS.
- 
- 
- 
+
+
+
+CONTEXT PATH
+=================
+Add a suffix to server hostname (IP/PORT) that is common and specific to our whole angular application.
+One way can be to write the common suffix part before each route path in routing.module.ts and also with navigate() functions, if any.
+A better approach is to use APP_BASE_HREF as follows:
+- app.module.TS
+  import {APP_BASE_HREF} from '@angular/common';
+
+  // inside providers array
+  providers: [{provide: APP_BASE_HREF, useValue: '/esp/kapoor/rakshit'}]
+
+
+
 LOCATION STRATEGIES
 =====================
 REFERENCE   :   https://codecraft.tv/courses/angular/routing/routing-strategies/
