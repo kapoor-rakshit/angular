@@ -102,6 +102,7 @@ node.js terminal is a CMD terminal with NODEJs and NPM path variables set for us
 > ng new <APP_NAME> 
 > ng serve
 > ng build --prod
+  ng build --prod --output-hashing=none           // prevents hash-number to be attached to build artifacts
 
 (MONO-REPO)   :  only one node_modules and common files which can be shared by all angular applications inside working directory <my-workspace>
 > ng new <my-workspace> --create-application=false --defaults
@@ -158,30 +159,79 @@ NOTE : material to be used must be imported in imports [] of '.module.ts'
 
 
 
-Angular SSR (Server Side Rendering) with Angular Universal
-===========================================================
-Angular Universal is a technology that renders Angular applications on the server.
-A normal Angular application executes in the browser, rendering pages in the DOM in response to user actions. 
-Angular Universal executes on the server, generating static application pages that later get bootstrapped on the client. 
-This means that the application generally renders more quickly, giving users a chance to view the application layout before it becomes fully interactive.
+Angular SSR (Server Side Rendering) and Pre-rendering with Angular Universal
+===============================================================================
+Angular applications are single-paged apps (SPAs) - this means a single HTML document is served to the client, 
+which can then be dynamically rewritten on the client browser-based on data received from the server, instead of serving a static page when routing. 
+
+Angular Universal allows the app to be executed on the server, which lets us generate and serve static HTML to the client in response to navigation. 
+This means that when user opens Angular app, server will show user a pre-rendered version of app which they can browse while client-side application loads behind-the-scenes. 
+When the client-side application has finished loading, the application switches from pre-rendered app to the fully interactive client-side app, without the user even noticing.
+
+SSR vs Pre-rendering
+- Dynamic SSR or SSR is when there will be live Node server spun up such that whenever Route is hit, it will dynamically generate and serialize application — returning that String to browser.
+  Static Pre-rendering or pre-rendering is when we want to pre-render a list of routes and create static files, (ie: index.html, about-us.html, etc) and then use server of our choice to serve up those files later on.
+- SSR is used when application (and the routes you need to SSR) are dynamic i.e. application structure is rendered based on JSON files where anything could change at any given moment.
+  Pre-rendering is used when application (or at least the Routes you’re trying to pre-render) are a static content eg: about us, contact us. 
+  dynamic content routes can be pointed to normal CSR version of your application.
+- SSR is rendering client-side app to HTML on the server i.e. server compiles application(render on a server) and sends generated HTML page back to client.
+  Prerendering is running client-side app at build time to capture its initial state as static HTML and saved as static HTML pages on file-system and sends same when requested.
+  In both rendering technique, we generate static HTML pages. Just the major difference is the location where HTML pages are generated.
+- CHECK SCREENSHOTS TOO.
 
 The Angular CLI compiles and bundles the Universal version of the app with the Ahead-of-Time (AOT) compiler. 
-A Node.js Express web server compiles HTML pages with Universal based on client requests.
-Prepare an app for server-side rendering using the Angular CLI:
+Install the Angular Universal schematic to set our app up for server-side rendering and pre-rendering.
 > ng add @nguniversal/express-engine
+OR update
+> ng update @nguniversal/express-engine
 
 This will create following new files:
 - main.server.ts             * bootstrapper for server app
 - server.ts                  * express web server
 - app/app.server.module.ts   * server-side application module
 
-To start rendering your app with Universal on your local system, use the following command
-> npm run dev:ssr
+A sample code for estimating FCP time, write in index.html of your app
+<script>
+    const po = new PerformanceObserver((list) => {
+      for (const entry of list.getEntriesByName('first-contentful-paint')) {
+        console.log('FCP: ', entry.startTime);
+        po.disconnect();
+      }
+    });
+    po.observe({type: 'paint', buffered: true});
+</script>
+
+- client-side rendered (CSR) version of our app is served using
+  > npm run start         OR       > ng serve
+  The CSR app is available on port 4200 (default), which can be changed in `package.json` file.
+
+- server-side rendered (SSR) version of our app is served using
+  > npm run build:ssr && npm run serve:ssr
+  These run script configuartions are available in package.json
+  The SSR app is available on port 4000 (default), which can be changed in the generated `server.ts` file.
+
+  To run SSR app in development mode, that will automatically recompile the client and server bundles and live-reload the browser.
+  > npm run dev:ssr
+  
+- pre-rendered version of our app
+  Pages that don’t need to be rendered server-side or rendered on the client every time a user makes a request. 
+  Angular Universal 9 now allows you to cache these pages as static files, which can then be served to the client via your CDN or a simple server.
+  Set up
+  1- pre-rendered files are found at `dist/<project-name>/browser` after running following command
+     > npm run prerender
+     This will look for all static routes using guess-parser and prerender it. Prerendering also renders the data received from API response.
+     Guess-parser is able to detect static routes, but it is unable to detect parameterized routes, so use following step.
+  2- In `angular.json` file and look for the "prerender" builder (at the very end of the default angular.json). 
+     The builder comes with a "routes": [], which allows to specify the routes of the app pages we wish to pre-render.
+     OR specify a .txt file with each route on new line and replace "routes" key with "routesFile": "./pre-render-routes-file.txt"
+  3- Deploy files in `dist/<project-name>/browser` to a server to serve pre-rendered version of app.
 
 There are three main reasons to create a Universal version of your app:
 - Facilitate web crawlers through search engine optimization (SEO)
-  Angular Universal can generate a static version of your app that is easily searchable, linkable, and navigable without JavaScript. 
+  Angular Universal can generate a static version of your app that is easily searchable, linkable, shareable and navigable without JavaScript. 
   Universal also makes a site preview available since each URL returns a fully rendered page.
+  This is evident as client-side application shows <app-root></app-root> with nothing else inside it, 
+  whereas server-side app displays page CSS and all app content coming from <app-root></app-root>. This makes it much easier for a web-crawler to scrape app’s content.
 - Improve performance on mobile and low-powered devices
   Some devices don't support JavaScript or execute JavaScript so poorly that the user experience is unacceptable. 
   For these cases, you may require a server-rendered, no-JavaScript version of the app. 
