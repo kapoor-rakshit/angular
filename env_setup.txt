@@ -137,6 +137,16 @@ because the "start" key of package.json is having value "ng serve -o".
 
 
 
+IVY ENGINE
+=============
+Ivy is the code name for Angular's next-generation compilation and rendering pipeline.
+With the version 9 release of Angular, the new compiler and runtime instructions are used by default instead of the older compiler and runtime, known as View Engine.
+
+AOT compilation with Ivy is faster and should be used by default.
+In the angular.json workspace configuration file, set the default build options for your project to always use AOT compilation.
+
+
+
 PWA experience to Angular
 ===============================
 Following package will add all necessary code for making an app a PWA, which otherwise had to be done manually.
