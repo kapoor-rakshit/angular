@@ -169,6 +169,49 @@ NOTE : material to be used must be imported in imports [] of '.module.ts'
 
 
 
+Angular Elements or Web Components
+======================================
+By using Angular Elements you can package Angular components as custom elements, a web standard for defining new HTML elements in a framework-agnostic way.
+The custom elements standard is currently supported by browsers like Chrome, Opera, and Safari. To be able to use it Firefox and Edge polyfills are available. 
+
+With a custom element you can extend the set of available HTML tags. The content of this tag is then controlled by JavaScript code which is included in the page.
+In order to keep track of all available custom elements the browser maintains a registry in which every elements needs to be registered first. 
+In this registry the name of the tag is mapped to the JavaScript class which controls the behavior and the output of that element.
+
+The Angular Elements functionality is available with the package @angular/elements. 
+This packages exposes the createCustomElement() function which can be used to create a custom element (web component) from an Angular component class. 
+Therewith it provides a bridge from Angular component interface and change detection functionality to the build-in DOM API.
+It will add the needed document-register-element.js polyfill and dependencies for Angular Elements at the same time.
+> ng add @angular/elements
+
+In app.module.TS (root module)
+1. Import Injector from the @angular/core package and createCustomElement from the @angular/elements package
+// example
+   import { NgModule, Injector } from '@angular/core';
+   import { createCustomElement } from '@angular/elements';
+    
+2. <COMPONENT> desired to be angular element will not be used in Angular application itself, so we need to add it to entryComponents property to @NgModule decorator.
+// example
+   entryComponents: [
+     <COMPONENT>
+   ]
+   
+3. Using createCustomElement() function , register newly created custom element in browser that return reference to CustomElementRegistry object
+// example
+   export class AppModule { 
+     constructor(private injector: Injector) {}
+     ngDoBootstrap() {
+        const el = createCustomElement(<COMPONENT>, { injector: this.injector });
+        customElements.define('custom-element-tag', el);
+     }
+   }
+   
+4. Build process
+   generate files under `/dist` without hash values appended to file names
+   > ng build --prod --output-hashing none
+ 
+
+
 Angular SSR (Server Side Rendering) and Pre-rendering with Angular Universal
 ===============================================================================
 Angular applications are single-paged apps (SPAs) - this means a single HTML document is served to the client, 
