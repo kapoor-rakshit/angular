@@ -207,8 +207,61 @@ In app.module.TS (root module)
    }
    
 4. Build process
-   generate files under `/dist` without hash values appended to file names
-   > ng build --prod --output-hashing none
+   a. generate files under `/dist` without hash values appended to file names
+      > ng build --prod --output-hashing none
+   b. bundle runtime,polyfills,main,script JS files into single file that is used for src of <script> , fs-extra: provides file system methods , concat: concatenate multiple files
+      > npm install fs-extra concat
+   c. create a bundle-js.js script
+         const fs = require('fs-extra');
+         const concat = require('concat');
+         (async function build() {
+          const filesES2015 = [
+           './dist/spaceXLaunchPrograms/browser/runtime-es2015.js',
+           './dist/spaceXLaunchPrograms/browser/polyfills-es2015.js',
+           './dist/spaceXLaunchPrograms/browser/scripts.js',
+           './dist/spaceXLaunchPrograms/browser/main-es2015.js'
+          ];
+          const filesES5 = [
+           './dist/spaceXLaunchPrograms/browser/runtime-es5.js',
+           './dist/spaceXLaunchPrograms/browser/polyfills-es5.js',
+           './dist/spaceXLaunchPrograms/browser/scripts.js',
+           './dist/spaceXLaunchPrograms/browser/main-es5.js'
+          ];
+
+          await fs.ensureDir('app-element');
+
+          await concat(filesES2015, 'app-element/spaceXApp-es2015.js');
+          await concat(filesES5, 'app-element/spaceXApp-es5.js');
+
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/styles.css', 'app-element/styles.css');
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/manifest.webmanifest', 'app-element/manifest.webmanifest');
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/ngsw-worker.js', 'app-element/ngsw-worker.js');
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/ngsw.json', 'app-element/ngsw.json');
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/safety-worker.js', 'app-element/safety-worker.js');
+          await fs.copyFile('./dist/spaceXLaunchPrograms/browser/worker-basic.min.js', 'app-element/worker-basic.min.js');
+    
+          await fs.copy('./dist/spaceXLaunchPrograms/browser/assets/', 'app-element/assets/' );
+    
+         })();
+	 
+   d. run above bundle script that will create app-element dir with all necessary files copied from /dist dir
+      > node bundle-js.js
+      
+   e. create index.html in this newly created dir and serve this index.html with http-server tool using command `http-server` at this dir
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Test Angular Elements</title>
+      <link rel="stylesheet" href="styles.css">
+      </head>
+      <body>
+        <app-element></app-element>
+        <script src="spaceXApp-es5.js" defer></script>
+        <script src="spaceXApp-es2015.js" async></script>
+      </body>
+      </html>
  
 
 
