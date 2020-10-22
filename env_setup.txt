@@ -140,10 +140,21 @@ because the "start" key of package.json is having value "ng serve -o".
 IVY ENGINE
 =============
 Ivy is the code name for Angular's next-generation compilation and rendering pipeline.
+Prior to angular v9 , IVY features were in beta and can be used for experimental purposes.
 With the version 9 release of Angular, the new compiler and runtime instructions are used by default instead of the older compiler and runtime, known as View Engine.
+This can be checked in `tsconfig.app.json` under  "angularCompilerOptions": {  "enableIvy": true }
 
 AOT compilation with Ivy is faster and should be used by default.
-In the angular.json workspace configuration file, set the default build options for your project to always use AOT compilation.
+In the `angular.json` workspace configuration file, set the default build options for your project to always use AOT compilation.
+
+View Engine v/s Ivy Engine
+Template HTML that we’ve written runs through the Angular compiler and generates highly optimised JS code that represents the structure of your template. 
+At runtime, this data structure is passed to the Angular interpreter, which uses the data to determine how to create the DOM.
+Template HTML -> Template data -> Angular Interpreter -> DOM
+
+Instead of generating template data and passing it into interpreter that then makes decisions on which operations to run ,we generate a set of template instructions directly.
+These instructions will do work of creating correct DOM on their own. So we no longer need interpreter that will check whether every operation is needed.
+Template HTML -> Template instructions -> DOM
 
 
 
