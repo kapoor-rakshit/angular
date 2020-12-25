@@ -1,0 +1,74 @@
+Drag / Drop file
+===================
+1. Create a directive and provide it in declarations array of corresponding .module.TS
+---------------------------------------------------------------------------------------
+import { Directive, Output, Input, EventEmitter, HostBinding, HostListener } from '@angular/core';
+
+@Directive({
+  selector: '[appDragDrop]';
+})
+export class DragDropDirective {
+	
+  @Output() onFileDropped = new EventEmitter<any>();
+	
+  @HostBinding('style.background-color') private background = '#f5fcff'
+  @HostBinding('style.opacity') private opacity = '1'
+	
+  //Dragover listener
+  @HostListener('dragover', ['$event']) onDragOver(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#9ecbec';
+    this.opacity = '0.8'
+  }
+	
+  //Dragleave listener
+  @HostListener('dragleave', ['$event']) public onDragLeave(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#f5fcff'
+    this.opacity = '1'
+  }
+	
+  //Drop listener
+  @HostListener('drop', ['$event']) public ondrop(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    this.background = '#f5fcff'
+    this.opacity = '1'
+    let files = evt.dataTransfer.files;
+    if (files.length > 0) {
+      this.onFileDropped.emit(files)
+    }
+  }
+}
+
+2. Attach this directive to HTML DOM
+--------------------------------------
+<div class="uploadfilecontainer" (click)="fileInput.click()" appDragDrop (onFileDropped)="uploadFile($event)">
+  <input hidden type="file" #fileInput (change)="uploadFile($event.target.files)">
+</div>
+
+3. Define event handler in corresponding TS
+---------------------------------------------
+files: any = [];
+uploadFile(event) {                       // drop event passes  '$event.target.files'  as arg to event handler
+  let fileSize = event[0].size;
+  console.log(`FILE SIZE ==> ${fileSize}`);
+}
+
+4. Add some CSS
+--------------------
+.uploadfilecontainer {
+    background-image: url("/assets/cloud-2044823_960_720.png");
+    background-repeat: no-repeat;
+    background-size: 100px;
+    background-position: center;
+    height: 200px;
+    width: 80%;
+    margin: 20px auto;
+    border: 2px dashed #1C8ADB;
+    border-radius: 10px;
+}
+
+

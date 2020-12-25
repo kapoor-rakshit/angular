@@ -1,0 +1,49 @@
+Rich text editor component for Angular
+========================================
+REFERENCE : https://ckeditor.com/docs/ckeditor5/latest/builds/guides/integration/frameworks/angular.html
+
+1. INSTALL
+---------------
+> npm install --save @ckeditor/ckeditor5-angular
+> npm install --save @ckeditor/ckeditor5-build-classic
+
+
+2. module.TS
+---------------
+import { CKEditorModule } from '@ckeditor/ckeditor5-angular';
+
+@NgModule({
+    imports: [
+        CKEditorModule,
+        // ...
+    ],
+    // ...
+})
+
+
+3. component.TS
+-------------------
+import * as ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+
+@Component( {
+    // ...
+} )
+export class MyComponent {
+    Editor = ClassicEditor;
+    dataEditor: any = "<p>Hello world</p>";
+    configEditor: any = {
+    	toolbar: ['bold', '|', 'italic', 'undo', 'redo', '-', 'numberedList', 'bulletedList'],
+    	placeholder: 'Type some text here...'
+    };
+}
+
+
+4. component.HTML
+--------------------
+<ckeditor 
+	[editor]="Editor" 
+	[(ngModel)]="dataEditor"
+	[config]="configEditor"
+>
+</ckeditor>
+
