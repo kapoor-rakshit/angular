@@ -1187,6 +1187,31 @@ LAZY LOADING
   export class AppModule { }
 
 
+create your own OBSERVABLES
+============================
+- Observables are lazy
+- Observables can have multiple values over time
+- Observables “push” values to subscribers
+- “next()”     : sends any value such as Numbers, Arrays or objects to it’s subscribers.
+  “error()”    : sends a Javascript error or exception.
+  “complete()” : does not send any value.
+- During observable execution there can be an infinite calls to the `observer.next()`, 
+  however when `observer.error()` or `observer.complete()` is called, execution stops and no more data will be delivered to subscribers.
+- Since each execution is run for every subscriber it’s important to not keep subscriptions open for subscribers that don’t need data anymore, 
+  as that would mean a waste of memory and computing power. When you subscribe to an observable, you get back a subscription, which represents the ongoing execution. 
+  Just call unsubscribe()to cancel the execution.
+- Example
+import { Observable } from "rxjs/Observable";
+// create observable
+const simpleObservable = new Observable((observer) => {  
+    // observable execution
+       observer.next("bla bla bla");
+       observer.complete();
+});
+// subscribe to the observable
+   simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {});
+// dispose the observable
+   simpleObservable.unsubscribe();
 
 
 SERVICE
