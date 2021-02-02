@@ -4,6 +4,12 @@ custom drag handles, previews, placeholders, horizontal lists dragging, locking 
 REFERENCE : https://material.angular.io/cdk/drag-drop/overview
 ==============================================================================================================================================
 
+0. add Angular Material
+-----------------------------
+> ng add @angular/material                        (MULTI-REPO)
+> ng add @angular/material --project <my-app>     (MONO-REPO)
+
+
 1. module.TS
 ---------------
 import {DragDropModule} from '@angular/cdk/drag-drop';
@@ -38,18 +44,80 @@ export class AppModule { }
   <div class="example-box" *ngFor="let movie of movies" cdkDragBoundary=".example-list" cdkDrag>{{movie}}</div>
 </div>
 
+<!-- 2.e. Transferring items between lists | cdkDropListGroup | cdkDropListData -->
+<div class="listContainer" cdkDropListGroup>
+  <!-- All lists in here will be connected. -->
+  <div cdkDropList class="example-list" [cdkDropListData]="movies_1" (cdkDropListDropped)="dropTransferReorder($event)">
+    <div class="example-box" *ngFor="let movie of movies_1" cdkDragBoundary=".listContainer" cdkDrag>{{movie}}</div>
+  </div>
+  <div cdkDropList class="example-list" [cdkDropListData]="movies_2" (cdkDropListDropped)="dropTransferReorder($event)">
+    <div class="example-box" *ngFor="let movie of movies_2" cdkDragBoundary=".listContainer" cdkDrag>{{movie}}</div>
+  </div>
+</div>
+
+<!-- 2.f. Customizing the drag area of item using a handle | cdkDragHandle -->
+<div class="example-box" cdkDrag>
+  I can only be dragged using the handle
+  <div class="example-handle" cdkDragHandle>hold & drag</div>
+</div>
+
+<!-- 2.g. Controlling items can/cannot be dropped into container from outside only | cdkDropListEnterPredicate | cdkDropListData | cdkDragData -->
+<div class="listContainer" cdkDropListGroup>
+  <!-- All lists in here will be connected. -->
+  <div cdkDropList class="example-list" [cdkDropListEnterPredicate]="allowPredicate" [cdkDropListData]="movies_1" (cdkDropListDropped)="dropTransferReorder($event)">
+    <div class="example-box" [cdkDragData]="movie" *ngFor="let movie of movies_1" cdkDragBoundary=".listContainer" cdkDrag>{{movie}}</div>
+  </div>
+  <div cdkDropList class="example-list" [cdkDropListEnterPredicate]="noReturnPredicate" [cdkDropListData]="movies_2" (cdkDropListDropped)="dropTransferReorder($event)">
+    <div class="example-box" [cdkDragData]="movie" *ngFor="let movie of movies_2" cdkDragBoundary=".listContainer" cdkDrag>{{movie}}</div>
+  </div>
+</div>
+
+<!-- 2.h. Controlling item can/cannot be dropped into particular index from outside & within | cdkDropListSortPredicate | cdkDropListData | cdkDragData -->
+<div cdkDropList class="example-list" [cdkDropListData]="numbers" (cdkDropListDropped)="drop($event)" [cdkDropListSortPredicate]="sortPredicate">
+  <div class="example-box" *ngFor="let number of numbers" [cdkDragData]="number" cdkDrag>{{number}}</div>
+</div>
+
+<!-- 2.i. Disabled dropping/sorting all within only | cdkDropListSortingDisabled -->
+<div cdkDropList class="example-list" [cdkDropListData]="movies_1" (cdkDropListDropped)="dropTransferReorder($event)" cdkDropListSortingDisabled>
+  <div class="example-box" *ngFor="let movie of movies_1" [cdkDragData]="movie" cdkDrag>{{movie}}</div>
+</div>
+
 
 3. component.TS
 ------------------
 /* Required import for reordering */
-import {CdkDragDrop, moveItemInArray} from '@angular/cdk/drag-drop';
+import {CdkDragDrop, moveItemInArray, transferArrayItem, CdkDrag} from '@angular/cdk/drag-drop';
 
 @Component({})
 export class CdkDragDropComponent {
   movies = [];
   
+  /* Reorder items in a list and update data model accordingly */
   drop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
+  }
+  
+  /* Transfer items between lists and update data model accordingly */
+  dropTransferReorder(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+    }
+  }
+  
+  /* Predicate function that allows only certain item to be dropped into a list. */
+  allowPredicate(item: CdkDrag<any>) {
+    return item.data % 2 === 0;
+  }
+  /* Predicate function that doesn't allow any item to be dropped into a list. */
+  noReturnPredicate() {
+    return false;
+  }
+  
+  /* Predicate function that only allows items to be dropped at certain indices */
+  sortPredicate(index: number, item: CdkDrag<any>) {
+    return (index + 1) % 2 === item.data % 2;
   }
 }
 
@@ -79,7 +147,7 @@ export class CdkDragDropComponent {
 }
 
 .example-list {
-    width: 500px;
+    width: 50vw;
     max-width: 100%;
     border: solid 1px #ccc;
     min-height: 60px;
@@ -112,14 +180,6 @@ export class CdkDragDropComponent {
   
 .example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
     transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.example-boundary {
-    width: 400px;
-    height: 400px;
-    max-width: 100%;
-    border: dotted #ccc 2px;
-    margin: auto;
 }
   
 
