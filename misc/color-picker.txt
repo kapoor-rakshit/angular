@@ -1,0 +1,70 @@
+REFERENCE : https://www.npmjs.com/package/ngx-color
+
+1. INSTALL
+--------------------
+> npm i ngx-color
+
+
+2. .module.TS
+--------------------
+import { ColorSketchModule } from 'ngx-color/sketch';
+
+@NgModule({
+  imports: [
+    ColorSketchModule
+  ],
+})
+export class AppModule {}
+
+
+3. .component.HTML
+---------------------
+<!--
+color              - property controls what color is active on the color picker.
+                     accepts string of HEX '#303030' or object of RGBA/HSLA { r: 51, g: 51, b: 51, a: 1 } / { h: 0, s: 0, l: .10, a: 1 }
+
+onChange           - called every time color is changed i.e. happens with drag event
+                     $event.color , returns object, example: {"hsl":{"h":240,"s":0.030502885408079185,"l":0.11576871999999999,"a":1},
+                                                              "hex":"#1d1d1e",
+                                                              "rgb":{"r":29,"g":29,"b":30,"a":1},
+                                                              "hsv":{"h":240,"s":0.05920000000000008,"v":0.1193,"a":1},
+                                                              "oldHue":240,"source":"hsva"}
+
+onChangeComplete   - called to get color, once color change is complete i.e. happens once drag is complete
+
+disableAlpha       - Remove alpha slider and options from picker. Default false.
+
+presetColors       - Array of Strings or Objects, for default colors at bottom of picker. Default is some pre-filled array.
+-->
+<div style="width: 50vw; margin: auto;">
+  <color-sketch
+	[color]="state" 
+	(onChange)="handleChange($event)" 
+	(onChangeComplete)="changeComplete($event)"
+	[disableAlpha]="hideAlphaSlider"
+	[presetColors]="presetColorsArray"
+  >
+  </color-sketch>
+</div>
+
+
+4. .component.TS
+---------------------
+import { ColorEvent } from 'ngx-color';
+
+state: any = '#5a7';
+hideAlphaSlider: boolean = true;
+presetColorsArray: any = ['#f00', '#0f0', '#00f'];
+
+handleChange($event: ColorEvent) {
+    this.state = $event.color;
+    (document.querySelector("#chkDIV") as HTMLElement).style.backgroundColor = this.state.hex;
+    console.log(`CHANGING ==> ${this.state}`);
+}
+
+changeComplete($event: ColorEvent) {
+    this.state = $event.color;
+    (document.querySelector("#chkDIV") as HTMLElement).style.backgroundColor = this.state.hex;
+  	console.log(`CHANGED ==> ${this.state}`);
+}
+
