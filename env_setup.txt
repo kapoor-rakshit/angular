@@ -992,6 +992,11 @@ This concept is used when we have a common class for data that can be used by mu
    functionReceiveMessage($event): void {
        this.DATA = $event;
    }
+   
+   
+-- SIBLING COMPONENTS
+Using SUBJECT we can communicate between sibling components.
+who will subscribe to subject via an injectable service and then each will get updated on emit of event.
 
 
 
@@ -1231,12 +1236,24 @@ const apiData = ajax('/api/data').pipe(
 );
 
 b) concatMap() | mergeMap() | switchMap() | exhaustMap()
-
+Example:
+this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
+- concatMap()
+  It takes the first Observable and use its values, wait for it to complete and then we use the next Observable, etc. until all Observables complete.
+- mergeMap()
+  It is similar to Promise.all([p1, p2]) i.e. The result Observable will not be completed until all the merged Observables are completed.
+  mergeMap don't wait for the previous inner Observable to complete before triggering the next innner Observable i.e. it subscribes to all observables in parallel.
+  we can have multiple inner Observables overlapping over time, emitting values in parallel.
+- switchMap()
+  if a new Observable starts emitting values we are then going to unsubscribe from the previous Observable, before subscribing to the new Observable.
+- exhaustMap()
+  if a new Observable starts emitting values we are then going to ignore new values in the source Observable until the previous value is completely processed.
 
 c) Subject | BehaviorSubject | ReplaySubject | AsyncSubject
 An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. 
 A Subject can multicast to many Observers. Subjects are like EventEmitters: they maintain a registry of many listeners.
 Subjects are the only way of making any Observable execution be SHARED to multiple Observers.
+Using SUBJECT we can communicate between sibling components, who will subscribe to subject and then will get updated on emit of event.
 Example:
 import { Subject, from } from 'rxjs';
 const subject = new Subject<number>();
