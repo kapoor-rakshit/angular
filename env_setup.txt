@@ -1212,6 +1212,49 @@ const simpleObservable = new Observable((observer) => {
    simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {});
 // dispose the observable
    simpleObservable.unsubscribe();
+   
+a) pipe() | retry() | catchError() | throwError()
+The pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
+The retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
+The catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
+Example:
+const apiData = ajax('/api/data').pipe(
+  map((res: any) => {
+    if (!res.response) {
+      console.log('Error occurred.');
+      throw new Error('Value expected!');
+    }
+    return res.response;
+  }),
+  retry(3),                                                           // Retry up to 3 times before failing
+  catchError((err: Error) => { return throwError(err.message); })
+);
+
+b) concatMap() | mergeMap() | switchMap() | exhaustMap()
+
+
+c) Subject | BehaviorSubject | ReplaySubject | AsyncSubject
+An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. 
+A Subject can multicast to many Observers. Subjects are like EventEmitters: they maintain a registry of many listeners.
+Subjects are the only way of making any Observable execution be SHARED to multiple Observers.
+Example:
+import { Subject, from } from 'rxjs';
+const subject = new Subject<number>();
+subject.subscribe({
+  next: (v) => console.log(`observerA: ${v}`)
+});
+subject.subscribe({
+  next: (v) => console.log(`observerB: ${v}`)
+});
+const observable = from([1, 2, 3]);
+observable.subscribe(subject);
+// OUTPUT LOGS:
+// observerA: 1
+// observerB: 1
+// observerA: 2
+// observerB: 2
+// observerA: 3
+// observerB: 3
 
 
 SERVICE
