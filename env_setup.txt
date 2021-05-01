@@ -711,7 +711,10 @@ Reference : https://angular.io/guide/structural-directives
                                  // *ngIf="num>10;then greater else smaller;" <ng-template #greater>num Greater 10</ng-template>
                                  //                                           <ng-template #smaller>num Smaller 10</ng-template>
                                  
-2. *ngFor                        // *ngFor="let item of items; let i = index"        // index of <item> in <items> array
+2. *ngFor                        // *ngFor="let item of items; let i = index"                       // index of <item> in <items> array
+                                 // *ngFor="let item of items; let i = index; trackBy:trackByFn;"   // trackBy recreates DOM by keeping track of changes specified in function
+				    <input type="text" [(ngModel)]="items[i]">                         // in comp.HTML | we can make use of [(ngModel)]="ARRAY[INDEX]" , which otherwise loses focus
+                                    trackByFn(index: any, item: any) { return index; }                 // in comp.TS   | instead of object references (default). 
 
 3. [ngSwitch]    ,    *ngSwitchCase
 
