@@ -203,6 +203,15 @@ Bypass Angular protection:
        this.iframe = sanitizer.bypassSecurityTrustResourceUrl("https://www.google.com")
       }
      }
+     
+     
+`const` in Angular and Typescript
+===================================
+`const` keyword will not work and gives compilation error `A class member cannot have the ‘const’ keyword`
+Because class members are mutable and modified and accessed by different calls and objects.
+Typescript thus provides readonly modifier field instead of const. These readonly can be reassigned unlike const keyword.
+Example:
+  readonly instanceVariable = "instanceData";
 
 
 Angular 10, new stuff
