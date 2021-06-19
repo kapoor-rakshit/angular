@@ -991,8 +991,7 @@ Angular provides three encapsulation strategies:
                        Styles defined in this component's @Component decorator are scoped to this component only.
 - Native : styles from main HTML do not propagate to the component. 
            Styles defined in this component's @Component decorator are scoped to this component only.
-- None : styles from the component propagate back to the main HTML and therefore are visible to all components on the page. 
-         Be careful with apps that have None and Native components in the application. 
+- None : styles from the component are visible to all components on the page.  
 	 All components with None encapsulation will have their styles duplicated in all components with Native encapsulation
 Example:
 @Component({
@@ -1002,10 +1001,31 @@ Example:
   		// ...
 	]
 })
-export class HelloComponent {
-	// ...
-}
 
+
+CHANGE DETECTION STRATEGIES
+=============================
+There are 2 change detection strategy in Angular (Default and onPush)
+Angular Change Detection is responsible for making the component dynamic. 
+During Change Detection Cycle, Angular looks for all the bindings, re-executes all the expression, 
+compares it will the previous values and if the change is detected, it propagates the change to the DOM Elements.
+- Default Change Detection Strategy 
+  If a component strategy is not configured, it is marked as Default.
+  Example:
+  Consider components i.e. ParentComponent and ChildComponent relationship.
+  The Parent Component contains a property “counter”, that can be updated every time when the user clicks the button. 
+  The Component is re-rendered every time the value of “counter” updates. This component also contains a Child Component. 
+  The Child Component is independent of “counter” data since we are not passing data to the ChildComponent using @Input.
+  In Child Component, we are not providing any Strategy inside the @Component Decorator, so it is default.
+  Every time when we update counter in the ParentComponent, the ChildComponent life cycle is also triggered to re-render, making app less performant.
+- onPush Change Detection Strategy
+  During this Change Detection Strategy, the ChildComponent is not always dirty checked, 
+  If parent element is updating values that are not passed as “@Input” properties to the Child Component, then the child Component should not be dirty checked.
+  Example:
+  @Component({
+  	selector: "child-component",
+  	changeDetection: ChangeDetectionStrategy.OnPush
+  })
 
 
 PASSING VARIABLES/VALUES TO and FROM COMPONENTS
