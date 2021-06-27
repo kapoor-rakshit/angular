@@ -964,15 +964,46 @@ STYLE
 =================
 -- A global file "styles.css" exists for entire application.
    eg:-  write   @import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+   
+-- :host pseudo-class selector
+   To style the component custom HTML element itself, and not something inside its template.
+   Let's say for example that we want to style the <app-root/> component itself, by adding to it, for example, an extra border.
+   We cannot do that using styles inside its `app.component.css` associated file,
+   because all styles inside that file will be scoped to elements of the template, and not the outer <app-root/> element itself.
+   :host h2 { 
+    border: 2px solid dimgray;
+    display: block;
+    padding: 20px;
+   }
+   
+-- :host-context pseudo-class selector
+   To have a component apply a style to some element outside of it. 
+   This does not happen often, but one possible common use case is for theme enabling classes.
+   For example, let's say that we would like to ship a component with multiple alternative themes.
+   Each theme can be enabled via adding a CSS class to a parent element of the component.
+   a. PARENT_COMP.HTML
+      <div class="blue-theme">
+    	<themeable-button></themeable-button>
+      </div>
+   b. THEMEABLE-BUTTON.comp.HTML
+      <button class="btn btn-theme">Themeable Button</button>
+   c. THEMEABLE-BUTTON.comp.CSS
+      :host-context(.red-theme) .btn-theme {
+         background: red;
+      }
+      :host-context(.blue-theme) .btn-theme {
+         background: blue;
+      }
 
--- To force the app component's "app.component.css" effects to its child components also use
-  /deep/   h1{  color:red;  }      OR
-  >>>      h1{  color:red;  }
-
--- For component specific style use  ".component.ts"  file
-   @Component({
-           styleUrls:['firstcss', 'secondcss', 'thirdcss']
-   })
+-- ::ng-deep pseudo-class selector
+   It disable view encapsulation for specific CSS rules.
+   It gives you access to DOM elements, which are not in your component's HTML.
+   ::ng-deep is often necessary when you didn't write the component and don't have access to its source.
+   For example, if you're using Angular Material (or any other third-party library like this), 
+   some generated elements are outside of your component's area (such as dialog), you can use ::ng-deep syntax
+  /deep/    h1{  color:red;  }      OR
+  >>>       h1{  color:red;  }      OR
+  ::ng-deep h1{  color:red;  }
 
 -- CLASS BINDING
    Binding a CSS class to elements    eg:- [class.CLASS_NAME_CSS] = "Boolean_VAR_EXPRESSION"
