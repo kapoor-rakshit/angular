@@ -766,7 +766,23 @@ Reference : https://angular.io/guide/structural-directives
 				    <input type="text" [(ngModel)]="items[i]">                         // in comp.HTML | we can make use of [(ngModel)]="ARRAY[INDEX]" , which otherwise loses focus
                                     trackByFn(index: any, item: any) { return index; }                 // in comp.TS   | instead of object references (default). 
 
-3. [ngSwitch]    ,    *ngSwitchCase
+3. [ngSwitch] , *ngSwitchCase , *ngSwitchDefault
+- We assign a switch-expression to the ngSwitch via property binding syntax.
+- Angular displays the inner_element only when the value of the match_expression matches the value of the switch_expression.
+  If there is more than one match, then it displays all of them.
+  Angular uses loose equality checks to compare ngSwitchCase expression with ngSwitch expression. 
+  This means that the empty string "" matches 0. "'2'" matches "2" , "9025" matches "'9025'"   and so on ...
+  Note that the ngSwitchCase does not hide the visibility of element, but removes them from DOM.
+- If none of the ngSwitchCase match_expression matches the switch_expression, then the angular displays the element attached to the ngSwitchDefault.
+  We can place ngSwitchDefault anywhere inside the container element and not necessarily at the bottom.
+  We are free to add more than one ngSwitchDefault directive. Angular displays all of them, if none matches with switch-expression.
+example:
+<container_element [ngSwitch]="switch_expression">
+    <inner_element *ngSwitchCase="match_expresson_1">...</inner_element>
+    <inner_element *ngSwitchCase="match_expresson_2">...</inner_element>
+    <inner_element *ngSwitchCase="match_expresson_3">...</inner_element>
+    <inner_element *ngSwitchDefault>...</inner_element>
+</container_element>
 
 
 
