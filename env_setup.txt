@@ -983,20 +983,27 @@ STYLE
    
 -- :host pseudo-class selector
    To style the component custom HTML element itself, and not something inside its template.
-   Let's say for example that we want to style the <app-root/> component itself, by adding to it, for example, an extra border.
-   We cannot do that using styles inside its `app.component.css` associated file,
-   because all styles inside that file will be scoped to elements of the template, and not the outer <app-root/> element itself.
-   :host h2 { 
-    border: 2px solid dimgray;
-    display: block;
-    padding: 20px;
-   }
+   Use the :host pseudo-class selector to target styles in element that hosts component (as opposed to targeting elements inside component's template).
+   Let's say for example that we want to style <app-demo></app-demo> component, by adding to it, for example, an extra border.
+   a. PARENT_COMP.HTML
+      <app-demo></app-demo>
+      <app-demo class="active"></app-demo>
+   b. APP-DEMO.comp.HTML
+      <span> demo component </span>
+   c. APP-DEMO.comp.CSS
+      :host {
+  	display: block;
+  	border: 1px solid black;
+      }
+      :host(.active) {
+  	border-width: 3px;
+      }
    
 -- :host-context pseudo-class selector
    To have a component apply a style to some element outside of it. 
    This does not happen often, but one possible common use case is for theme enabling classes.
    For example, let's say that we would like to ship a component with multiple alternative themes.
-   Each theme can be enabled via adding a CSS class to a parent element of the component.
+   Each theme can be enabled via adding a CSS class to a parent element OR in any ancestor of the component host element, up to the document root.
    a. PARENT_COMP.HTML
       <div class="blue-theme">
     	<themeable-button></themeable-button>
