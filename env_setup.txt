@@ -1201,6 +1201,7 @@ Written in  ".component.ts"  of  respective COMPONENT
 Feature MODULES
 =====================
 > ng generate module <module_name>
+> ng generate module <module_name> --routing               // Adds  `MODULE_NAME-route.module.ts`   routing file inside module created
 - Having all (say 100s) components in one module (root module, app.module.ts) might make it difficult to debug
   plus it might make initial loading slower as all modules are to be loaded, if not used lazy loading, which is possible via submodules
 - // example
