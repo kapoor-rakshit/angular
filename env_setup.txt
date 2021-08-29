@@ -95,9 +95,7 @@ SETUP
 ================
 Refer  SetupInstructions.docx  document
 
-
 node.js terminal is a CMD terminal with NODEJs and NPM path variables set for user automatically.
-
 
 (MULTI-REPO)  :  every new angular project created will have its own node_modules, files (angular.json, package.json), folders.
 > ng new <APP_NAME> 
@@ -1101,9 +1099,9 @@ This concept is used when we have a common class for data that can be used by mu
 
 -- INNER COMPONENT (child) to OUTER COMPONENT (parent)
    this is used to receive a message in parent based on an event triggered in child
-   in INNER COMPONENT                    import {EventEmitter} from '@angular/core'
    In child-comp.ts
    ----------------------
+   import {EventEmitter} from '@angular/core';
    @Output() outputVarName: EventEmitter<string> = new EventEmitter<string>();
    
    functionOnEvent() {
@@ -1122,9 +1120,45 @@ This concept is used when we have a common class for data that can be used by mu
    
    
 -- SIBLING COMPONENTS
-Using SUBJECT we can communicate between sibling components.
-who will subscribe to subject via an injectable service and then each will get updated on emit of event.
-
+   1. Using @Output and @Input in children and parent components, we can communicate between sibling components via parent component.
+                    OR
+   2. Use of EventEmitter in a service, a sibling component will subscribe to EventEmitter and another sibling will emit an event, via an injectable service.
+      .service.TS
+      ----------------
+      import { EventEmitter, Injectable } from '@angular/core';
+      @Injectable({
+         providedIn: 'root'
+      })
+      export class TimerV2Service {
+         timerValue: EventEmitter<any> = new EventEmitter<any>();
+         timerStatus: EventEmitter<any> = new EventEmitter<any>();
+      }
+      
+      COMP1.component.TS
+      ----------------------
+      export class TimerV2ConfigComponent implements OnInit, OnDestroy {
+      	  constructor(private timerService: TimerV2Service) { }
+	  
+	  this.timerService.timerValue.emit(0);
+	  this.timerService.timerStatus.emit("pause");
+      }
+      
+      COMP2.component.TS
+      ----------------------
+      export class TimerV2Component implements OnInit {
+           constructor(private timerService: TimerV2Service) { }
+	   
+	   ngOnInit(): void {
+               this.timerService.timerValue.subscribe((count: number)=> {
+               this.timerVal = count;
+             },
+             (err: Error)=> {
+               console.log(`ERROR in receving time value ==> ${err.message}`);
+             });
+           }
+      }
+                    OR
+   3. Using SUBJECT
 
 
 LIFECYCLE methods
