@@ -1157,8 +1157,51 @@ This concept is used when we have a common class for data that can be used by mu
              });
            }
       }
-                    OR
-   3. Using SUBJECT
+                    OR (RECOMMENDED APPROACH)
+   3. Using Subject in a service
+      .service.TS
+      ---------------
+      import { Subject } from 'rxjs';
+      @Injectable({
+         providedIn: 'root'
+      })
+      export class TimerV2Service {
+          timerValue: Subject<any> = new Subject<any>();
+  	  timerStatus: Subject<any> = new Subject<any>();
+      }
+      
+      COMP1.component.TS
+      ---------------------
+      export class TimerV2ConfigComponent implements OnInit, OnDestroy {
+      	  constructor(private timerService: TimerV2Service) { }
+	  
+	  this.timerService.timerValue.next(0);
+	  this.timerService.timerStatus.next("pause");
+      }
+      
+      COMP2.component.TS
+      ---------------------
+      import { Component, OnDestroy, OnInit } from '@angular/core';
+      import { Subscription } from 'rxjs';
+      export class TimerV2ClicksComponent implements OnInit, OnDestroy {
+      
+      	timerStatSub!: Subscription;
+	
+	constructor(private timerService: TimerV2Service) { }
+	
+	ngOnInit(): void {
+          this.timerStatSub = this.timerService.timerValue.subscribe((count: number)=> {
+               this.timerVal = count;
+             },
+             (err: Error)=> {
+               console.log(`ERROR in receving time value ==> ${err.message}`);
+             });
+        }
+      	
+	ngOnDestroy() {
+    	  this.timerStatSub.unsubscribe();
+  	}
+      }
 
 
 LIFECYCLE methods
