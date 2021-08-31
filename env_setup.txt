@@ -1412,16 +1412,17 @@ create your own OBSERVABLES
   Just call unsubscribe()to cancel the execution.
 - Example
 import { Observable } from "rxjs/Observable";
-// create observable
+// create observable | new Observable((obs)=> {})     OR    Observable.create((obs)=> {})
 const simpleObservable = new Observable((observer) => {  
     // observable execution
        observer.next("bla bla bla");
        observer.complete();
 });
-// subscribe to the observable
-   simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {});
-// dispose the observable
-   simpleObservable.unsubscribe();
+// subscribe to the observable, it accepts success function, error function, completion function
+// NOTE: An error CANCELs observable , it cannot emit new values. This is not same as COMPLETION and thus if error occurrs completion function won't run.
+   this.observableSub = simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {}, ()=> {});
+// dispose the observable, inside ngOnDestroy()
+   observableSub.unsubscribe();
    
 a) pipe() | retry() | catchError() | throwError()
 The pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
@@ -1643,16 +1644,22 @@ Import and write in "imports"   of     "app.module.ts"   the routing object whic
 
 NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
 
-NOTE : <a href=""> ... </a>  sends request to BROWSER directly , so use routerLink="" to send control to routerModule  
+NOTE : <a href=""> ... </a>  sends request to BROWSER directly which reloads it and returns requested page but that is not how SPA should work,
+       so use routerLink="" to send control to routerModule
 If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
-If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['staticURLArg', dynamicArg_VAR, 'staticURLArg']"></a>
+If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['/staticURLArg', dynamicArg_VAR, 'staticURLArg']"></a>
+NOTE: Add leading '/' to provide absolute path. The path name will get appended after HOSTNAME.
+      Without leading '/' or using './'   i.e.  './staticURLArg'  , it is relative path and path name will get appended after current URL path in address.
+      Relative paths can also be specified using '../../' i.e. '../../staticURLArg' ,which moves dir level up as routerLink knows in which COMPs template it is being written
+
 Set single CSS class to active link using                        routerLinkActive="CSS_Class"
 Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="['CSS_CLASS_1', 'CSS_CLASS_2']"
+
 For exact match of urls use                                      [routerLinkActiveOptions]="{exact:true}"
 For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
 
 Create file         "app.routing-module.ts"   in project's app component root dir , which contains urls/routes
-                     NOTE : Do not put '/' in path , ANGULAR will put it automatically
+                     NOTE : Do not put leading '/' in path, ANGULAR will put it automatically. It will rather give error if we add leading '/'
                      - examples
                      {path: 'URL', component: 'NameOfComponentClass', data: {dataVAR_IN_ROUTE: 'dataPassedToComponent'}
                      }                                                                 // data accessed via ActivatedRoute in component
@@ -1803,9 +1810,14 @@ REST APIs have four types of parameters:
  3. Query string parameters
  ----------------------------
   using [queryParams] in <a></a> OR in router.navigate([]) OR in HTTP options in a ".service.ts" to attach Query string params with route.
+  queryParamsHandling, allow to handle query params while navigation, which in default behavior discards previous navigation route query params.
+       'merge': Merge previous navigation route queryParams with given query params, i.e. both are provided to URL
+       'preserve': Preserve previous navigation route query params only, i.e. discard given query params, only previous route query params provided to URL
   Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
+                                    , <a [routerLink]="['/user/bob']" [queryParams]="{debug: true}" queryParamsHandling="merge"></a>
                                     OR
             "component.ts"          , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]}});
+	    			    , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]} , queryParamsHandling: 'merge'});
                                     OR
             ".service.ts"           , REFER passing header or body parameter example
             "app.routing-module.ts" , {path : "targetComp/:varname_1/:varname_2", component: TargetComponent}
