@@ -1638,43 +1638,47 @@ i.e. (did not leave/re-open the component but the URL did receive a new param)
 
 CLIENT SIDE ROUTING
 =============================
-Multiple routes... eg: localhost:4200/home/signup/
-
 Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing-module.ts"
 
 NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
 
 NOTE : <a href=""> ... </a>  sends request to BROWSER directly which reloads it and returns requested page but that is not how SPA should work,
-       so use routerLink="" to send control to routerModule
-If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
-If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['/staticURLArg', dynamicArg_VAR, 'staticURLArg']"></a>
-NOTE: Add leading '/' to provide absolute path. The path name will get appended after HOSTNAME.
-      Without leading '/' or using './'   i.e.  './staticURLArg'  , it is relative path and path name will get appended after current URL path in address.
-      Relative paths can also be specified using '../../' i.e. '../../staticURLArg' ,which moves dir level up as routerLink knows in which COMPs template it is being written
+       so use `routerLink` to send control to routerModule
+- If the link is static, we can use                                <a routerLink="/product/iPhone"></a>
+  If the link is dynamic, , NOTE : use of '' inside string         <a [routerLink]="['/staticURLArg', dynamicArg_VAR, 'staticURLArg']"></a>
+  NOTE: Add leading '/' to provide absolute path. The path name will get appended after HOSTNAME.
+        Without leading '/' or using './'   i.e.  './staticURLArg'  , it is relative path and path name will get appended after current URL path in address.
+        Relative paths can also be specified using '../../' i.e. '../../staticURLArg' ,which moves dir level up as routerLink knows in which COMPs template it is being written
 
-Set single CSS class to active link using                        routerLinkActive="CSS_Class"
-Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="['CSS_CLASS_1', 'CSS_CLASS_2']"
+- Set single CSS class to active link using                        routerLinkActive="CSS_Class"
+  Set multiple CSS classes , NOTE : use of '' inside string        [routerLinkActive]="['CSS_CLASS_1', 'CSS_CLASS_2']"
 
-For exact match of urls use                                      [routerLinkActiveOptions]="{exact:true}"
-For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
+- For exact match of urls use                                      [routerLinkActiveOptions]="{exact:true}"
+  For partial match  ,  eg:- employees/:DYNAMIC_ROUTING , DO NOT use {exact:true}
+  
+- To programatically navigate to a path i.e. from .comp.TS file, use  this.router.navigate(['/timer-app-v2']);
+  By default, it's behavior is Absolute path i.e. a leading slash is not mandatory for same. Still a good practice to add leading slash.
+  To have Relative path, use `relativeTo` parameter and provide ActivatedRoute as it's value i.e.  this.router.navigate(['timer-app-v2'], {relativeTo: this.route});
 
 Create file         "app.routing-module.ts"   in project's app component root dir , which contains urls/routes
                      NOTE : Do not put leading '/' in path, ANGULAR will put it automatically. It will rather give error if we add leading '/'
                      - examples
-                     {path: 'URL', component: 'NameOfComponentClass', data: {dataVAR_IN_ROUTE: 'dataPassedToComponent'}
-                     }                                                                 // data accessed via ActivatedRoute in component
-                     {path: 'employees', children: [
+		       {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
+                       {path: '', component: 'BaseComponent', pathMatch: 'full' }              // 'full': whole URL path needs to match , 'prefix'(default)
+		       {path: "home", redirectTo: "/my-home"}                                  // redirection, Absolute if begins with (/) , else Relative to path specified. 
+                       {path: 'URL', component: 'NameOfComponentClass', data: {dataVAR_IN_ROUTE: 'dataPassedToComponent'}}   // data accessed via ActivatedRoute in component
+                       {path: 'employees', children: [                                         // specify children path to avoid writing 'employees/' again and again
                                   { path: '', component: EmployeesComponent },
-                                  { path: 'add', component: AddEmployeeFormComponent, canDeactivate: [AddEmployeeGuardService]},
-                                  { path: ':id', component: EmployeeDetailComponent, canActivate: [EmployeeDetailGuardService]}]
-                     }                                                                       // specify children path to avoid writing parent-'employees/' again and again
-                     {path: '**', component: 'NoneOfAboveURLMatchRequest'}                   // when none of URLs match request it comes here
-                     {path: '', component: 'BaseComponent'}                                  // empty path means BASE_URL ie '/'
-                     {path: '', component: 'BaseComponent', pathMatch: 'full' }              // whole URL path needs to match
-                     {path: '', component: 'BaseComponent', pathMatch: 'prefix' }            // first route where the path matches the start of the URL is chosen
-                     {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName], canLoad: [RouteAuthServiceName], resolve: { dataVAR_IN_ROUTE: RouteAuthServiceName }}
-                           // To restrict access to a URL/Component , there are 5 types of route guards :-
-                           // CanActivate     : Controls if route can be activated.
+                                  { path: 'add', component: AddEmployeeFormComponent},
+                                  { path: ':id', component: EmployeeDetailComponent}]}
+	               {path: 'employees', component: EmployeesComponent, children: [          // here we need other <router-outlet></router-outlet> in EmployeesComponent.html
+                                  { path: 'add', component: AddEmployeeFormComponent},            this will let child component's view become available in parent component 
+                                  { path: ':id', component: EmployeeDetailComponent}]}
+                       {path: '**', component: 'NoneOfAboveURLMatchRequest'}                   // wildcard, must be written at last, when none of URLs match
+                       {path: 'URL', component: '', canActivate: [RouteAuthServiceName], canDeactivate: [RouteAuthServiceName], 
+		                                    canLoad: [RouteAuthServiceName], resolve: { dataVAR_IN_ROUTE: RouteAuthServiceName }}
+                       // To restrict access to a URL/Component , there are 5 types of route guards :-
+                              CanActivate     : Controls if route can be activated.
                               CanActivateChild: Controls if children of a route can be activated.
                               CanLoad         : Controls if route can even be loaded. 
                                                 This becomes useful for feature modules that are lazy loaded. 
@@ -1816,8 +1820,8 @@ REST APIs have four types of parameters:
   Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
                                     , <a [routerLink]="['/user/bob']" [queryParams]="{debug: true}" queryParamsHandling="merge"></a>
                                     OR
-            "component.ts"          , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]}});
-	    			    , this.router.navigate(['targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]} , queryParamsHandling: 'merge'});
+            "component.ts"          , this.router.navigate(['/targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]}});
+	    			    , this.router.navigate(['/targetComp'], { queryParams: { q1: 'mapcolumns', q2: [163, 592, 586]} , queryParamsHandling: 'merge'});
                                     OR
             ".service.ts"           , REFER passing header or body parameter example
             "app.routing-module.ts" , {path : "targetComp/:varname_1/:varname_2", component: TargetComponent}
@@ -1856,12 +1860,24 @@ REST APIs have four types of parameters:
                                                           .pipe(catchError((err: Error) => { return throwError(err.message) })); }
  NOTE - To read HTTP RESPONSE BODY, use INTERCEPTORS.
 
+5. Fragment
+----------------------------
+A fragment or a hash fragment appends data to URL with `#`, after query params.
+Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [fragment]="'checkFrag'"></a>
+                                    OR
+          "component.ts"          , this.router.navigate(['/targetComp'], {fragment: 'checkFrag'});
+	  
+	  "targetComponent.TS"    , constructor(private route: ActivatedRoute) {
+	  				this.route.fragment.subscribe((frag: string) => {
+                                             console.log(`${frag}`);
+                                         });
+	                            }
 
 
 CONTEXT PATH
 =================
 Add a suffix to server hostname (IP/PORT) that is common and specific to our whole angular application.
-One way can be to write the common suffix part before each route path in routing.module.ts and also with navigate() functions, if any.
+One way can be to write this common suffix part before each route path in routing.module.ts and also with navigate() functions, if any.
 A better approach is to use APP_BASE_HREF as follows:
 - app.module.TS
   import {APP_BASE_HREF} from '@angular/common';
