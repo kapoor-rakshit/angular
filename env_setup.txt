@@ -865,12 +865,28 @@ Angular FORMS
    - create .ts class and .html template for it.
    - use of directives ngModel, ngForm, ngModelGroup, ngSubmit.
    - validations are part of template (.html)
-   
    - states of form input  ,  example : 1. <input #INPUT_REF="ngModel" /> 
                                         2. <form #FORM_REF="ngForm" (ngSubmit)="submitFunction(FORM_REF.value)"></form>
      INPUT_REF.pristine | INPUT_REF.dirty             // value modified    or not
      INPUT_REF.touched  | INPUT_REF.untouched         // widget is focused or not
      INPUT_REF.valid    | INPUT_REF.invalid           // value is invlaid  or not as per constraints like (required, minlength, pattern)
+   - Angular provides some built-in validators for template driven forms:- required | email | maxlength | minlength | pattern
+     <div *ngIf="INPUT_REF.invalid && (INPUT_REF.dirty || INPUT_REF.touched)" class="alert alert-danger">
+          <div *ngIf="INPUT_REF.errors?.required">
+            Description is required.
+          </div>
+          <div *ngIf="INPUT_REF.errors?.minlength">
+            Description must be at least 3 characters long.
+          </div>
+     </div>
+   - We may also enable HTML5 default form validation, that does show an orange alert pop up for invalid fields, by adding  `ngNativeValidate`  to input
+   - set/patch value , allows us to modify values of form widgets
+     @ViewChild('FORM_REF') myForm: NgForm;
+     this.myForm.form.setValue({ field1: '', field2: '', ... , fieldN: '' });         // all fields must be present
+     this.myForm.form.patchValue({ fieldANY: '' });                                   // any field(s) may be present
+   - reset() , allows to empty form widgets and also make their states touched,valid,dirty to set to default. 
+     We may also pass data to reset method, just like setValue()
+     this.myForm.form.reset();
    
 2. Model driven forms (Reactive forms)
    - These are dynamic in nature , JS/TS intensive and less HTML.
@@ -880,7 +896,7 @@ Angular FORMS
      customerForm: FormGroup;                                      // create new FormGroup , similar to #formRef
      ngOnInit() {
         this.customerForm = new FormGroup({                        // create new FormControl for each widget in FormGroup , supports builtin validators
-            <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]),
+            <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)], [this.CUSTOM_ASYNC_VALIDATOR.bind(this)]),
             <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required])
         });
         // dynamic setting/clearing of validators
@@ -895,11 +911,11 @@ Angular FORMS
      constructor(private _fb: FormBuilder) { }                      // inject FormBuilder service in class
      ngOnInit() {
         this.customerForm = this._fb.group({                        // .group method of FormBuilder service
-           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)]],
+           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)], [this.CUSTOM_ASYNC_VALIDATOR.bind(this)]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required]],
-           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [CUSTOM_VALIDATOR_FUNCTION]]
+           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [this.CUSTOM_VALIDATOR_FUNCTION.bind(this)]]
         });                                                               // Custom Validator function for individual formControl defined outside @Component
-                                                                             function CUSTOM_VALIDATOR_FUNCTION(ctrl: AbstractControl): { [key: string]: boolean } | null {
+                                                                             CUSTOM_VALIDATOR_FUNCTION(ctrl: FormControl|AbstractControl): { [key: string]: boolean } | null {
                                                                                 if(ctrl.value.trim() == "") {
                                                                                     return {'required': true};
                                                                                 }
@@ -909,12 +925,12 @@ Angular FORMS
                                                                                 return null;
                                                                              }
           this.customerForm = this._fb.group({
-           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>'],
+           <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [], [this.CUSTOM_ASYNC_VALIDATOR.bind(this)]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>'],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>']
-        }, {validator: CUSTOM_VALIDATOR_FUNCTION});
+        }, {validator: this.CUSTOM_VALIDATOR_FUNCTION.bind(this)});
                                                                           // Custom Validator function for entire formGroup defined outside @Component
-                                                                             const CUSTOM_VALIDATOR_FUNCTION: ValidatorFn = (fg: FormGroup): ValidationErrors => {
+                                                                             CUSTOM_VALIDATOR_FUNCTION(fg: FormGroup): ValidationErrors | null {
                                                                                const password = fg.controls['formControlName_ATTR'];
                                                                                const cnfpassword = fg.controls['formControlName_ATTR'];
                                                                                 if(password.value.trim() == "") {
@@ -925,18 +941,26 @@ Angular FORMS
                                                                                 }
                                                                                 return null;
                                                                               }
+									      
+									   // Custom Async validators array(passed as third arg), allows to have asyncronous validation
+									      It is useful if we need to check on input data from external API call.
+									      It introduces a third state of form field as ng-pending, before giving ng-valid or ng-invalid
         
         // dynamic setting/clearing of validators
-        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
-        this.customerForm.updateValueAndValidity();
+           this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+           this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+           this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+           this.customerForm.updateValueAndValidity();
      }
      
-     // set/patch value to form widgets
-     this.customerForm.setValue({<formControlName_ATTR>: "Google", <formControlName_ATTR>: "Australia"});
-                                                                            // all widgets <> must be supplied , else error , similar to HTTP POST
-     this.customerForm.patchValue({<formControlName_ATTR>: "Google"});      // only desired <> can be supplied ,              similar to HTTP PATCH
+     // set/patch/reset value to form widgets
+        this.customerForm.setValue({<formControlName_ATTR>: "Google", <formControlName_ATTR>: "Australia"});     // all widgets must be supplied, else error
+        this.customerForm.patchValue({<formControlName_ATTR>: "Google"});                                        // only desired can be supplied
+        this.customerForm.reset();                                                         // reset form data(data can be passed like setValue()) and states touched,valid,dirty
+     
+     // value/status changes subscription
+        this.customerForm.valueChanges.subscribe((val: any)=> { });                        // subscribe to changes of values in form widgets
+	this.customerForm.statusChanges.subscribe((val: any)=> { });                       // subscribe to changes of status(touched,valid,dirty) in form widgets
      
      // function to retrieve HTML context
      get naamValidAlertFunc() {
@@ -949,7 +973,7 @@ Angular FORMS
             name: this.customerForm.get('<formControlName_ATTR>').value,
             location: this.customerForm.get('<formControlName_ATTR>').value,
         };
-        this.customerForm.reset();                                                              // reset form
+        
         // dynamic setting/clearing of validators
            this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
            this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
