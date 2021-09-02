@@ -914,7 +914,7 @@ Angular FORMS
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)], [this.CUSTOM_ASYNC_VALIDATOR.bind(this)]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [Validators.required]],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>', [this.CUSTOM_VALIDATOR_FUNCTION.bind(this)]]
-        });                                                               // Custom Validator function for individual formControl defined outside @Component
+        });                                                               // Custom Validator function for individual formControl
                                                                              CUSTOM_VALIDATOR_FUNCTION(ctrl: FormControl|AbstractControl): { [key: string]: boolean } | null {
                                                                                 if(ctrl.value.trim() == "") {
                                                                                     return {'required': true};
@@ -929,7 +929,7 @@ Angular FORMS
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>'],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>']
         }, {validator: this.CUSTOM_VALIDATOR_FUNCTION.bind(this)});
-                                                                          // Custom Validator function for entire formGroup defined outside @Component
+                                                                          // Custom Validator function for entire formGroup
                                                                              CUSTOM_VALIDATOR_FUNCTION(fg: FormGroup): ValidationErrors | null {
                                                                                const password = fg.controls['formControlName_ATTR'];
                                                                                const cnfpassword = fg.controls['formControlName_ATTR'];
@@ -963,25 +963,25 @@ Angular FORMS
 	this.customerForm.statusChanges.subscribe((val: any)=> { });                       // subscribe to changes of status(touched,valid,dirty) in form widgets
      
      // function to retrieve HTML context
-     get naamValidAlertFunc() {
-         return this.customerForm.get('<formControlName_ATTR>'); 
-     }
+        get naamValidAlertFunc() {
+           return this.customerForm.get('<formControlName_ATTR>'); 
+        }
      
      // submit method
-     onSubmit(){                                                        // onSubmit has no arg, as Reactive forms make use of formgroup
-        let newCustomer: Customer = {
+        onSubmit(){                                                        // onSubmit has no arg, as Reactive forms make use of formgroup
+          let newCustomer: Customer = {
             name: this.customerForm.get('<formControlName_ATTR>').value,
             location: this.customerForm.get('<formControlName_ATTR>').value,
-        };
+          };
         
-        // dynamic setting/clearing of validators
-           this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-           this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-           this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
-           this.customerForm.updateValueAndValidity();
+          // dynamic setting/clearing of validators
+             this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+             this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+             this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+             this.customerForm.updateValueAndValidity();
         
-        this._customersService.addCustomer(newCustomer); 
-     }
+          this._customersService.addCustomer(newCustomer); 
+        }
      
      // 2. component.HTML                                            // onSubmit() has no arg, as Reactive forms make use of formgroup
      <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">       // [formGroup] , property binding for connecting TS form to HTML
@@ -996,6 +996,67 @@ Angular FORMS
         </select>
      </form>
      
+2.A FORM ARRAYS
+-------------------------
+Reference: https://blog.angular-university.io/angular-form-array/
+FormArray container is ideal when we don't know number of form controls upfront.
+This happens when content of form is being defined at runtime, depending on user interaction or even backend data.
+eg:
+.comp.HTML
+--------------
+<form [formGroup]="studForm" (ngSubmit)="formSubmit()">
+    <label>School: <input type="text" formControlName="school"/></label>
+    <ng-container formArrayName="studsArr">
+        <ng-container *ngFor="let stud of studControls; let ind=index;">
+            <div [formGroupName]="ind">
+                <label>Name: <input type="text" formControlName="name"/></label>
+                <label>Email: <input type="email" formControlName="mail"/></label>
+                <button type="button" (click)="deleteStudent(ind)">Delete</button>
+            </div>
+        </ng-container>
+    </ng-container>
+    <button type="submit" [disabled]="studForm.invalid">Submit</button>
+</form>
+<button type="button" (click)="addStudent()">Add Student</button>
+
+.comp.TS
+---------------
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+studForm!: FormGroup;
+constructor(private _fb: FormBuilder) { }
+ngOnInit(): void {
+    this.studForm = this._fb.group({
+      school: ['', [Validators.required, Validators.minLength(3)]],
+      studsArr: this._fb.array([])
+    });
+}
+
+get studControls() {
+    return (this.studForm.get("studsArr") as FormArray).controls;
+}
+
+addStudent() {
+    const studData = this._fb.group({
+      name: ['', [Validators.required]],
+      mail: ['', [Validators.required, Validators.email]]
+    });
+    (this.studForm.get("studsArr") as FormArray).push(studData);
+}
+
+deleteStudent(indexToDelete: number) {
+    (this.studForm.get("studsArr") as FormArray).removeAt(indexToDelete);
+}
+
+formSubmit() {
+    console.log(`${this.studForm.get("school")?.value}`);
+
+    let arrayRes = this.studForm.get("studsArr") as FormArray;
+    let len = arrayRes.length;
+    for(let i=0; i<len; i+=1) {
+      console.log(`${arrayRes.at(i).get("name")?.value}`);
+      console.log(`${arrayRes.at(i).get("mail")?.value}`);
+    }
+}
 
 
 STYLE
