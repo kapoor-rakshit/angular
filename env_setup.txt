@@ -839,7 +839,32 @@ C) @ViewChild(EmployeesComponent, {static: false}) employeesComponentRefVAR: Emp
        console.log(`Logging through template reference => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
        console.log(`Logging through Child Component => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
     }
-   
+    
+NOTE: Static query with @ViewChild and @ContentChild
+--------------------------------------------------------
+a "static" flag dictates when that query's results should be assigned.
+Starting with version 9, the static flag will default to false.
+This flag only applies to @ViewChild and @ContentChild queries,
+because @ViewChildren and @ContentChildren queries don't have concept of static/dynamic (they are always resolved as if they are "dynamic").
+- Before Angular v9
+  // query results sometimes available in `ngOnInit`, sometimes in `ngAfterViewInit` (based on template)
+  @ViewChild('foo') foo: ElementRef;
+- From Angular v9
+  // query results available in `ngOnInit`        , result available before change detection ran for that view
+  // eg: <div #foo></div>
+  @ViewChild('foo', {static: true}) foo: ElementRef;
+     OR
+  // query results available in `ngAfterViewInit` , result not available until after change detection ran for that view
+  // eg: <div #foo *ngIf="showing"></div>
+  @ViewChild('foo', {static: false}) foo: ElementRef;
+  
+It is recommended retrieving query results in `ngAfterViewInit` for view queries and `ngAfterContentInit` for content queries.
+This is because by time those lifecycle hooks run, change detection has completed for relevant nodes and we have collected all possible query results.
+This setting will ensure query matches that are dependent on binding resolution (e.g. results inside *ngIf or *ngFor) will be found by the query.
+However, sometimes for creating embedded views on the fly, we need access to a TemplateRef in a query to create a view dynamically,
+That cannot be done in `ngAfterViewInit` as Change detection has already run on that view, 
+so creating a new view with the template will cause an ExpressionHasChangedAfterChecked error to be thrown. 
+In this case, you will want to set {static: true} and create your view in `ngOnInit`.
 
 
 Angular Animations
@@ -881,12 +906,12 @@ Angular FORMS
      </div>
    - We may also enable HTML5 default form validation, that does show an orange alert pop up for invalid fields, by adding  `ngNativeValidate`  to input
    - set/patch value , allows us to modify values of form widgets
-     @ViewChild('FORM_REF') myForm: NgForm;
-     this.myForm.form.setValue({ field1: '', field2: '', ... , fieldN: '' });         // all fields must be present
-     this.myForm.form.patchValue({ fieldANY: '' });                                   // any field(s) may be present
+       @ViewChild('FORM_REF') myForm: NgForm;
+       this.myForm.form.setValue({ field1: '', field2: '', ... , fieldN: '' });         // all fields must be present
+       this.myForm.form.patchValue({ fieldANY: '' });                                   // any field(s) may be present
    - reset() , allows to empty form widgets and also make their states touched,valid,dirty to set to default. 
-     We may also pass data to reset method, just like setValue()
-     this.myForm.form.reset();
+     We may also pass data to reset method, just like patchValue(), fields not specified will be set to empty.
+       this.myForm.form.reset();
    
 2. Model driven forms (Reactive forms)
    - These are dynamic in nature , JS/TS intensive and less HTML.
@@ -956,8 +981,8 @@ Angular FORMS
      // set/patch/reset value to form widgets
         this.customerForm.setValue({<formControlName_ATTR>: "Google", <formControlName_ATTR>: "Australia"});     // all widgets must be supplied, else error
         this.customerForm.patchValue({<formControlName_ATTR>: "Google"});                                        // only desired can be supplied
-        this.customerForm.reset();                                                         // reset form data(data can be passed like setValue()) and states touched,valid,dirty
-     
+        this.customerForm.reset();                                                         // reset data(data can be passed like patchValue()) and states touched,valid,dirty
+                                                                                           // fields not specified will be set to empty
      // value/status changes subscription
         this.customerForm.valueChanges.subscribe((val: any)=> { });                        // subscribe to changes of values in form widgets
 	this.customerForm.statusChanges.subscribe((val: any)=> { });                       // subscribe to changes of status(touched,valid,dirty) in form widgets
@@ -996,7 +1021,7 @@ Angular FORMS
         </select>
      </form>
      
-2.A FORM ARRAYS
+2.A FORM-ARRAYS
 -------------------------
 Reference: https://blog.angular-university.io/angular-form-array/
 FormArray container is ideal when we don't know number of form controls upfront.
