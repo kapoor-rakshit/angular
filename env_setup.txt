@@ -667,14 +667,14 @@ NOTE : For creating NEW PIPE
                                   - example
                                     @Pipe({
                                       name: 'customPipe', 
-                                      pure: true
-                                    })
+                                      pure: true               // pipe is NOT(default) re-calculated on every change of data. once pipe applied, it needs to re-trigger, say
+                                    })                         // we need to type in again in filter input, to show data changes that too matches with filter text.
                                     
                                   - example
                                     @Pipe({
                                       name: 'customPipe',
-                                      pure: false
-                                    })
+                                      pure: false              // pipe is re-calculated on every data change, i.e. say we have a filter pipe and we input data
+                                    })                         // in field to filter, but then a data change happens, matching filter text, so this will show that new data too.
                                     
                                   -- Async pipe
                                   - It is an example of impure pipe , 
