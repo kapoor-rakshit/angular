@@ -1876,11 +1876,12 @@ Create file         "app.routing-module.ts"   in project's app component root di
 
 DYNAMIC ROUTING
 ===================
-REST APIs have four types of parameters:
+REST APIs have certain types of parameters:
  - Header parameters: Parameters included in the request header, usually related to authorization.
  - Path parameters: Parameters within the path of the endpoint, before the query string (?).
  - Query string parameters: Parameters in the query string of the endpoint, after the ?.
  - Request body parameters: Parameters included in the request body. Usually submitted as JSON.
+ - Fragment: appended to URL after query params(if any), with # symbol.
  
  1. Header parameters
  --------------------
@@ -1891,12 +1892,20 @@ REST APIs have four types of parameters:
                                         params: {                                 // appended as query string parameters in request URL
                                           "chkP" : "namo ji",
                                           "chkP1" : "PM"
-                                        }
+                                        },
+					observe: 'events'                         // observe HTTP OPTION allows monitoring of request-response sequence
+					                                             It has values: 'body'(default), 'response'(full response obj received i.e. status, headers)
+										     'events'(seq. of events in req-resp lifecycle)
                                      };
                                      constructor(private _http: HttpClient) { }
                                      addProduct(HTTP_BODY) {
                                          return this._http.post(this._productsUrl, HTTP_BODY, this.httpOptions)
-                                                          .pipe(catchError((err: Error) => { return throwError(err.message) })); }
+                                                          .pipe(tap((evt)=> { console.log(`${evt}`); 
+							                      if(evt.type == HttpEventType.Sent) {} 
+									      if(evt.type == HttpEventType.Response) {}
+									      if(evt.type == HttpEventType.UploadProgress) {}
+							                    }), 
+							        catchError((err: Error) => { return throwError(err.message) })); }
  NOTE - To read HTTP RESPONSE HEADERS, use INTERCEPTORS.
 
  2. Path Parameters
@@ -2073,7 +2082,8 @@ HTTP INTERCEPTORS
        
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
-            headers: req.headers.set('Authorization', "mytoken"),
+            headers: req.headers.set('Authorization', "mytoken"),                    // .set()    - overwrites(if existing) or add new(if not existing) header
+	                                                                             // .append() - adds multiple values(if existing) or add new(if not existing) header
             params: req.params.set('filter', 'completed'),
             body: req.body.replace(/pizza/gi, 'desi_bread')
           });
