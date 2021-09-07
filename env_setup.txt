@@ -787,7 +787,7 @@ example:
 @VIEWCHILD / @VIEWCHILDREN
 ================================
 It provides reference to HTML DOM, similar to "document.getElementById()" in core JS.
-This concept can be used in following 3 ways
+This concept can be used in following ways:-
 1. Native HTML Element Reference              (Component .TS ==> <== Component .HTML)
 // used ngAfterViewInit and not ngOnInit() in example as this is called when DOM/template is constructed.
 // example
@@ -839,6 +839,38 @@ C) @ViewChild(EmployeesComponent, {static: false}) employeesComponentRefVAR: Emp
        console.log(`Logging through template reference => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
        console.log(`Logging through Child Component => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
     }
+    
+4. Programmatic creation of components        (Directive, Component.HTML, Component.TS)
+// a generic approach can be to use *ngIf, via .HTML file
+// to have it programmatically via .TS file, follow below steps
+A) .directive.TS
+   import { Directive, ViewContainerRef } from '@angular/core';
+   @Directive({
+     selector: '[adHost]',
+   })
+   export class AdDirective {
+     constructor(public viewContainerRef: ViewContainerRef) { }        // NOTE: use of 'public'
+   }
+   
+B) .comp.HTML
+   <ng-template adHost></ng-template>
+
+C) .comp.TS
+   @ViewChild(AdDirective, {static: false}) adHost!: AdDirective;
+   constructor(private componentFactoryResolver: ComponentFactoryResolver) { }
+   loadDynamicComp() {
+   	const componentFactory = this.componentFactoryResolver.resolveComponentFactory(dynamicComponent);
+	const viewContainerRef = this.adHost.viewContainerRef;
+	viewContainerRef.clear();
+	
+	const componentRef = viewContainerRef.createComponent<any>(componentFactory);
+    	componentRef.instance.DYNAMIC_COMPs_VAR = "data value for dynamic component";
+	this.subsEvent = componentRef.instance.DYNAMIC_COMPs_EVENT-EMITTER.subscribe(()=> { this.subsEvent.unsubscribe(); viewContainerRef.clear(); }); 
+   }  
+D) .module.TS
+   declarations: [],
+   imports: [],
+   entryComponents: [dynamicComponent]                                 // for components that do not have any selector or route
     
 NOTE: Static query with @ViewChild and @ContentChild
 --------------------------------------------------------
