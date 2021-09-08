@@ -1698,24 +1698,44 @@ SERVICE
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
             > ng generate service <SERVICE_NAME>
 
-declare this service class in  "providers" array of ROOT module metadata i.e.  "app.module.ts"  to have same instance of this service, all down the hierarchy.
-            OR
-declare this service class in  "providers" array of SUB module metadata i.e.  "MODULE.ts"  to have same instance of this service, within module's components & child components only
-            OR
-declare this service class in  "providers" array of COMPONENT metadata to have same instance of this service, within component & it's child components only.
-            OR
-if metadata providedIn: 'root' is given in @Injectable({}) decorator , it prevents need to write in "providers" array of app.module.ts.
-However, it is always recommended to add service class to providers array as above behavior may change in coming versions.
-
-NOTE: If we specify in all "providers" array of component's, SUB module's, ROOT module's  metadata
-      then we will have three instances of service and each will override behavior starting from component level.
-
-Write URL for ".servive.ts" in a global class (Global) i.e.   src > app > config > `www.service.ts` file.
-Inject in component/module  ".service.ts"  using  constructor()
-	example: constructor(private global: Global) { global.baseURL; }
-This will prevent need to change URL for each component/module ".service.ts" since it is available in a globally accessible file.
-
 Inject in     ".component.ts"  file  of COMPONENT using   constructor()
+
+A) declare this service class in "providers" array of ROOT module metadata i.e.  "app.module.ts"  to have same instance of this service, app wide, all down the hierarchy.
+            OR
+   add metadata providedIn: 'root' to @Injectable({}) decorator , it prevents need to write in "providers" array of app.module.ts.
+   However, it is always recommended to add service class to providers array as above behavior may change in coming versions.
+   
+B.1.) declare this service class in "providers" array of EAGERLY LOADED SUB module metadata i.e. "MODULE.ts"  to have same instance app wide.
+      this is same as declaring in providers of "app.module.TS"   or   adding providedIn: 'root' metadata to @Injectable({}) decorator.
+   
+B.2.) declare this service class in "providers" array of LAZY LOADED SUB module metadata i.e. "MODULE.ts"  to have different instance, but same within sub-module only
+      eg: if service provided in both providers array of ROOT module and sub-module, we will have two instances of that service
+   
+C) declare this service class in "providers" array of COMPONENT metadata to have different instance, but same within component & it's child components only.
+   eg: if service provided in both providers array of ROOT module and component, we will have two instances of that service
+   
+   
+ENVIRONMENT PROPERTIES
+--------------------------
+> src\environments\environment.prod.ts          (used in production build)
+> src\environments\environment.ts               (used in development mode)
+These files provide global scope for variables. eg: TOKEN-KEY, BACKEND-URL, SSH-KEYS etc...
+Specify keys-values in both files per environment specific as Angular automatically makes use of these two files as per environment it is being run on.
+Eg:
+ > environment.ts
+   export const environment = {
+  	production: false,
+	API_URL: "https://uhc-backend-DEV-URL"
+   };
+ > environment.prod.ts
+   export const environment = {
+  	production: true,
+	API_URL: "https://uhc-backend-PROD-URL"
+   };
+ > .service.TS
+   import { environment } from 'PATH-TO-DEV-ENVIRONMENT.TS-FILE';
+   let endpoint = `${environment.API_URL}/login`;
+
 
 COMMUNICATION with SERVICE
 ---------------------------
