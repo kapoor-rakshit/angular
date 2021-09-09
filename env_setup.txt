@@ -902,14 +902,95 @@ In this case, you will want to set {static: true} and create your view in `ngOnI
 Angular Animations
 =========================
 From Angular 4 , animations are part of separate animations library and not part of angular core library as it was earlier.
-inside app.module.ts             import BrowserAnimationsModule and write it in imports[] array
-inside component's .ts file      animations: [] ,this contains animationName and it's properties, just like template and css properties given.
-                                 stateVar: string = "small";                            // this variable change will trigger animation
-                                 animateFunc(){
-                                    this.stateVar=(this.stateVar=="small"?"large":"small");
-                                 }
-inside component's .html file    <p [@animationName]="stateVar" (click)="animateFunc()">some random text</p>
-
+A) app.module.TS             import BrowserAnimationsModule and write it in imports[] array
+B) COMP.TS                   animations: []   metadata inside @Component({  })
+import { animate, group, keyframes, state, style, transition, trigger } from '@angular/animations';
+@Component({
+  animations: [
+    trigger('animationVar', [                       /** Name of animation */
+      state('original', style({                     /** Style to apply when stateVAR value is equal to arg here */
+        backgroundColor: 'blue',
+        outline: '2px solid green'
+      })),
+      state('formatted', style({
+        backgroundColor: 'green',
+        outline: '2px solid blue'
+      })),
+      state('formatted2', style({
+        backgroundColor: 'yellow',
+        outline: '2px solid red'
+      })),
+      transition('original => formatted', [        /** =>: Apply style, as per change direction & duration specified, not immediately */
+        animate(1000)
+      ]),
+      transition('formatted => formatted2', [
+        animate(1000)
+      ]),
+      transition('* => void', [                   /** VOID: when element does not exist in DOM, it is in VOID state */
+        group([                                   /** GROUP: runs animate funcs async i.e. both run simultaneously */
+          animate(1000, style({
+            backgroundColor: 'purple'
+          })),
+          animate(2000, style({
+            transform: 'scaleY(5)',
+            opacity: 0
+          }))
+        ])
+      ]),
+      transition('original <=> *', [               /** <=> : either direction  |  * : any value of stateVAR */
+        style({                                    /** immediate style, when transition starts */
+          transform: 'scale(2)'
+        }),
+        animate(5000, style({                      /** style during transition phase of stateVAR */
+          transform: 'scale(5) rotate(45deg)'
+        })),
+        animate(2000, keyframes([                  /** KEYFRAMES: precise control during transition using offset(0-1) of duration */
+          style({
+            backgroundColor: 'black',
+            offset: 0
+          }),
+          style({
+            backgroundColor: 'gray',
+            offset: 1
+          })
+        ])),
+        animate(1000)                              /** duration for transition to final state after above animate duration(s) complete */
+      ])
+    ])
+  ]
+})
+export class FloatingTextComponent implements OnInit {
+  stateVar: any = undefined;
+  show: boolean = true;	
+  originalDiv() {
+    this.stateVar = 'original';
+  }
+  formattedDiv() {
+    this.stateVar = 'formatted';
+  }
+  formatted2Div() {
+    this.stateVar = 'formatted2';
+  }
+  hideShowDiv() {
+    this.show = this.show ? false : true;
+  }
+  animationStart(evt: any) {                                                           /** callbacks for animation start and done event */
+    console.log(`STARTED ==> ${evt.fromState} , ${evt.toState} , ${evt.triggerName}`);
+  }
+  animationDone(evt: any) {
+    console.log(`DONE ==> ${evt.fromState} , ${evt.toState} , ${evt.triggerName}`);
+  }
+}
+C) comp.HTML
+<div *ngIf="show" class="testDiv" 
+    [@animationVar]="stateVar"
+    (@animationVar.start)="animationStart($event)"
+    (@animationVar.done)="animationDone($event)">
+</div>
+<button type="button" (click)="originalDiv()">Original</button>
+<button type="button" (click)="formattedDiv()">Format</button>
+<button type="button" (click)="formatted2Div()">Format 2</button>
+<button type="button" (click)="hideShowDiv()">{{show ? 'Hide' : 'Show'}}</button>
 
 
 Angular FORMS
