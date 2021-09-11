@@ -239,6 +239,39 @@ It will update angular.json, package.json, app.module.ts, index.html plus create
 > ng add @angular/pwa                             (MULTI-REPO)
 > ng add @angular/pwa --project <my-app>          (MONO-REPO)
 
+@angular/pwa package provides offline functionalities to our app by making use of service workers. This can be configured in `ngsw-config.json` file.
+A) "assetGroups": [                                 /** Caching static resources or assets i.e. resources loaded from page's origin, CDNs */
+   	{
+		"name": "app",
+		"installMode": "prefetch",          /** prefetch(default): fetch every single listed resource | lazy: cache which are requested from listed resource */
+		"resources": {
+			"files": ['/**/*.css', '/*.js'],
+			"urls": ['GOOGLE-FONTs-CDN']
+		}
+	},
+	{
+		"name": "assets",
+		"installMode": "lazy",
+		"updateMode": "prefetch",
+		"resources": {
+			"files": ['/assets/**']
+		}
+	}
+   ]
+B) "dataGroups": [                                  /** Caching dynamic data from NETWORK API requests */
+	{
+		"name": "myDATA",
+		"urls": ['API-REQ-URLs'],
+		"cacheConfig": {
+			"maxSize": 5,               /** maximum number of entries, or responses, in the cache */
+			"maxAge": "3d12h",          /** how long responses are allowed to remain in the cache before being considered invalid and evicted */
+			"timeout": "5s30u",         /** how long the Angular service worker will wait for the network to respond before using a cached response */
+			"strategy": "freshness"     /** performance(default): depend on `maxAge`, If resource exists in cache use it and no network request is made */
+			                                freshness: depend on `timeout`, fetch data from network request. Only if network times out, use cache
+							NOTE : To simulate 'staleWhileRevalidate' strategy, set `strategy` to 'freshness' and `timeout` to '0u'
+		}
+	}
+   ]
 
 
 Angular Material
