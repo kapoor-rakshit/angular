@@ -243,7 +243,7 @@ It will update angular.json, package.json, app.module.ts, index.html plus create
 A) "assetGroups": [                                 /** Caching static resources or assets i.e. resources loaded from page's origin, CDNs */
    	{
 		"name": "app",
-		"installMode": "prefetch",          /** prefetch(default): fetch every single listed resource | lazy: cache which are requested from listed resource */
+		"installMode": "prefetch",          /** prefetch(default): fetch every listed resources | lazy: cache only which are requested from listed resources */
 		"resources": {
 			"files": ['/**/*.css', '/*.js'],
 			"urls": ['GOOGLE-FONTs-CDN']
@@ -252,7 +252,10 @@ A) "assetGroups": [                                 /** Caching static resources
 	{
 		"name": "assets",
 		"installMode": "lazy",
-		"updateMode": "prefetch",
+		"updateMode": "prefetch",           /** Defaults to value of installMode. Determines caching behavior when new version of app is discovered.
+		                                        prefetch: download/cache changed resources immediately.
+							lazy: not cache resources. Instead, treats them unrequested, waits until they're requested again before updating them. 
+							      NOTE : An updateMode of lazy is only valid if the installMode is also lazy. */
 		"resources": {
 			"files": ['/assets/**']
 		}
