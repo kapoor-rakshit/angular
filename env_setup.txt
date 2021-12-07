@@ -2645,7 +2645,7 @@ Angular TDD
   - COMPONENT DOM testing      (html of component)
   - COMPONENT SERVICE testing  (services used in component)
 - To run angular tests
-  > ng test --code-coverage            (MULTI-REPO)    // test: runs all .spec.ts in app | --code-coverage: generates report ( root/coverage dir)
+  > ng test --code-coverage            (MULTI-REPO)    // test: runs all .spec.ts in app | --code-coverage: generates report ( ROOT_DIR/coverage/index.html )
   > ng test <appName> --code-coverage  (MONO-REPO)
 - commonly used methods:
   - TestBed()              : similar to app.module which will import the component
@@ -2857,5 +2857,42 @@ Angular TDD
         });
       });
     });
-  
+    
+    // MISC. TESTING SAMPLE CODES/NOTES
+    - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)      // To have a report of only a specific component
+    - karma.conf.js : singleRun:false                                             // To rerun test report on any change of file(s)
+    
+    - {provide: Store, useValue: {select: () => of({}) , dispatch: () => {}}}     // When working with Store test cases,add to providers array of TestBed config
+    
+    - const store = TestBed.get(Store);                                           
+      spyOn(store,'select').and.returnValue(of()).and.returnValue(of());          // returnValue : return value from method | of : return value to observable success function
+      spyOn(store,'select').and.returnValue(throwError(''));                                                                | throwError : return value to obsv error function
+      
+    - component['getProfileMetaData'](123);                                       // component's PRIVATE method call
+      component['primaryAdvisor'] = <any>{advisorId : 1224};                      // component's PRIVATE property assignment
+      
+    - const appService = TestBed.get(AppSessionService);
+      const investpathService = TestBed.get(InvestpathService);
+      spyOn(appService, 'getItemFromStorage').and.returnValue(null);              // spyOn : calling service methods OR while writing expect() for them
+      investpathService.investpathProfileInfo = {clientInfo: {client: false}};    // service's property assignment
+      
+    - spyOn<any>(component, 'saveDetails');                                       // spyOn : writing expect() for component's private method
+      expect(component['saveDetails']).toHaveBeenCalled();
+      
+    - const elm = document.createElement('div') as HTMLElement;                   // HTML DOM related test cases
+      elm.setAttribute('class', 'form-control__error-label');
+      spyOn(document, 'querySelector').and.returnValue(elm);
+      component['scrollToError']();
+      expect(elm).toHaveClass('investpath-error');
+      
+    - const mockDialog = { open: jasmine.createSpy('open') };                     // mockDialog created 
+      { provide: MatDialog, useValue: mockDialog }                                // add to providers array
+      expect(mockDialog.open).toHaveBeenCalled();                                 // expect() for material dialog's open/close
+      
+    - const MAT_DIALOG_DATA_INITIAL = {                                           // mock data for dialog component having @Inject(MAT_DIALOG_DATA)
+           title: '',
+           handleAdditionalFunctionality: jasmine.any(Function)
+      };
+      { provide: MAT_DIALOG_DATA, useValue: MAT_DIALOG_DATA_INITIAL }             // add to providers array
+      const data = TestBed.get(MAT_DIALOG_DATA);                                  // reference to MAT_DIALOG_DATA for writing expect()
 
