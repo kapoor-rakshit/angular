@@ -628,6 +628,7 @@ app.component.ts          --   defines @Component
                                                                       [ngClass] = "'firstCSSClass secondCSSClass'"                 // NOTE : use of '' over class names
                                                                       [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
                                                                       [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
+								      [ngValue] = "option"                     // [value] is string, whereas with [ngValue] object can be passed
 
                                 --   EVENT BINDING                    (click)    = 'funccall()'                // NOTE : use of () for event  and ' ' for func
                                                                       (input)    = 'func($event.target.value)' //        send data from DOM to component
@@ -1293,6 +1294,7 @@ STYLE
 					   [style.left]="'15px'"
 					   [style.background-color]="'blue'"
 					   [style.font-size]="Boolean_VAR_EXPRESSION ? '20px' : '12px'"
+					   [ngStyle] = "{'font-style' : styleVAR , 'font-weight' : 'bold'}"
 					   
 VIEW ENCAPSULATION
 ========================
