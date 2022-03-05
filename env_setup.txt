@@ -207,9 +207,27 @@ Bypass Angular protection:
 ===================================
 `const` keyword will not work and gives compilation error `A class member cannot have the ‘const’ keyword`
 Because class members are mutable and modified and accessed by different calls and objects.
-Typescript thus provides readonly modifier field instead of const. These readonly can be reassigned unlike const keyword.
-Example:
-  readonly instanceVariable = "instanceData";
+Typescript thus provides readonly modifier field instead of const. const is for variables and readonly is for class properties.
+In both cases reassignment is NOT possible, however value can change. Eg: const a=[9025,4021];
+Example: readonly instanceVariable = "instanceData";                      a=[9025]; // INVALID | a[0]=4084; // VALID
+
+
+Global window var | Ambient var in Typescript
+==============================================
+- Adding new global properties to Window object
+  Create global object outside class/component in .TS file
+  These variables can then be used anywhere in our .TS file using,  window.VAR
+  Eg: declare global {
+        interface Window {
+          fullName?: string;
+          emailId?: string;
+        }
+      }
+- Ambient variable declarations
+  If we are using a lib that adds global variables and we need to assign something to it in .TS file
+  We need to inform compiler about their existence. Declare them outside class/component in .TS file
+  And then these can be assigned using,  window['dataLayer'] = window['dataLayer'] || [];  dataLayer.push({});
+  Eg: declare var dataLayer: any;
 
 
 Angular 10, new stuff
