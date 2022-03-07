@@ -284,7 +284,7 @@ B) "dataGroups": [                                  /** Caching dynamic data fro
 		"name": "myDATA",
 		"urls": ['API-REQ-URLs'],
 		"cacheConfig": {
-			"maxSize": 5,               /** maximum number of entries, or responses, in the cache */
+			"maxSize": 5,               /** maximum number of entries, or responses, in the cache. Eg: 5:last five entries in 'urls' array */
 			"maxAge": "3d12h",          /** how long responses are allowed to remain in the cache before being considered invalid and evicted */
 			"timeout": "5s30u",         /** how long the Angular service worker will wait for the network to respond before using a cached response */
 			"strategy": "freshness"     /** performance(default): depend on `maxAge`, If resource exists in cache use it and no network request is made */
