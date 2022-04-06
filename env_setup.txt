@@ -2844,6 +2844,7 @@ MISC. TESTING SAMPLE CODES/NOTES
 ---------------------------------------
     - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)      // To have a report of only a specific component
     - karma.conf.js : singleRun:false                                             // To rerun test report on any change of file(s)
+    		    : captureTimeout:150000					  // To set timeout for browser while running test cases on machine
     
     - {provide: Store, useValue: {select: () => of({}) , dispatch: () => {}}}     // When working with Store test cases,add to providers array of TestBed config
     
