@@ -1357,7 +1357,14 @@ compares it will the previous values and if the change is detected, it propagate
   	selector: "child-component",
   	changeDetection: ChangeDetectionStrategy.OnPush
   })
-
+- Explicit change detection
+  It explicitly marks the view as changed so that it can be checked again
+  Example:
+  constructor(private cdRef: ChangeDetectorRef) { }
+  ngOnInit() {
+    this.cdRef.markForCheck();
+  }
+  
 
 PASSING VARIABLES/VALUES TO and FROM COMPONENTS
 =================================================
