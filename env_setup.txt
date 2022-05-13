@@ -1698,17 +1698,24 @@ create your own OBSERVABLES
   Just call unsubscribe()to cancel the execution.
 - Example
 import { Observable } from "rxjs/Observable";
-// create observable | new Observable((obs)=> {})     OR    Observable.create((obs)=> {})
-const simpleObservable = new Observable((observer) => {  
-    // observable execution
+A.1.// create observable | new Observable((obs)=> {})     OR    Observable.create((obs)=> {})
+    const simpleObservable = new Observable((observer) => {  
+       // observable execution
        observer.next("bla bla bla");
        observer.complete();
-});
-// subscribe to the observable, it accepts success function, error function, completion function
-// NOTE: An error CANCELs observable , it cannot emit new values. This is not same as COMPLETION and thus if error occurrs completion function won't run.
+   });
+A.2.// optional-Create subject to check for unsubscribe
+    private unsubscribe: Subject<void> = new Subject<void>();
+B. // subscribe to the observable, it accepts success function, error function, completion function
+   // NOTE: An error CANCELs observable , it cannot emit new values. This is not same as COMPLETION and thus if error occurrs completion function won't run.
    this.observableSub = simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {}, ()=> {});
-// dispose the observable, inside ngOnDestroy()
+   //   OR
+   simpleObservable.pipe(takeUntil(this.unsubscribe)).subscribe((data: any)=> {}, (err: Error)=> {}, ()=> {});
+C. // dispose the observable, inside ngOnDestroy()
    observableSub.unsubscribe();
+   //   OR
+   this.unsubscribe.next();
+   this.unsubscribe.complete();
    
 a) pipe() | retry() | catchError() | throwError()
 The pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
