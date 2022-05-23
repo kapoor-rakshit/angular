@@ -404,7 +404,7 @@ In app.module.TS (root module)
  
 
 
-Angular SSR (Server Side Rendering) and Pre-rendering with Angular Universal
+Angular SSR (Server Side Rendering) and Pre-rendering/SSG(Static Site Generation) with Angular Universal
 ===============================================================================
 Angular applications are single-paged apps (SPAs) - this means a single HTML document is served to the client, 
 which can then be dynamically rewritten on the client browser-based on data received from the server, instead of serving a static page when routing. 
@@ -413,7 +413,9 @@ Angular Universal allows the app to be executed on the server, which lets us gen
 This means that when user opens Angular app, server will show user a pre-rendered version of app which they can browse while client-side application loads behind-the-scenes. 
 When the client-side application has finished loading, the application switches from pre-rendered app to the fully interactive client-side app, without the user even noticing.
 
-SSR vs Pre-rendering
+CSR vs SSR vs SSG
+- CSR allows having highly user interactive websites.
+  However, it might result in delayed FCP due to large bundle size of JS. Also, there is problem with SEO.
 - Dynamic SSR or SSR is when there will be live Node server spun up such that whenever Route is hit, it will dynamically generate and serialize application — returning that String to browser.
   Static Pre-rendering or pre-rendering is when we want to pre-render a list of routes and create static files, (ie: index.html, about-us.html, etc) and then use server of our choice to serve up those files later on.
 - SSR is used when application (and the routes you need to SSR) are dynamic i.e. application structure is rendered based on JSON files where anything could change at any given moment.
@@ -462,7 +464,7 @@ A sample code for estimating FCP time, write in index.html of your app
   To run SSR app in development mode, that will automatically recompile the client and server bundles and live-reload the browser.
   > npm run dev:ssr
   
-- pre-rendered version of our app
+- SSG/pre-rendered version of our app
   Pages that don’t need to be rendered server-side or rendered on the client every time a user makes a request. 
   Angular Universal 9 now allows you to cache these pages as static files, which can then be served to the client via your CDN or a simple server.
   Set up
