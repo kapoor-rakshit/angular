@@ -1,0 +1,21 @@
+REFERENCE: https://momentjs.com/
+===================================
+
+INSTALL
+=========
+npm install moment
+
+IMPORT in COMPONENT
+=====================
+import * as moment from 'moment';
+
+Examples
+==========
+public time: string;
+
+public ngOnInit(): void {
+  this.time = moment().format('dddd');                                      // d: day in digit (Sunday is 0) | dddd: day in words (Thursday)
+              moment().add(1, 'days').format('DD-MM-YYYY');                 // MM: month in digits | MMMM: month in words (May)
+              moment().add(1, 'days').format('DD-MMMM-YYYY, hh:mm:ss a');   // a: AM/PM
+              moment().subtract(3, 'days').calendar();                      // Last Monday at 5:45 PM
+}
