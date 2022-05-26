@@ -1845,6 +1845,22 @@ subject.complete();
 // observerB: 5
 
 
+Title Service
+====================
+Title service is part of Browser platform and provides an API for getting and setting current HTML document title.
+Using browser's document object and set title manually i.e. using document.title will be dirty
+and undermines chances of running app outside of a browser (server-side,pre-rendering) someday.
+Eg:
+import { Title } from '@angular/platform-browser';
+export class MyComponent {
+  public constructor(private titleService: Title) { }
+  
+  ngOninit() {
+    let oldTitle = this.titleService.getTitle();
+    this.titleService.setTitle(`oldTitle - ${newTitle}`);
+  }
+}
+
 
 SERVICE
 ====================
