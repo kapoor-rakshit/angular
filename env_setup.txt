@@ -1353,18 +1353,28 @@ compares it will the previous values and if the change is detected, it propagate
   Every time when we update counter in the ParentComponent, the ChildComponent life cycle is also triggered to re-render, making app less performant.
 - onPush Change Detection Strategy
   During this Change Detection Strategy, the ChildComponent is not always dirty checked, 
-  If parent element is updating values that are not passed as “@Input” properties to the Child Component, then the child Component should not be dirty checked.
+  If parent element is updating values that are not passed as “@Input” properties to Child Component, then the child Component should not be dirty checked.
+  OnPush itself means, only run change detection if:
+  	*Reference of the @Input property has changed altogether i.e. obj={name:'name'}; | obj.name="new name"; (NOT RUN) | obj={name:'new name'}; (RUN)
+	*An event has fired, like click or any of child components has emitted an event
   Example:
   @Component({
   	selector: "child-component",
   	changeDetection: ChangeDetectionStrategy.OnPush
   })
 - Explicit change detection
-  It explicitly marks the view as changed so that it can be checked again
+  *Use markForCheck() if you're using OnPush strategy.
+   It explicitly marks the view as changed so that it can be checked again.
+   It will not run change detection, but mark its ancestors as needing to run change detection.
+   Next/current cycle change detection runs, it will run also for those components which were marked.
+  *Use detectChanges() when you've updated model after angular has run it's change detection,
+   or if the update hasn't been in angular world at all (third party function has updated your model and you want to update the view after that)
+   It will run change detection immediately from the current component down through its descendants.
   Example:
   constructor(private cdRef: ChangeDetectorRef) { }
   ngOnInit() {
     this.cdRef.markForCheck();
+    this.cdRef.detectChanges();
   }
   
 
