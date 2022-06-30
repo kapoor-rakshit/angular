@@ -1746,7 +1746,7 @@ const apiData = ajax('/api/data').pipe(
   catchError((err: Error) => { return throwError(err.message); })
 );
 
-b) concatMap() | mergeMap() | switchMap() | exhaustMap()
+b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin()
 Example:
 this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
 - concatMap()
@@ -1759,6 +1759,22 @@ this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course
   if a new Observable starts emitting values we are then going to unsubscribe from the previous Observable, before subscribing to the new Observable.
 - exhaustMap()
   if a new Observable starts emitting values we are then going to ignore new values in the source Observable until the previous value is completely processed.
+- forkJoin()
+  when we make multiple HTTP requests(to same/different server) and wait until get responses from all HTTP requests for rendering view.
+  forkJoin waits for each HTTP request to complete and group’s all observables returned by each HTTP call into a single observable array
+  and finally return that observable array.
+  Eg:
+  SERVICE.TS
+    let response1 = this.http.get(requestUrl1);
+    let response2 = this.http.get(requestUrl2);
+    let response3 = this.http.get(requestUrl3);
+    return forkJoin([response1, response2, response3]);
+  COMP.TS  
+    SERVICEMETHOD().subscribe((responseList) => {
+        this.responseData1 = responseList[0];
+        this.responseData2 = responseList[1];
+    	this.responseData3 = responseList[2];
+    });
 
 c) Subject | BehaviorSubject | ReplaySubject | AsyncSubject
 An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. 
