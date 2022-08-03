@@ -5,8 +5,6 @@ MongoDB , Express , Angular , Node
 MERN stack
 MongoDB , Express , React , Node
 
-
-
 FRONTEND CLIENT side FRAMEWORK(s) which use HTML, JS, TS, Dart for building application(s)
 Angular , React
 Angular works on REAL DOM.
@@ -15,14 +13,19 @@ React works on VIRTUAL DOM , better performance as compared to Angular.
 BACKEND SERVER(s)
 NodeJs , ExpressJs , ASP.NET , J2EE
 
-
-
 Traditional Web Application  |  Single Page Application
                              -  Initial load (JS, CSS, HTML) on index.html (Single Page)
                              -  Initally slow on index.html but subsequent requests are faster
                              -  Client - Browser loads/remove/modify DOM coz they have ANGULAR/REACT libs
 Check reference screenshots too.
 
+
+Why TypeScript ?
+=================
+1. It provides intent of code and increases readibility. eg: function sum(a: number, b: number): number { return a+b; }
+2. Errors related to typeof args, return type can be detected at compile time, which otherwise would be possible at runtime only.
+3. Auto suggestions while writing TS code is provided by most tools (VScode).
+4. No need to write unit test cases related to type of args, return type.
 
 
 Angular Versioning
@@ -39,9 +42,7 @@ Angular 3 does not exist
 Reason : angular/router module in core library of Angular was at v3.x.x plus ahead of v2.x.x for other modules.
          Now if Angular v3 is released , angular/router module will be at v4.x.x while others will be at v3.x.x
          So to avoid cofusion it was dropped and moved to v4 directly.
-
 Every six months , one major release is made to Angular Version.
-
 
 
 METADATA
@@ -52,7 +53,6 @@ NOTE : a class immediately succeeded by METADATA decorator will only act as ANGU
 
 Transpiler is used to convert TS to JS.
 This is done either by browser or before providng production build to browser for faster response.
-
 
 
 NPM
@@ -88,7 +88,6 @@ Set proxy for a network to allow download of packages
 
 > npm config delete <KEY>
 Delete a config setting <KEY> , it can be `proxy`, `https-proxy`    etc...
-
 
 
 SETUP
@@ -139,7 +138,6 @@ add additional dependencies (e.g. polyfills), or scaffold package-specific initi
 
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
-
 
 
 IVY ENGINE
