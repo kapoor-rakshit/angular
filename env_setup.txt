@@ -1421,7 +1421,7 @@ This concept is used when we have a common class for data that can be used by mu
 NOTE: USE OF @Attribute(), when any child comp properties value is static and it will never change
       Accessing property using @Attribute() means, the value will be evaluated only once (during the first change detection) and
       it will be injected in constructor phase itself, and will not be checked on subsequent change detection cycle run of that component,
-      as would happen in @Input() properties. Therefore, making performance improvised.
+      as otherwise would happen in @Input() properties. Therefore, making performance improvised.
       In child-comp.ts
       --------------------
       constructor(@Attribute('EXTERNAL_VAR_NAME') public INTERNAL_VAR_NAME: string) { }
