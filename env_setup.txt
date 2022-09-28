@@ -738,7 +738,25 @@ NOTE : For creating NEW PIPE
                                     because even thought the observable parameter may not change the new value may arrive through this observable that needs to be processed by change detection.
                                   - However async pipe unsubscribes itself from observables on 'ngOnDestroy()'
                                     
-
+<ng-template>, <ng-container> and <ng-content>
+================================================
+- <ng-template></ng-template>
+  It allows us to conditionally render content using template reference variables(#TEMPLATE-REF-VAR) and structural directives(*ngIf)
+- <ng-container></ng-container>
+  It allows not to have an extra <div> on DOM.
+  eg: We cannot use two structural directives on one <div>, therefore we can make use of <ng-container> for one and <div> for another.
+- <ng-content></ng-content>
+  It acts as a placeholder for dynamic content from PARENT COMP to CHILD COMP.
+  Eg:PARENT-COMP.HTML
+     ------------------
+      <child-comp>
+  	<div>Child Component Details</div>
+      </child-comp>
+     CHILD-COMP.HTML
+     ------------------
+      <ng-content></ng-content>		// NOT REPLACE HERE, since another <ng-content></ng-content> exists
+      <div>inside child</div>
+      <ng-content></ng-content>         // <div>Child Component Details</div> | REPLACE HERE, since it is last <ng-content></ng-content> in file
 
 ngDIRECTIVES
 =====================
