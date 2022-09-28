@@ -1,4 +1,3 @@
-﻿
 MEAN stack
 MongoDB , Express , Angular , Node
 
@@ -1391,6 +1390,18 @@ This concept is used when we have a common class for data that can be used by mu
    In parent-comp.html
    ---------------------
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts" > default text if child component not available </child-selector-tag>
+   
+NOTE: USE OF @Attribute(), when any child comp properties value is static and it will never change
+      Accessing property using @Attribute() means, the value will be evaluated only once (during the first change detection) and
+      it will be injected in constructor phase itself, and will not be checked on subsequent change detection cycle run of that component,
+      as would happen in @Input() properties. Therefore, making performance improvised.
+      In child-comp.ts
+      --------------------
+      constructor(@Attribute('EXTERNAL_VAR_NAME') public INTERNAL_VAR_NAME: string) { }
+   
+      In parent-comp.html
+      ---------------------
+      <child-selector-tag  EXTERNAL_VAR_NAME="VALUE_NOT_FROM-TS-FILE">VALUE here is a string, number directly passed in HTML</child-selector-tag>
 
 
 -- INNER COMPONENT (child) to OUTER COMPONENT (parent)
