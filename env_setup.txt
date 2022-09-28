@@ -1315,14 +1315,23 @@ STYLE
 					   
 VIEW ENCAPSULATION
 ========================
-View encapsulation defines whether the template and styles defined within component can affect whole application or vice versa. 
+View encapsulation defines whether the template and styles defined within component can affect whole application or not.
+It is provided in CHILD COMPONENT's metadata.
 Angular provides three encapsulation strategies:
-- Emulated (default) : styles from main HTML propagate to the component. 
-                       Styles defined in this component's @Component decorator are scoped to this component only.
-- Native : styles from main HTML do not propagate to the component. 
-           Styles defined in this component's @Component decorator are scoped to this component only.
-- None : styles from the component are visible to all components on the page.  
-	 All components with None encapsulation will have their styles duplicated in all components with Native encapsulation
+- Emulated (default) : Angular will not create a Shadow DOM for the component, but it will only EMULATE as a Shadow DOM.
+		       Hence, application also runs in browsers that do not support Shadow DOM.
+		       The style will be scoped to the component only because although styles are written to document head,
+		       but instead of simple .CLASS{} selector that we used, Angular creates a .CLASS[_ngcontent-1]{} selector.
+- Native or ShadowDom: Native is now deprecated in favor of ShadowDOM implementation.
+	   	       The reason for the change is that the Native ViewEncapsulation uses the deprecated version of ShadowDOM,
+	   	       and the new one uses the current version of the standard. (For the browsers that support it).
+		       Angular will create Shadow DOM for the component.
+		       Styles from component along with styles from parent component are also injected inside shadow root.
+		       Styles are NOT written to document head but in component’s template inside #shadow-root
+- None : There is NO shadow DOM.
+	 Style is not scoped to the component i.e. no style encapsulation.
+	 Styles applied to our component are written to the document head and as a result component could overwrite styles to/from another component.
+	 That’s why this is the unscoped strategy.
 Example:
 @Component({
 	// ...
