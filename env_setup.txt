@@ -1821,12 +1821,12 @@ this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course
     	this.responseData3 = responseList[2];
     });
 - shareReplay()
-  Share source and replay last specified number of emissions on subscription. It is similar to ReplaySubject.
+  It is similar to ReplaySubject. Share source and replay last specified number of emissions on subscription.
+  It is used to cache HTTP response in app to avoid computations run again i.e. late subscribers to a stream that needs access to previously emitted values.
   Default is all previous values, else we may specify number of previous values too.
-  It is used in case of heavy computation situations where we have late subscribers to stream that need access to previously emitted values.
   Eg:
   SERVICE.TS
-    this._http.get(URL).pipe(shareReplay(1));
+    return this._http.get(URL).pipe(shareReplay(1));
   COMP_1.TS
     SERVICEMETHOD().subscribe();
   COMP_2.TS
@@ -2053,7 +2053,30 @@ CLIENT SIDE ROUTING
 =============================
 Import and write in "imports"   of     "app.module.ts"   the routing object which was exported from "app.routing-module.ts"
 
-NOTE : wherever define    <router-outlet></router-outlet>    routing module urls output shown there
+NOTE : wherever define <router-outlet></router-outlet> directive that acts as a placeholder for routing module urls output shown there
+       Using multiple <router-outlet></router-outlet> in same template, it will consider LAST <router-outlet></router-outlet> of file to render content.
+       To overcome this i.e. have multiple <router-outlet></router-outlet> in same template, we can use NAMED <router-outlet></router-outlet>
+       However it is RELATIVE to PRIMARY <router-outlet></router-outlet> and adding leading '/' for routerLink will NOT work.
+       The URL for a secondary route uses the following syntax to specify both primary and secondary routes at same time.
+         https://base-path/PRIMARY-ROUTER-OUTLET-PATH(OUTLET-NAME-1:OUTLET-PATH-1//OUTLET-NAME-2:OUTLET-PATH-2)
+       Eg:
+       .HTML
+         <a routerLink='A'>A</a>
+	 <a routerLink='B'>B</a>
+	 <a [routerLink]='[{ outlets: { OUTLET-NAME-1: ["C"] } }]'>C</a>
+	 <a [routerLink]='[{ outlets: { OUTLET-NAME-2: ["D",VAR-FROM-TS] } }]'>D</a>
+	 <router-outlet></router-outlet>                                         // IGNORED, as same <router-outlet></router-outlet> exists below too
+	 <router-outlet name='OUTLET-NAME-1'></router-outlet>			 // C RENDER here, names are different for C and D
+	 <router-outlet></router-outlet>					 // A,B RENDER here
+	 <router-outlet name='OUTLET-NAME-2'></router-outlet>			 // D RENDER here
+       .TS
+         const routes: Routes = [
+	 	{ path: 'A', component: AComponent },
+		{ path: 'B', component: BComponent },                             // A,B will render to <router-outlet></router-outlet>
+		{ path: 'C', component: CComponent, outlet: 'OUTLET-NAME-1' },    // C will render to <router-outlet name='OUTLET-NAME-1'></router-outlet>
+		{ path: 'D/:id', component: DComponent, outlet: 'OUTLET-NAME-2' } // D will render to <router-outlet name='OUTLET-NAME-2'></router-outlet>
+	 ];
+	 this.router.navigate([{ outlets: { OUTLET-NAME: 'PATH' } }]);
 
 NOTE : <a href=""> ... </a>  sends request to BROWSER directly which reloads it and returns requested page but that is not how SPA should work,
        so use `routerLink` to send control to routerModule
