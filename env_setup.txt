@@ -1767,16 +1767,19 @@ C. // dispose the observable, inside ngOnDestroy()
    this.unsubscribe.next();
    this.unsubscribe.complete();
    
-a) pipe() | take() | takeUntil() | takeWhile() | retry() | catchError() | throwError()
+a) pipe() | skip() | take() | takeUntil() | takeWhile() | retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
+skip() allows to ignore first x emissions from the source. It is oppposite to take().
 take() operator specify how many values to receive from Observable before unsubscribe i.e. when received specified number of values, unsubscribe automatically.
 takeUntil() operator receive values from Observable until other specified Observable emits new value i.e. .next() and .complete() from other obsv.
-takeWhile() operator continue receiving values whilst a specified condition remains true. Once it becomes false, unsubscribe automatically.
+takeWhile() operator continue receiving values until specified func returns true. Once it becomes false, unsubscribe automatically.
 retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
 catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
 const apiData = ajax('/api/data').pipe(
-  take(5),
+  skip(5),
+  take(10),
+  takeWhile(val => val < 3),
   map((res: any) => {
     if (!res.response) {
       console.log('Error occurred.');
@@ -1788,7 +1791,7 @@ const apiData = ajax('/api/data').pipe(
   catchError((err: Error) => { return throwError(err.message); })
 );
 
-b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin()
+b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | shareReplay()
 Example:
 this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
 - concatMap()
@@ -1817,6 +1820,17 @@ this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course
         this.responseData2 = responseList[1];
     	this.responseData3 = responseList[2];
     });
+- shareReplay()
+  Share source and replay last specified number of emissions on subscription. It is similar to ReplaySubject.
+  Default is all previous values, else we may specify number of previous values too.
+  It is used in case of heavy computation situations where we have late subscribers to stream that need access to previously emitted values.
+  Eg:
+  SERVICE.TS
+    this._http.get(URL).pipe(shareReplay(1));
+  COMP_1.TS
+    SERVICEMETHOD().subscribe();
+  COMP_2.TS
+    SERVICEMETHOD().subscribe();
 
 c) Subject | BehaviorSubject | ReplaySubject | AsyncSubject
 An RxJS Subject is a special type of Observable that allows values to be multicasted to many Observers. 
