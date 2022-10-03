@@ -1731,8 +1731,8 @@ LAZY LOADING
   export class AppModule { }
 
 
-create your own OBSERVABLES
-============================
+create your own OBSERVABLES | RxJS operators
+==============================================
 - Observables are lazy
 - Observables can have multiple values over time
 - Observables “push” values to subscribers
@@ -1746,14 +1746,16 @@ create your own OBSERVABLES
   Just call unsubscribe()to cancel the execution.
 - Example
 import { Observable } from "rxjs/Observable";
-A.1.// create observable | new Observable((obs)=> {})     OR    Observable.create((obs)=> {})
+A // create observable | new Observable((obs)=> {})     OR    Observable.create((obs)=> {})
     const simpleObservable = new Observable((observer) => {  
        // observable execution
        observer.next("bla bla bla");
        observer.complete();
    });
-A.2.// optional-Create subject to check for unsubscribe
-    private unsubscribe: Subject<void> = new Subject<void>();
+   // create variable or subject to check for unsubscribe
+   private observableSub: Subscription;
+   // OR
+   private unsubscribe: Subject<void> = new Subject<void>();
 B. // subscribe to the observable, it accepts success function, error function, completion function
    // NOTE: An error CANCELs observable , it cannot emit new values. This is not same as COMPLETION and thus if error occurrs completion function won't run.
    this.observableSub = simpleObservable.subscribe((data: any)=> {}, (err: Error)=> {}, ()=> {});
@@ -1765,12 +1767,16 @@ C. // dispose the observable, inside ngOnDestroy()
    this.unsubscribe.next();
    this.unsubscribe.complete();
    
-a) pipe() | retry() | catchError() | throwError()
-The pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
-The retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
-The catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
+a) pipe() | take() | takeUntil() | takeWhile() | retry() | catchError() | throwError()
+pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
+take() operator specify how many values to receive from Observable before unsubscribe i.e. when received specified number of values, unsubscribe automatically.
+takeUntil() operator receive values from Observable until other specified Observable emits new value i.e. .next() and .complete() from other obsv.
+takeWhile() operator continue receiving values whilst a specified condition remains true. Once it becomes false, unsubscribe automatically.
+retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
+catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
 const apiData = ajax('/api/data').pipe(
+  take(5),
   map((res: any) => {
     if (!res.response) {
       console.log('Error occurred.');
