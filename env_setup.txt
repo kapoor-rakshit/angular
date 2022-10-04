@@ -1767,7 +1767,8 @@ C. // dispose the observable, inside ngOnDestroy()
    this.unsubscribe.next();
    this.unsubscribe.complete();
    
-a) pipe() | skip() | take() | takeUntil() | takeWhile() | retry() | catchError() | throwError()
+a.1) pipe() | skip() | take() | takeUntil() | takeWhile() |
+     retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
 skip() allows to ignore first x emissions from the source. It is oppposite to take().
 take() operator specify how many values to receive from Observable before unsubscribe i.e. when received specified number of values, unsubscribe automatically.
@@ -1779,7 +1780,7 @@ Example:
 const apiData = ajax('/api/data').pipe(
   skip(5),
   take(10),
-  takeWhile(val => val < 3),
+  takeWhile((val) => { return val < 3}),
   map((res: any) => {
     if (!res.response) {
       console.log('Error occurred.');
@@ -1790,6 +1791,13 @@ const apiData = ajax('/api/data').pipe(
   retry(3),                                                           // Retry up to 3 times before failing
   catchError((err: Error) => { return throwError(err.message); })
 );
+
+a.2) debounceTime() delays values emitted by source for given due time.
+     If within this time new value arrives on source, previous delay is dropped & timer is reset.
+     Useful in autocomplete fields and saves field from making multiple requests when user is typing.
+     Note: It keeps track of most recent values from source and emits only when due time has passed.
+     Example:
+     this.searchForm.get("search").valueChanges.pipe(debounceTime(1000)).subscribe((val) => {console.log(val)});
 
 b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | shareReplay()
 Example:
