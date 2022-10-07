@@ -640,12 +640,17 @@ app.component.ts          --   defines @Component
                                                                       src={{ var }}                  // attribute values
 
                                 --   NOTE : INTERPOLATION is only for STRINGs , for integer , boolean..use 
-                                     PROPERTY BINDING                 [disabled] = 'var'                       // NOTE : use of [] for attrib and ' ' for vals
-                                     CSS_CLASS BINDING                [class.CLASS_NAME_CSS] = "BooleanVAR_EXPRESSION"
-                                                                      [ngClass] = "'firstCSSClass secondCSSClass'"                 // NOTE : use of '' over class names
-                                                                      [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
-                                                                      [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
+                                     PROPERTY BINDING                 [disabled] = 'VAR-FROM-TS'               // use of [] for attr and ' ' for vals
 								      [ngValue] = "option"                     // [value] is string, whereas with [ngValue] object can be passed
+								      // ! : non-null assertion operator
+								      // When enabled strictTemplates and strictNullChecks, typecheck errors might occur i.e.
+								      // when using async pipe it's possible that there is no value available yet.
+								      // In that case, it still has to return something — which is null,
+								      // this might result in error where Observable is expected to emit non-nullable value.
+								      // To prevent this, use ! for disregarding type incompatibility
+								      // Eg:
+								      <user-detail [user]="user!"></user-detail>
+								      <user-detail [user]="(user$ | async)!"></user-detail>   // NOTE: use of () for async pipe
 
                                 --   EVENT BINDING                    (click)    = 'funccall()'                // NOTE : use of () for event  and ' ' for func
                                                                       (input)    = 'func($event.target.value)' //        send data from DOM to component
