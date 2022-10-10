@@ -752,6 +752,7 @@ NOTE : For creating NEW PIPE
   eg: We cannot use two structural directives on one <div>, therefore we can make use of <ng-container> for one and <div> for another.
 - <ng-content></ng-content>
   It acts as a placeholder for dynamic content from PARENT COMP to CHILD COMP.
+  This is referred as Single Slot Content Projection.
   Eg:PARENT-COMP.HTML
      ------------------
       <child-comp>
@@ -759,9 +760,9 @@ NOTE : For creating NEW PIPE
       </child-comp>
      CHILD-COMP.HTML
      ------------------
-      <ng-content></ng-content>		// NOT REPLACE HERE, since another <ng-content></ng-content> exists
+      <ng-content></ng-content>	  // NOT REPLACE HERE, since another <ng-content></ng-content> exists
       <div>inside child</div>
-      <ng-content></ng-content>         // <div>Child Component Details</div> | REPLACE HERE, since it is last <ng-content></ng-content> in file
+      <ng-content></ng-content>   // <div>Child Component Details</div> | REPLACE HERE, since it is last <ng-content></ng-content> in file
 
 ngDIRECTIVES
 =====================
@@ -2124,10 +2125,12 @@ NOTE : <a href=""> ... </a>  sends request to BROWSER directly which reloads it 
   By default, it's behavior is Absolute path i.e. a leading slash is not mandatory for same. Still a good practice to add leading slash.
   To have Relative path, use `relativeTo` parameter and provide ActivatedRoute as it's value i.e.  this.router.navigate(['timer-app-v2'], {relativeTo: this.route});
   
-- To navigate to route without changing URL in browser, use skipLocationChange
+- To navigate to route without changing URL in browser, use skipLocationChange.
   With this, a new state is not pushed to browser history.
-  Eg: <a [routerLink]="['/skipchange']" skipLocationChange="true">Skip Change From a tag</a>
-      this.router.navigate(['skipchange'], {skipLocationChange: true});
+  Eg: from .HTML
+      	<a [routerLink]="['/skipchange']" skipLocationChange="true">Skip Change From a tag</a>
+      from .TS
+      	this.router.navigate(['skipchange'], {skipLocationChange: true});
 
 Create file         "app.routing-module.ts"   in project's app component root dir , which contains urls/routes
                      NOTE : Do not put leading '/' in path, ANGULAR will put it automatically. It will rather give error if we add leading '/'
