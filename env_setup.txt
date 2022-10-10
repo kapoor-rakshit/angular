@@ -1963,10 +1963,13 @@ Create "interface.ts"  file and export interface
   OR
 > ng generate interface <INTERFACE_NAME>
 NOTES:
-1. Adding `?` makes that prop as optional
-2. Extend an interface by declaring it again, it will have all properties within it's same name
+1. Adding `?` operator makes that prop as optional.
    OR
-   Use `extends` keyword
+   Use `Partial<INTERFACE>`, to specify that ALL properties within INTERFACE are optional, regardless of use of '?' operator against each prop.
+2. Use `Pick<INTERFACE, KEY-1 | KEY-2>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
+3. Extend an interface by declaring it again, it will have all properties within it's same name.
+   OR
+   Use `extends` keyword to inherit from parent INTERFACE props.
 Eg:
 export interface BirdInterface {
   wings: number;
@@ -1976,9 +1979,11 @@ export interface BirdInterface {
     tail: boolean;
 }
 export interface Peacock extends BirdInterface {
-  colourful: true;
-  flies: false;
+  colourful: boolean;
+  flies: boolean;
 }
+let peacock: Partial<Peacock> = { tail: false };
+const sparw: Pick<BirdInterface, 'nose' | 'tail'> = { tail: true };    // 'nose' is optional in BirdInterface, so here also optional
 
 
 SERVICEs
