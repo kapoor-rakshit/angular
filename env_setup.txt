@@ -1957,7 +1957,31 @@ export class MyComponent {
 }
 
 
-SERVICE
+INTERFACEs
+====================
+Create "interface.ts"  file and export interface
+  OR
+> ng generate interface <INTERFACE_NAME>
+NOTES:
+1. Adding `?` makes that prop as optional
+2. Extend an interface by declaring it again, it will have all properties within it's same name
+   OR
+   Use `extends` keyword
+Eg:
+export interface BirdInterface {
+  wings: number;
+  nose?: boolean;
+}
+export interface BirdInterface {
+    tail: boolean;
+}
+export interface Peacock extends BirdInterface {
+  colourful: true;
+  flies: false;
+}
+
+
+SERVICEs
 ====================
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
             > ng generate service <SERVICE_NAME>
@@ -2005,26 +2029,12 @@ COMMUNICATION with SERVICE
 ---------------------------
 NOTE      : MAKE sure to install JSON SERVER   "npm install -g json-server"
 Reference :                                    "https://github.com/typicode/json-server"
-
 NOTE : JSON-Server uses default KEYWORD  "id"
 Create a .JSON file under dir        "PROJ\src\"
-
 CHANGE DIR to your .JSON file's dir  "PROJ\src\"
 Start JSON SERVER                              "json-server -–watch filename.json"       // --watch keeps check over any changes made
-
-OPEN new TERMINAL window
-CHANGE DIR to "PROJ"  as it is where "package.json" is present
-Start ng      "ng serve"
-
 declare  "HttpClientModule" in  "imports"  of  "app.module.ts"
-
 configure ".service.ts"
-
-CREATE    "interface.ts"  file and export interface
-           > ng generate interface <INTERFACE_NAME>
-
-configure ".component.ts" file
-
 
 
 Use of HttpClientModule
@@ -2071,7 +2081,7 @@ NOTE : wherever define <router-outlet></router-outlet> directive that acts as a 
        To overcome this i.e. have multiple <router-outlet></router-outlet> in same template, we can use NAMED <router-outlet></router-outlet>
        However it is RELATIVE to PRIMARY <router-outlet></router-outlet> and adding leading '/' for routerLink will NOT work.
        The URL for a secondary route uses the following syntax to specify both primary and secondary routes at same time.
-         https://base-path/PRIMARY-ROUTER-OUTLET-PATH(OUTLET-NAME-1:OUTLET-PATH-1//OUTLET-NAME-2:OUTLET-PATH-2)
+         https://base-path/PRIMARY-ROUTER-OUTLET-PATH(OUTLET-NAME-1:OUTLET-PATH-1//OUTLET-NAME-2:OUTLET-PATH-2//OUTLET-NAME-3:OUTLET-PATH-3)
        Eg:
        .HTML
          <a routerLink='A'>A</a>
@@ -2108,6 +2118,11 @@ NOTE : <a href=""> ... </a>  sends request to BROWSER directly which reloads it 
 - To programatically navigate to a path i.e. from .comp.TS file, use  this.router.navigate(['/timer-app-v2']);
   By default, it's behavior is Absolute path i.e. a leading slash is not mandatory for same. Still a good practice to add leading slash.
   To have Relative path, use `relativeTo` parameter and provide ActivatedRoute as it's value i.e.  this.router.navigate(['timer-app-v2'], {relativeTo: this.route});
+  
+- To navigate to route without changing URL in browser, use skipLocationChange
+  With this, a new state is not pushed to browser history.
+  Eg: <a [routerLink]="['/skipchange']" skipLocationChange="true">Skip Change From a tag</a>
+      this.router.navigate(['skipchange'], {skipLocationChange: true});
 
 Create file         "app.routing-module.ts"   in project's app component root dir , which contains urls/routes
                      NOTE : Do not put leading '/' in path, ANGULAR will put it automatically. It will rather give error if we add leading '/'
