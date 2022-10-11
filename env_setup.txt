@@ -757,7 +757,7 @@ NOTE : For creating NEW PIPE
   eg: We cannot use two structural directives on one <div>, therefore we can make use of <ng-container> for one and <div> for another.
 - <ng-content></ng-content>
   It acts as a placeholder for dynamic content from PARENT COMP to CHILD COMP.
-  This is referred as Single Slot Content Projection.
+  a) Single Slot Content Projection
   Eg:PARENT-COMP.HTML
      ------------------
       <child-comp>
@@ -765,9 +765,28 @@ NOTE : For creating NEW PIPE
       </child-comp>
      CHILD-COMP.HTML
      ------------------
-      <ng-content></ng-content>	  // NOT REPLACE HERE, since another <ng-content></ng-content> exists
+      <ng-content></ng-content>	    // NOT REPLACE HERE, since another <ng-content></ng-content> exists
       <div>inside child</div>
-      <ng-content></ng-content>   // <div>Child Component Details</div> | REPLACE HERE, since it is last <ng-content></ng-content> in file
+      <ng-content></ng-content>     // REPLACE HERE <div>Child Component Details</div>, since it is last <ng-content></ng-content> in file
+      
+  b) Multi Slot Content Projection
+     a selector can be ATTRIBUTE (by using ngProjectAs), ID, CLASS
+  Eg:PARENT-COMP.HTML
+     ------------------
+      <child-comp>
+  	<div>Child Component Details</div>
+	<p id="header">Header</p>
+	<p class="footer">Footer</p>
+	<ng-container id="header">CONTAINER</ng-container>
+	<ng-container ngProjectAs="[attrVAR]">CONTAINER ATTR</ng-container>
+      </child-comp>
+     CHILD-COMP.HTML
+     ------------------
+      <ng-content></ng-content>                         // <div>Child Component Details</div> | anything does not match `select` comes here
+      <ng-content select="#header"></ng-content>        // <p id="header">Header</p> <ng-container id="header">CONTAINER</ng-container>
+      <ng-content select=".footer"></ng-content>        // <p class="footer">Footer</p>
+      <ng-content select="[attrVAR]"></ng-content>      // <ng-container ngProjectAs="[attrVAR]">CONTAINER ATTR</ng-container>
+      
 
 ngDIRECTIVES
 =====================
