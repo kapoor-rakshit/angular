@@ -2022,6 +2022,30 @@ let peacock: Partial<Peacock> = { tail: false };
 const sparw: Pick<BirdInterface, 'nose' | 'tail'> = { tail: true };    // 'nose' is optional in BirdInterface, so here also optional
 
 
+ENUMs
+==========
+// Enums allow us to define a set of named constants.
+// TypeScript provides both numeric and string-based enums.
+// 1
+	export enum Direction {
+		Up = 1,                            // if not specified any value and it is first key, it will be 0
+		Down,                              // values for each key increments (if numeric) by 1 from previous value,  down = 2
+		Left,                              // left = 3
+		Right                              // right = 4
+	}
+// 2
+	export enum EmployeesActionTypes {
+		SHOW_COMPANY_NAME = 'SHOW_COMPANY_NAME',
+		ADD = 'ADD',
+		NUM_KEY_0,			   // ERROR: Enum member must have initializer, as it is not first key & does not come after numeric key val
+		NUM_KEY_1 = 5,
+		NUM_KEY_2			   // NUM_KEY_2 = 6, increments by 1 after numeric key val
+	}
+// 3
+	EmployeesActionTypes.SHOW_COMPANY_NAME = 'NEW NAME';	// ERROR: Cannot assign 'SHOW_COMPANY_NAME' because it is read-only property
+	EmployeesActionTypes.NEW_KEY = "NEW VAL";		// ERROR: Property 'NEW_KEY' does not exist on type 'typeof EmployeesActionTypes'.
+
+
 SERVICEs
 ====================
 Write a     ".service.ts"   file for COMPONENT   and  use   @Injectable()  decorator over   export class ServiceClass{  }
