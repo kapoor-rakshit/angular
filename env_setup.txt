@@ -2021,10 +2021,9 @@ export interface Peacock extends BirdInterface {
 let peacock: Partial<Peacock> = { tail: false };
 const sparw: Pick<BirdInterface, 'nose' | 'tail'> = { tail: true };    // 'nose' is optional in BirdInterface, so here also optional
 
-
 ENUMs
-==========
-// Enums allow us to define a set of named constants.
+===========
+// Enums allow us to define a set of named constants, which are READ-ONLY and NEW KEYS CANNOT be added to it.
 // TypeScript provides both numeric and string-based enums.
 // 1
 	export enum Direction {
@@ -2036,14 +2035,28 @@ ENUMs
 // 2
 	export enum EmployeesActionTypes {
 		SHOW_COMPANY_NAME = 'SHOW_COMPANY_NAME',
-		ADD = 'ADD',
-		NUM_KEY_0,			   // ERROR: Enum member must have initializer, as it is not first key & does not come after numeric key val
+		NUM_KEY_0,			  // ERROR: Enum member must have initializer, as it is not first key & does not come after numeric key val
 		NUM_KEY_1 = 5,
-		NUM_KEY_2			   // NUM_KEY_2 = 6, increments by 1 after numeric key val
+		NUM_KEY_2			  // NUM_KEY_2 = 6, increments by 1 after numeric key val
 	}
 // 3
-	EmployeesActionTypes.SHOW_COMPANY_NAME = 'NEW NAME';	// ERROR: Cannot assign 'SHOW_COMPANY_NAME' because it is read-only property
+	EmployeesActionTypes.SHOW_COMPANY_NAME = 'NEW VAL';	// ERROR: Cannot assign 'SHOW_COMPANY_NAME' because it is read-only property
 	EmployeesActionTypes.NEW_KEY = "NEW VAL";		// ERROR: Property 'NEW_KEY' does not exist on type 'typeof EmployeesActionTypes'.
+	
+BARRELs in TS
+====================
+Barrels are technique used to roll up exports from different modules into single one, usually called index.ts, to simplify imports.
+Barrels thus simply combine the exports of one or more other modules.
+Eg: In a library, it is useful to expose single module exposing public API to outside world.
+    As a consumer, barrels are useful because they let concentrate on what to use and not on where symbols are located.
+    A barrel in Angular framework: https://github.com/angular/angular/blob/master/packages/core/src/core.ts
+    This barrel is re-exported by  https://github.com/angular/angular/blob/master/packages/core/public_api.ts  i.e.  export * from './src/core';
+
+DECLARATION MERGING in TS
+============================
+Declaration Merging means that compiler merges two or more separate declarations declared with same name into a single definition.
+This merged definition has features of all of original declarations.
+Eg: Interface merging, as shown in INTERFACEs notes example above.
 
 
 SERVICEs
