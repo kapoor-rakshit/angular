@@ -1150,11 +1150,6 @@ Angular FORMS
             <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required, Validators.minLength(3)], [this.CUSTOM_ASYNC_VALIDATOR.bind(this)]),
             <formControlName_ATTR>: new FormControl('<INITIAL_VALUE_WIDGET>', [Validators.required])
         });
-        // dynamic setting/clearing of validators
-        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
-        this.customerForm.updateValueAndValidity();
      }
      // ---- OR ----
      // 2. Using FormBuilder service
@@ -1197,18 +1192,21 @@ Angular FORMS
 									      It is useful if we need to check on input data from external API call.
 									      It introduces a third state of form field as ng-pending, before giving ng-valid or ng-invalid
         
-        // dynamic setting/clearing of validators
-           this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-           this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-           this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
-           this.customerForm.updateValueAndValidity();
-     }
+     // dynamic setting/clearing of validators
+        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
+        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
+        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+        this.customerForm.updateValueAndValidity();
      
      // set/patch/reset value to form widgets
         this.customerForm.setValue({<formControlName_ATTR>: "Google", <formControlName_ATTR>: "Australia"});     // all widgets must be supplied, else error
         this.customerForm.patchValue({<formControlName_ATTR>: "Google"});                                        // only desired can be supplied
         this.customerForm.reset();                                                         // reset data(data can be passed like patchValue()) and states touched,valid,dirty
                                                                                            // fields not specified will be set to empty
+     // addControl/removeControl
+        this.customerForm.addControl('formControlName_ATTR', new FormControl('', [Validators.required, Validators.pattern(/^\d+$/)]));
+	this.customerForm.removeControl('formControlName_ATTR'); 
+	
      // value/status changes subscription
         this.customerForm.valueChanges.subscribe((val: any)=> { });                        // subscribe to changes of values in form widgets
 	this.customerForm.statusChanges.subscribe((val: any)=> { });                       // subscribe to changes of status(touched,valid,dirty) in form widgets
@@ -1224,13 +1222,6 @@ Angular FORMS
             name: this.customerForm.get('<formControlName_ATTR>').value,
             location: this.customerForm.get('<formControlName_ATTR>').value,
           };
-        
-          // dynamic setting/clearing of validators
-             this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-             this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-             this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
-             this.customerForm.updateValueAndValidity();
-        
           this._customersService.addCustomer(newCustomer); 
         }
      
@@ -1243,7 +1234,7 @@ Angular FORMS
          <mat-error *ngIf="(customerNameInputRef.touched || customerNameInputRef.dirty) && customerNameInputRef.errors?.required">Customer name is <b>required</b></mat-error>
          
          <select [formControlName]="['formControlName_ATTR']">
-            <option *ngFor="let location of locations" [value]="location">{{location}}</option>
+            <option *ngFor="let location of locations" [ngValue]="location">{{location}}</option>
         </select>
      </form>
      
