@@ -1581,9 +1581,9 @@ In the context of Angular 2 it can be used to properly initialize fields.
 Angular 2’s DI (dependency injection) also tries to find providers that match the types of the constructor’s parameters, resolves them, and passes them to the constructor as arguments.
 
 ngOnChanges()	 {  }
+Called once before ngOnInit() ONLY IF IT HAS @INPUT props, OTHERWISE NOT CALLED and also
 Respond when @Input properties REFERENCE change i.e. this.rates.inr = 550;    // NOT CALL, still @Input() property changes if changeDetection is NOT OnPush
 						     this.rates = {inr: 550}; // CALL
-Called before ngOnInit() and whenever one or more data-bound @Input properties change.
 The method receives a SimpleChanges object of current and previous property values.
 example:
         TS  (child.comp.ts)
@@ -1608,6 +1608,8 @@ This makes it the perfect place to do any of the initialization work/logic for t
 ngDoCheck()	
 Detect and act upon changes that Angular can't or won't detect on its own.
 Called during every change detection run, immediately after ngOnChanges() and after ngOnInit() on the first run.
+NOTE: In DEVELOPMENT MODE Angular always runs ngDoCheck() twice, second time for double detect changes i.e. a notify b, and b notify a
+      In production mode change detection is only run once.
 example:
 <app-rates [rates]="ratesVAR"></app-rates>
 this.rates.inr = 550; // NOT tracked by ngOnChanges() as there is NOT REFERENCE change of prop
@@ -1622,6 +1624,8 @@ Called once after the first ngDoCheck().
 ngAfterContentChecked()	
 Respond after Angular checks the content projected into the directive/component.
 Called after the ngAfterContentInit() and every subsequent ngDoCheck().
+NOTE: In DEVELOPMENT MODE Angular always runs ngAfterContentChecked() twice, second time for double detect changes i.e. a notify b, and b notify a
+      In production mode change detection is only run once.
 
 ngAfterViewInit()
 Content is what is passed as children usually to be projected at some <ng-content> element of a component.
@@ -1632,6 +1636,8 @@ Called once after the first ngAfterContentChecked().
 ngAfterViewChecked()	
 Respond after Angular checks the component's views and child views / the view that a directive is in.
 Called after the ngAfterViewInit() and every subsequent ngAfterContentChecked().
+NOTE: In DEVELOPMENT MODE Angular always runs ngAfterViewChecked() twice, second time for double detect changes i.e. a notify b, and b notify a
+      In production mode change detection is only run once.
 
 ngOnDestroy()	
 Cleanup just before Angular destroys the directive/component.
