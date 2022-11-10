@@ -1403,15 +1403,13 @@ compares it will the previous values and if the change is detected, it propagate
   Example:
   Consider components i.e. ParentComponent and ChildComponent relationship.
   The Parent Component contains a property “counter”, that can be updated every time when the user clicks the button. 
-  The Component is re-rendered every time the value of “counter” updates. This component also contains a Child Component. 
-  The Child Component is independent of “counter” data since we are not passing data to the ChildComponent using @Input.
-  In Child Component, we are not providing any Strategy inside the @Component Decorator, so it is default.
-  Every time when we update counter in the ParentComponent, the ChildComponent life cycle is also triggered to re-render, making app less performant.
+  The Component is re-rendered every time the value of “counter” updates. This component also contains a Child Component which uses "counter" values.
+  Every time update counter in ParentComponent either BY REFERENCE or PROP change, ChildComponent life cycle is also triggered to re-render, making app less performant.
 - onPush Change Detection Strategy
   During this Change Detection Strategy, the ChildComponent is not always dirty checked, 
-  If parent element is updating values that are not passed as “@Input” properties to Child Component, then the child Component should not be dirty checked.
+  If parent element is updating values BY REFERENCE, only then child Component should be dirty checked and update @Input() values.
   OnPush itself means, only run change detection if:
-  	*Reference of the @Input property has changed altogether i.e. obj={name:'name'}; | obj.name="new name"; (NOT RUN) | obj={name:'new name'}; (RUN)
+  	*Reference of the @Input property has changed i.e. obj={name:'name'}; | obj.name="new name"; (NOT CHANGE @INPUT) | obj={name:'new name'}; (CHANGE @INPUT)
 	*An event has fired, like click or any of child components has emitted an event
   Example:
   @Component({
@@ -1583,7 +1581,8 @@ In the context of Angular 2 it can be used to properly initialize fields.
 Angular 2’s DI (dependency injection) also tries to find providers that match the types of the constructor’s parameters, resolves them, and passes them to the constructor as arguments.
 
 ngOnChanges()	 {  }
-Respond when Angular (re)sets data-bound @Input properties.
+Respond when @Input properties REFERENCE change i.e. this.rates.inr = 550;    // NOT CALL, still @Input() property changes if changeDetection is NOT OnPush
+						     this.rates = {inr: 550}; // CALL
 Called before ngOnInit() and whenever one or more data-bound @Input properties change.
 The method receives a SimpleChanges object of current and previous property values.
 example:
@@ -1609,6 +1608,10 @@ This makes it the perfect place to do any of the initialization work/logic for t
 ngDoCheck()	
 Detect and act upon changes that Angular can't or won't detect on its own.
 Called during every change detection run, immediately after ngOnChanges() and after ngOnInit() on the first run.
+example:
+<app-rates [rates]="ratesVAR"></app-rates>
+this.rates.inr = 550; // NOT tracked by ngOnChanges() as there is NOT REFERENCE change of prop
+		      // However, it is tracked by ngDoCheck()
 
 ngAfterContentInit()
 Content is what is passed as children usually to be projected at some <ng-content> element of a component.
