@@ -2503,7 +2503,7 @@ HTTP INTERCEPTORS
    }
    
    // 2A. auth-interceptor.ts
-   //     Intercepting HTTP Request
+   //     Intercepting HTTP REQUEST | MODIFY HTTP REQUEST
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -2528,7 +2528,7 @@ HTTP INTERCEPTORS
     }
     
    // 2B. auth-interceptor.ts
-   //     Intercepting HTTP Response
+   //     Intercepting HTTP RESPONSE | MODIFY HTTP RESPONSE
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
@@ -2539,8 +2539,8 @@ HTTP INTERCEPTORS
        console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
        console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options only
 
-       // specify url for whose RESPONSE headers required
        if(req.url.toLowerCase().includes("filedata")) {
+       // READ RESPONSE
         return next.handle(req).pipe(
             // There may be other events besides the response
             filter(event => event instanceof HttpResponse),
@@ -2550,6 +2550,18 @@ HTTP INTERCEPTORS
                 console.log(`RESPONSE HEADERS ==> ${event.headers.keys()}`);
             })
         );
+	
+	// MODIFY RESPONSE
+	return next.handle(req).map((event: HttpEvent<any>) => {
+            if (event instanceof HttpResponse) {
+                return event.clone({
+		    headers: event.headers.set('CUSTOM-HEADER', 'VAL'),
+                    body: 'myCustomResponse'
+                });
+            }
+            return event;
+        })
+	
        } else {
            return next.handle(req);
        }
