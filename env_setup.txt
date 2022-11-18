@@ -1208,8 +1208,14 @@ Angular FORMS
 	this.customerForm.removeControl('formControlName_ATTR'); 
 	
      // value/status changes subscription
-        this.customerForm.valueChanges.subscribe((val: any)=> { });                        // subscribe to changes of values in form widgets
-	this.customerForm.statusChanges.subscribe((val: any)=> { });                       // subscribe to changes of status(touched,valid,dirty) in form widgets
+        this.customerForm.valueChanges.subscribe((formVal: any)=> { });                    // subscribe to changes of values in form widgets/form(all widgets)
+		Eg: formVal = {<formControlName_ATTR_1>: VAL, <formControlName_ATTR_2>: VAL}
+	this.customerForm.statusChanges.subscribe((formStat: any)=> { });                  // subscribe to changes of status in form widgets/form(all widgets)
+		Eg: formStat = VALID | INVALID | PENDING | DISABLED
+		
+     // .value | .getRawValue()
+     	Eg: this.reactiveForm.value;							   // disabled fields are not returned
+	    this.reactiveForm.getRawValue();						   // all fields are returned
      
      // function to retrieve HTML context
         get naamValidAlertFunc() {
@@ -1298,6 +1304,38 @@ formSubmit() {
       console.log(`${arrayRes.at(i).get("name")?.value}`);
       console.log(`${arrayRes.at(i).get("mail")?.value}`);
     }
+}
+
+2.B. NESTED FORMGROUPS (formGroupName inside formGroup)
+--------------------------------------------------------
+.HTML
+------
+<form [formGroup]="teamForm" (ngSubmit)="onFormSubmit()">
+    <input type="text" formControlName="teamName">  
+    <input type="number" formControlName="noOfEmp">  
+    <ng-container formGroupName="teamLead"> 
+      <input type="text" formControlName="empName">
+      <input type="number" formControlName="age">
+    </ng-container>
+</form>
+
+.TS
+------
+teamForm!: FormGroup;
+constructor(private _fb: FormBuilder) { }
+ngOnInit(): void {
+    this.teamForm = this._fb.group({
+      teamName: ['', [Validators.required]],
+      noOfEmp:['', [Validators.required]],
+      teamLead: this._fb.group({
+      	empName: ['', [Validators.required]],
+	age: ['', [Validators.required]]
+      })
+    });
+}
+
+get empNameField() {
+    return this.teamForm.get('teamLead').get('empName');
 }
 
 
