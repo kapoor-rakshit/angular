@@ -1193,9 +1193,13 @@ Angular FORMS
 									      It introduces a third state of form field as ng-pending, before giving ng-valid or ng-invalid
         
      // dynamic setting/clearing of validators
-        this.customerForm.get('<formControlName_ATTR>').setValidators(Validators.required);     // setValidators
-        this.customerForm.get('<formControlName_ATTR>').clearValidators();                      // clearValidators
-        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();               // for set/clear to take effect
+        this.customerForm.get('<formControlName_ATTR>').setValidators([Validators.required]);     // setValidators: overwrites existing validators
+	this.customerForm.get('<formControlName_ATTR>').addValidators([Validators.required]);     // addValidators: without affecting other validators,
+												     Adding a validator that already exists will have no effect.
+												     If same validators passed in addValidators[], only first added
+        this.customerForm.get('<formControlName_ATTR>').clearValidators();                        // clearValidators: empties all validator list
+	this.customerForm.get('<formControlName_ATTR>').removeValidators([Validators.required]);  // removeValidators: only specified removed
+        this.customerForm.get('<formControlName_ATTR>').updateValueAndValidity();                 // IMPORTANT: for set/clear to take effect
         this.customerForm.updateValueAndValidity();
      
      // set/patch/reset value to form widgets
