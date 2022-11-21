@@ -1813,6 +1813,93 @@ LAZY LOADING
      bootstrap: [ AppComponent ]
   })
   export class AppModule { }
+  
+  
+STANDALONE COMPONENTS/DIRECTIVES/PIPES | LAZY LOADING of STANDALONE
+======================================================================
+Starting Angular v14, we have STANDALONE concept. It reduces need for NgModules, by using metadata `standalone: true`
+Angular classes marked as standalone do not need to be declared in an NgModule (Angular compiler will report an error if we try).
+Also, Standalone components specify their dependencies directly instead of getting them through NgModules.
+Eg:
+main.TS
+----------
+import {bootstrapApplication} from '@angular/platform-browser';
+import { provideRouter, Routes } from '@angular/router';
+const appRoutes: Routes = [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
+  { path: 'home', component: HomeComponent },
+  {
+    path: 'profile',
+    loadComponent: async () => {
+      return (await import('./app/profile.component')).ProfileComponent;       // A. loadComponent ( to lazy load single STANDALONE component )
+    }
+  },
+  {
+    path: 'product',
+    loadChildren: async () => {
+      return (await import('./app/product/product.route')).productRoutes;      // B. loadChildren (to lazy load bunch of STANDALONE components)
+    }
+  }];
+bootstrapApplication(AppComponent, { providers: [provideRouter(appRoutes)] }); // `bootstrapApplication` is used in place of `bootstrapModule`
+									       // `provideRouter` is used in place of `RouterModule.forRoot` to configure router
+
+app.COMP.TS
+--------------
+import { RouterOutlet, RouterLinkWithHref } from '@angular/router';
+@Component({
+  selector: 'my-app',
+  templateUrl: './app.component.html',
+  imports: [RouterOutlet, RouterLinkWithHref],                                 // imports[] dependencies, STANDALONE child comp, directives, pipes
+  standalone: true                                                             // marked as `standalone`
+})
+export class AppComponent {}
+
+app.COMP.HTML
+----------------
+<button routerLink="home">Home (eager load)</button>
+<button routerLink="profile">Profile(lazy load)</button>
+<button routerLink="product">Product(lazy load)</button>
+<router-outlet></router-outlet>
+
+profile.COMP.TS
+-----------------
+@Component({
+  template: 'Profile page ....',
+  standalone: true
+})
+export class ProfileComponent {}
+
+product.COMP.TS
+-----------------
+import { RouterLinkWithHref, RouterOutlet } from '@angular/router';
+@Component({
+  templateUrl: './product.component.html',
+  imports: [RouterOutlet, RouterLinkWithHref],
+  standalone: true
+})
+export class ProductComponent {}
+
+product.COMP.HTML
+-------------------
+<button [routerLink]="['old-product']">Old Product</button>
+<button [routerLink]="['new-product']">New Product</button>
+<router-outlet></router-outlet>
+
+product.ROUTE.TS
+-------------------
+export const productRoutes: Routes = [{
+    path: '',
+    component: ProductComponent,
+    children: [
+      {
+        path: 'old-product',
+        component: OldProductComponent
+      },
+      {
+        path: 'new-product',
+        component: NewProductComponent
+      }]
+}];
 
 
 create your own OBSERVABLES | RxJS operators
@@ -2575,12 +2662,6 @@ HTTP INTERCEPTORS
    @Injectable()
    export class AuthInterceptor implements HttpInterceptor {
      intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-
-       console.log(`**** REQUEST URL **** ==> ${req.url}`);
-       console.log(`**** REQUEST PARAMETERS URL **** ==> ${req.urlWithParams}`);       // URL with all query string parameters (including those passed in HTTP options)
-       console.log(`**** REQUEST BODY **** ==> ${JSON.stringify(req.body)}`);
-       console.log(`**** REQUEST HEADERS **** ==> ${req.headers.keys()}`);
-       console.log(`**** REQUEST PARAMS **** ==> ${req.params.keys()}`);              // query string parameters passed in HTTP options only
 
        if(req.url.toLowerCase().includes("filedata")) {
        // READ RESPONSE
