@@ -1865,7 +1865,7 @@ profile.COMP.TS
 -----------------
 @Component({
   template: 'Profile page ....',
-  standalone: true
+  standalone: true							       // marked as `standalone`
 })
 export class ProfileComponent {}
 
@@ -1874,8 +1874,8 @@ product.COMP.TS
 import { RouterLinkWithHref, RouterOutlet } from '@angular/router';
 @Component({
   templateUrl: './product.component.html',
-  imports: [RouterOutlet, RouterLinkWithHref],
-  standalone: true
+  imports: [RouterOutlet, RouterLinkWithHref],				      // imports[] dependencies
+  standalone: true							      // marked as `standalone`
 })
 export class ProductComponent {}
 
