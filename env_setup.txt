@@ -1450,6 +1450,7 @@ compares it will the previous values and if the change is detected, it propagate
 - onPush Change Detection Strategy
   During this Change Detection Strategy, the ChildComponent is not always dirty checked, 
   If parent element is updating values BY REFERENCE, only then child Component should be dirty checked and update @Input() values.
+  IMPORTANT: Value changes by PROP are not lost, they are all just pending and come in place once change detection runs for child comp (click, event emit etc.)
   OnPush itself means, only run change detection if:
   	*Reference of the @Input property has changed i.e. obj={name:'name'}; | obj.name="new name"; (NOT CHANGE @INPUT) | obj={name:'new name'}; (CHANGE @INPUT)
 	*An event has fired, like click or any of child components has emitted an event
