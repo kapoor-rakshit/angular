@@ -1842,7 +1842,6 @@ const appRoutes: Routes = [
   }];
 bootstrapApplication(AppComponent, { providers: [provideRouter(appRoutes)] }); // `bootstrapApplication` is used in place of `bootstrapModule`
 									       // `provideRouter` is used in place of `RouterModule.forRoot` to configure router
-
 app.COMP.TS
 --------------
 import { RouterOutlet, RouterLinkWithHref } from '@angular/router';
