@@ -1840,9 +1840,9 @@ const appRoutes: Routes = [
       return (await import('./app/product/product.route')).productRoutes;      // B. loadChildren (to lazy load bunch of STANDALONE components)
     }
   }];
-bootstrapApplication(AppComponent, { providers: [provideRouter(appRoutes)] }); // `bootstrapApplication` is used in place of `bootstrapModule`
-									       // `provideRouter` is used in place of `RouterModule.forRoot` to configure router
-app.COMP.TS
+bootstrapApplication(AppComponent,{providers: [provideRouter(appRoutes, withPreloading(PreloadAllModules))]}); // bootstrapApplication instead of `bootstrapModule`
+													       // provideRouter instead of `RouterModule.forRoot`
+app.COMP.TS												       // withPreloading instead of `preloadingStrategy`
 --------------
 import { RouterOutlet, RouterLinkWithHref } from '@angular/router';
 @Component({
