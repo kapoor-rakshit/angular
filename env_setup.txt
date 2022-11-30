@@ -2352,14 +2352,19 @@ Create file         "app.routing-module.ts"   in project's app component root di
 		                                    canLoad: [RouteAuthServiceName], resolve: { dataVAR_IN_ROUTE: RouteAuthServiceName }}
                        // To restrict access to a URL/Component , there are 5 types of route guards :-
                               CanActivate     : Controls if route can be activated.
-                              CanActivateChild: Controls if children of a route can be activated.
+			      			If we navigate to parent route it will be called, if we then navigate to a child route it will NOT fire.
+						However, If we directly navigate to child route,it will be fired.
+                              CanActivateChild: Controls if children of route can be activated.
+			      			It will be executed while navigating between child routes and also directly navigate to a child route.
+						If we navigate to parent route, the canActivateChild guard will NOT be fired.
                               CanLoad         : Controls if route can even be loaded. 
                                                 This becomes useful for feature modules that are lazy loaded. 
                                                 They won’t even load if the guard returns false, thus cannot even see the source code of the module.
                                                 It must be used with canActivate, because once loaded and user logged out, it will still be present in browser cache, guard will return true.
                               CanDeactivate   : Controls if the user can leave a route. 
-                                                NOTE : This guard doesn’t prevent the user from closing the browser tab or navigating to a different address. 
-                                                       It only prevents actions from within the application itself.
+                                                NOTE : It only prevents actions from within the application itself.
+						       This guard doesn’t prevent user from closing browser tab or navigating to different address.
+						       We may use `beforeunload` event of JS window, to achieve this.
                               Resolve         : To complete data retrieval before navigating to a route
                                                 Refer: loading.io/css    for loader's HTML (app.component.html) + CSS (app.component.css)
                                                 NOTE : it uses NAVIGATION instance as written in app.component.ts (ROOT component)
