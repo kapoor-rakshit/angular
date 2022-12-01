@@ -1820,6 +1820,7 @@ STANDALONE COMPONENTS/DIRECTIVES/PIPES | LAZY LOADING of STANDALONE
 Starting Angular v14, we have STANDALONE concept. It reduces need for NgModules, by using metadata `standalone: true`
 Angular classes marked as standalone do not need to be declared in an NgModule (Angular compiler will report an error if we try).
 Also, Standalone components specify their dependencies directly instead of getting them through NgModules.
+IMPORTANT: We can also import STANDALONE COMPs to imports[] array of existing @NgModule(), to use them in our app.
 Eg:
 main.TS
 ----------
@@ -1840,16 +1841,19 @@ const appRoutes: Routes = [
       return (await import('./app/product/product.route')).productRoutes;      // B. loadChildren (to lazy load bunch of STANDALONE components)
     }
   }];
-bootstrapApplication(AppComponent,{providers: [provideRouter(appRoutes, withPreloading(PreloadAllModules))]}); // bootstrapApplication instead of `bootstrapModule`
-													       // provideRouter instead of `RouterModule.forRoot`
-app.COMP.TS												       // withPreloading instead of `preloadingStrategy`
+bootstrapApplication(AppComponent,{providers: [provideRouter(appRoutes, withPreloading(PreloadAllModules)),    // bootstrapApplication instead of `bootstrapModule`
+					       importProvidersFrom(HttpClientModule, FormsModule)]});	       // provideRouter instead of `RouterModule.forRoot`
+													       // withPreloading instead of `preloadingStrategy`
+													       // importProvidersFrom, DI configuration of NgModule
+app.COMP.TS												       
 --------------
 import { RouterOutlet, RouterLinkWithHref } from '@angular/router';
 @Component({
   selector: 'my-app',
   templateUrl: './app.component.html',
-  imports: [RouterOutlet, RouterLinkWithHref],                                 // imports[] dependencies, STANDALONE child comp, directives, pipes
-  standalone: true                                                             // marked as `standalone`
+  imports: [RouterOutlet, RouterLinkWithHref, CustomerModule],             // imports[] DEPENDENCIES, STANDALONE CHILD-COMP|DIRECTIVES|PIPES
+  									   // To import NON-STANDALONE CHILD-COMP|DIRECTIVES|PIPES, import @NgModule that have them
+  standalone: true                                                         // marked as `standalone`
 })
 export class AppComponent {}
 
@@ -1873,7 +1877,7 @@ product.COMP.TS
 import { RouterLinkWithHref, RouterOutlet } from '@angular/router';
 @Component({
   templateUrl: './product.component.html',
-  imports: [RouterOutlet, RouterLinkWithHref],				      // imports[] dependencies
+  imports: [RouterOutlet, RouterLinkWithHref],
   standalone: true							      // marked as `standalone`
 })
 export class ProductComponent {}
