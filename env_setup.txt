@@ -644,8 +644,9 @@ app.component.ts          --   defines @Component
 							    	      <p ngNonBindable>Expression: {{ 3 + 1 }}</p>      // Expression: {{ 3 + 1 }}
 
                                 --   NOTE : INTERPOLATION is only for STRINGs | for integer,boolean use 
-                                     PROPERTY BINDING                 [disabled] = 'VAR-FROM-TS'               // use of [] for attr and ' ' for vals
-								      [ngValue] = "option"                     // [value] is string, whereas with [ngValue] object can be passed
+                                     PROPERTY BINDING                 [disabled] = 'VAR-FROM-TS'           // use of [] for attr and ' ' for vals
+								      [ngValue] = "option"                 // [value] is string,whereas with [ngValue] object can be passed
+								      [ngSrc] = "IMAGE_PATH"		   // <img [ngSrc]="IMAGE_PATH"/> ,does img optimizations
 								      // ! : non-null assertion operator
 								      // When enabled strictTemplates and strictNullChecks, typecheck errors might occur i.e.
 								      // when using async pipe it's possible that there is no value available yet.
