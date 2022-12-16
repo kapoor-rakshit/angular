@@ -2245,6 +2245,20 @@ Declaration Merging means that compiler merges two or more separate declarations
 This merged definition has features of all of original declarations.
 Eg: Interface merging, as shown in INTERFACEs notes example above.
 
+TYPE DEFINITION FILES or .d.ts
+=================================
+*.d.ts are type definition files that allow to use existing JavaScript code in TypeScript.
+TypeScript doesn't have any information about JS function including name, type of parameters.
+In order to use JS function in a TypeScript file, we provide it in a d.ts file.
+The d.ts file doesn't contain any implementation, and isn't compiled to JavaScript at all.
+Eg:
+// math.js
+const sum = (a, b) => a + b;
+export { sum };
+
+// math.d.ts
+declare function sum(a: number, b: number): number;
+
 
 SERVICEs
 ====================
@@ -2617,8 +2631,6 @@ Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [fr
                                              console.log(`${frag}`);
                                          });
 	                            }
-
-
 CONTEXT PATH
 =================
 Add a suffix to server hostname (IP/PORT) that is common and specific to our whole angular application.
@@ -3286,7 +3298,8 @@ Angular TDD
 MISC. TESTING SAMPLE CODES/NOTES
 ---------------------------------------
     - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)      // To have a report of only a specific component
-    - karma.conf.js : singleRun:false                                             // To rerun test report on any change of file(s)
+    - karma.conf.js : browsers:['ChromeHeadless'],				  // `ChromeHeadless` to prevent browser popup | `Chrome` to allow browser popup
+    		    : singleRun:false,                                            // To rerun test report on any change of file(s)
     		    : captureTimeout:150000					  // To set timeout for browser while running test cases on machine
     
     - {provide: Store, useValue: {select: () => of({}) , dispatch: () => {}}}     // When working with Store test cases,add to providers array of TestBed config
