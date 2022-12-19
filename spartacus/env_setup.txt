@@ -1,3 +1,6 @@
+Spartacus is Angular-based JavaScript storefront for SAP Commerce Cloud.
+Spartacus talks to SAP Commerce Cloud exclusively through the Commerce REST API.
+
 SETUP
 =============
 > ng new <APP_NAME>
@@ -29,7 +32,7 @@ SETUP
 
 
 MODULES / COMPONENTS
-======================
+========================
 > ng g m custom-pdp
 > ng g c custom-pdp/custom-product-intro
 
@@ -60,7 +63,7 @@ custom-product-intro.comp.HTML
 <ng-container *ngIf = "product$ | async as product">
     <h1>{{product?.name}}</h1>
     <h3>{{product?.price?.formattedValue}}</h3>
-    <cx-star-rating                                       // comp from spartacus storefront
+    <cx-star-rating                                     // comp used from spartacus storefront, must be imported in module
       [rating] = "product?.averageRating"
       [disabled] = "true">
     </cx-star-rating>
@@ -88,3 +91,16 @@ contentSlots: {
     }
   ]
 }
+
+
+STYLES
+============
+Spartacus provides default styling library called Sparta in the @spartacus/styles package.
+This package should be imported into project through the `styles.scss` file.
+src/styles.scss
+------------------
+$primary: #e502bf                                                          // if any new value to scss variables, has to be re-assigned.
+$font-weight-normal: 500;                                                  // this is done before Sparta library import.
+
+@import '~@spartacus/styles/index';                                        // Sparta lib import
+
