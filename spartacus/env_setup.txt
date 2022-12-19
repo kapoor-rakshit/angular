@@ -1,0 +1,90 @@
+SETUP
+=============
+> ng new <APP_NAME>
+> ng add @spartacus/schematics --baseUrl <BACKEND_URL> --baseSite=<CONFIG> --ssr --pwa
+
+1. Create a directory named `spartacus` and inside it:
+    1. create module `spartacus-configuration.module.TS`
+       // This will have all configs for spartacus like baseUrl, baseSite etc.
+    2. create module `spartacus-features.module.TS`
+       // All module imports like FooterNavigationModule, BreadcrumbModule etc.
+    3. create module `spartacus.module.TS`
+       // import above modules along with BaseStorefrontModule
+       @NgModule({
+          declarations: [],
+          imports: [SpartacusFeaturesModule, SpartacusConfigurationModule, BaseStorefrontModule],
+          exports: [BaseStorefrontModule]
+       })
+       export class SpartacusModule {}
+    
+2. app.module.TS
+------------------
+- Remove module `AppRoutingModule` from import (if added when creating Angular project), else nothing will be displayed.
+- import `spartacus.module.TS` that we created above, which had other SPARTACUS modules imported.
+
+3. app.component.HTML
+-----------------------
+- Entire content is deleted and replaced by a single HTML tag
+  <cx-storefront></cx-storefront>
+
+
+MODULES / COMPONENTS
+======================
+> ng g m custom-pdp
+> ng g c custom-pdp/custom-product-intro
+
+// import this feature module to `app.module.TS`
+// To use special feature components available via Spartacus Storefront, they are to be imported
+// `withConfig` defines that it is a CMS component.
+// flexType is used for identification
+custom-pdp.module.TS
+----------------------
+@NgModule({
+    declarations: [CUSTOM-COMP-NAME],
+    imports: [
+        CommonModule,
+        StarRatingModule,                                // module from spartacus storefront
+        ConfigModule.withConfig({
+            cmsComponents: {
+                FLEX-TYPE-NAME: {
+                    component: CUSTOM-COMP-NAME
+                }
+            }
+        } as CmsConfig)
+    ]
+})
+export class CustomPdpModule {}
+
+custom-product-intro.comp.HTML
+---------------------------------
+<ng-container *ngIf = "product$ | async as product">
+    <h1>{{product?.name}}</h1>
+    <h3>{{product?.price?.formattedValue}}</h3>
+    <cx-star-rating                                       // comp from spartacus storefront
+      [rating] = "product?.averageRating"
+      [disabled] = "true">
+    </cx-star-rating>
+</ng-container>
+
+NOTE: Components come from backend side.
+An API call , /pages?lang=EN&curr=AUD , gets all components that are used. It returns:
+contentSlots: {
+  contentSlot: [
+    {
+      components: {
+          component: [
+            {
+              uid: "CustomTileWithTextResponsiveBannerComponent",
+              typeCode: "FFCMSContainerComponent",
+              flexType: "FFCMSContainerComponent"
+            }
+          ]
+      }
+      name: "Tile With Text Banner Slot",
+      position: "TileWithTextBanner",
+      slotId: "TileWithTextBannerSlot",
+      slotShared: false,
+      slotUuid: "eyJpdG"
+    }
+  ]
+}
