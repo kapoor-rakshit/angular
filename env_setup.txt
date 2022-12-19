@@ -1399,8 +1399,23 @@ get empNameField() {
 
 STYLE
 =================
--- A global file "styles.css" exists for entire application.
-   eg:-  write   @import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
+-- A global file "src/styles.css" exists for entire application.
+   eg:- 
+   // CDN URL
+   	@import "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css";
+   // NODE_MODULES , ~ tells webpack to search through `node_modules` , i.e. bootstrap/scss DIR has '_mixins.scss' FILE
+   	@import '~bootstrap/scss/mixins';
+   // CUSTOM FILE IMPORT
+   	- src/styles.scss
+		@import 'styles/index';
+	- src/styles DIR will have '_index.scss' FILE
+		@import 'variables';
+		@import 'banners';
+	- src/styles DIR will have 'variables.scss' and 'banners.scss' FILE
+		:root {
+		   --cx-color-primary: #e82649;
+		   --cx-color-text: #1d1d1d;
+		 }
    
 -- :host pseudo-class selector
    To style the component custom HTML element itself, and not something inside its template.
