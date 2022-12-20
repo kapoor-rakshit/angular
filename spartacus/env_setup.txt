@@ -6,8 +6,8 @@ SETUP
 > ng new <APP_NAME>
 > ng add @spartacus/schematics --baseUrl <BACKEND_URL> --baseSite=<CONFIG> --ssr --pwa
 
-1. Create a directory named `spartacus` and inside it:
-    1. create module `spartacus-configuration.module.TS`
+1. It creates a directory named `spartacus` and inside it:
+    1. creates module `spartacus-configuration.module.TS`
        // This will have all configs for spartacus like baseUrl, baseSite etc.
     2. create module `spartacus-features.module.TS`
        // All module imports like FooterNavigationModule, BreadcrumbModule etc.
@@ -22,13 +22,17 @@ SETUP
     
 2. app.module.TS
 ------------------
-- Remove module `AppRoutingModule` from import (if added when creating Angular project), else nothing will be displayed.
+- Remove default angular module `AppRoutingModule` from import (if added when creating Angular project), else nothing will be displayed.
 - import `spartacus.module.TS` that we created above, which had other SPARTACUS modules imported.
 
 3. app.component.HTML
 -----------------------
 - Entire content is deleted and replaced by a single HTML tag
   <cx-storefront></cx-storefront>
+  
+NOTE: if missed some config, while creating app, it can be done later too
+> ng g @spartacus/schematics:add-pwa                    // adds spartacus-specific PWA module
+> ng g @spartacus/schematics:add-ssr                    // adds SSR configuration
 
 
 MODULES / COMPONENTS
@@ -46,7 +50,7 @@ custom-pdp.module.TS
     declarations: [CUSTOM-COMP-NAME],
     imports: [
         CommonModule,
-        StarRatingModule,                                // module from spartacus storefront
+        StarRatingModule,                                // module import from spartacus storefront
         ConfigModule.withConfig({
             cmsComponents: {
                 FLEX-TYPE-NAME: {
@@ -91,6 +95,10 @@ contentSlots: {
     }
   ]
 }
+
+
+ROUTING
+============
 
 
 STYLES
