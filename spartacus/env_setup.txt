@@ -5,10 +5,22 @@ SETUP
 =============
 > ng new <APP_NAME>
 > ng add @spartacus/schematics --baseUrl <BACKEND_URL> --baseSite=<CONFIG> --ssr --pwa
+  --baseUrl: url of backend
+  --baseSite: name of storefront
+  --ssr: enable SSR features of app
+  --pwa: enable PWA features of app
 
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
        // This will have all configs for spartacus like baseUrl, baseSite etc.
+       @NgModule({
+          declarations: [],
+          imports: [],
+          providers: [
+             provideConfig(layoutConfig),               // page layout config file, where we mention `position` value received from backend, in `slots`
+             provideConfig(mediaConfig)
+          ]})
+       export class SpartacusConfigurationModule {}
     2. create module `spartacus-features.module.TS`
        // All module imports like FooterNavigationModule, BreadcrumbModule etc.
     3. create module `spartacus.module.TS`
@@ -40,10 +52,10 @@ MODULES / COMPONENTS
 > ng g m custom-pdp
 > ng g c custom-pdp/custom-product-intro
 
-// import this feature module to `app.module.TS`
-// To use special feature components available via Spartacus Storefront, they are to be imported
+// import these feature modules to `app.module.TS`
+// To use feature components that are available via Spartacus Storefront, they are to be imported
 // `withConfig` defines that it is a CMS component.
-// flexType is used for identification
+    // flexType or typeCode value that we receive from backend is used for mapping to our SPARTACUS component
 custom-pdp.module.TS
 ----------------------
 @NgModule({
@@ -53,7 +65,7 @@ custom-pdp.module.TS
         StarRatingModule,                                // module import from spartacus storefront
         ConfigModule.withConfig({
             cmsComponents: {
-                FLEX-TYPE-NAME: {
+                TYPE-CODE-NAME: {
                     component: CUSTOM-COMP-NAME
                 }
             }
@@ -67,7 +79,7 @@ custom-product-intro.comp.HTML
 <ng-container *ngIf = "product$ | async as product">
     <h1>{{product?.name}}</h1>
     <h3>{{product?.price?.formattedValue}}</h3>
-    <cx-star-rating                                     // comp used from spartacus storefront, must be imported in module
+    <cx-star-rating                                     // comp used from spartacus storefront, must be imported in that module
       [rating] = "product?.averageRating"
       [disabled] = "true">
     </cx-star-rating>
