@@ -2345,6 +2345,9 @@ const httpOptions = {
   headers: new HttpHeaders({
     'content-type' : 'application/json',
     'authorization' : 'tokenValue'
+  }),
+  params: new HttpParams({
+    'categoryId': 4095
   })
 }
 import 'rxjs' in app.module.ts     // RxJS is a library for reactive programming using Observables, to make it easier to compose asynchronous or callback-based code.
@@ -2544,10 +2547,9 @@ REST APIs have certain types of parameters:
                                         headers: new HttpHeaders({
                                           'Content-Type':  'application/json'
                                         }),
-                                        params: {                                 // appended as query string parameters in request URL
-                                          "chkP" : "namo ji",
-                                          "chkP1" : "PM"
-                                        },
+					params: new HttpParams({
+    					  'categoryId': 4095			  // appended as query string parameters in request URL
+  					}),
 					observe: 'events'                         // observe HTTP OPTION allows monitoring of request-response sequence
 					                                             It has values: 'body'(default), 'response'(full response obj received i.e. status, headers)
 										     'events'(seq. of events in req-resp lifecycle)
