@@ -17,7 +17,7 @@ SETUP
           declarations: [],
           imports: [],
           providers: [
-             provideConfig(layoutConfig),               // page layout config file, where we mention `position` value received from backend, in `slots`
+             provideConfig(layoutConfig),               // custom page layout config file
              provideConfig(mediaConfig)
           ]})
        export class SpartacusConfigurationModule {}
@@ -47,8 +47,8 @@ NOTE: if missed some config, while creating app, it can be done later too
 > ng g @spartacus/schematics:add-ssr                    // adds SSR configuration
 
 
-MODULES / COMPONENTS
-========================
+MODULES / COMPONENTS / LAYOUT
+=================================
 > ng g m custom-pdp
 > ng g c custom-pdp/custom-product-intro
 
@@ -85,6 +85,31 @@ custom-product-intro.comp.HTML
     </cx-star-rating>
 </ng-container>
 
+layout-config.TS                                       // a custom layout file to be provided to `spartacus-configuration-module.TS`
+---------------------                                  // layouts are rendered in <CX-PAGE-LAYOUT> and slots(POSITION keys from backend) in <CX-PAGE-SLOT>
+import { LayoutConfig } from '@spartacus/storefront';
+export const layoutConfig: LayoutConfig = {
+  layoutSlots: {
+      header: {                                                    // <cx-page-layout class="header"></cx-page-layout>
+        lg: { slots: ['PreHeader', 'SiteLogo', 'SearchBox'] },     // <cx-page-slot position="PreHeader"></cx-page-slot>
+        slots: ['PreHeader', 'SearchBox']                             // less than lg breakpoint, these slots will be rendered
+      },
+      navigation: {                                                // <cx-page-layout class="navigation"></cx-page-layout>
+        lg: { slots: ['MegaMenu'] },                               // lg(>=992px), these slots(position vals) will be rendered in <cx-page-slot>
+        md: { slots: ['PreHeader', 'SearchBox', 'MegaMenu'] },     // md(>=768px)
+        sm: { slots: ['PreHeader', 'SearchBox', 'MegaMenu'] },     // sm(>=576px)
+        xs: { slots: ['PreHeader', 'SearchBox', 'MegaMenu'] }      // xs(<576px)
+      },
+      footer: {                                                    // <cx-page-layout class="footer"></cx-page-layout>
+        slots: ['Footer']                                          // <cx-page-slot position="Footer"></cx-page-slot>
+      },
+      LandingPage2Template: {                                      // <cx-page-layout class="LandingPage2Template"></cx-page-layout>
+        pageFold: 'Section2B',                                     // indication to speed up initial creation of this(Section2B),previous,sibling slots
+        slots: []
+      }
+  }
+}
+
 NOTE: Components come from backend side.
 An API call , /pages?lang=EN&curr=AUD , gets all components that are used. It returns:
 contentSlots: {
@@ -94,13 +119,13 @@ contentSlots: {
           component: [
             {
               uid: "CustomTileWithTextResponsiveBannerComponent",
-              typeCode: "FFCMSContainerComponent",
+              typeCode: "FFCMSContainerComponent",                        // typecode: mapping to custom spartacus component
               flexType: "FFCMSContainerComponent"
             }
           ]
       }
       name: "Tile With Text Banner Slot",
-      position: "TileWithTextBanner",
+      position: "TileWithTextBanner",                                     // position: included in slot
       slotId: "TileWithTextBannerSlot",
       slotShared: false,
       slotUuid: "eyJpdG"
