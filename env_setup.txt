@@ -592,8 +592,10 @@ src/app           : contains components (.html, .ts, .css, -spec.ts)
 src/polyfills     : compatibility for different browsers.
 src/styles.css    : define styling classes which can be used by all components in app, like defining global styles.
 src/index.html    : the starting point, the page which browser reads and loads when running angular app. (contains <selector></selector> for bootstrap component)
-src/main.ts       :	the entry point from a code perpective for your angular app. (contains  platformBrowserDynamic().bootstrapModule(AppModule))
+src/main.ts       : the entry point from a code perpective for your angular app. (contains  platformBrowserDynamic().bootstrapModule(AppModule))
 angular.json      : CLI configuration defaults
+		    	1. To change default prefix(app-) for selector value, change `prefix` value under `projects`.
+		   	   So now, when we create new component, it's selector will be `NEW_PREFIX-comp-name`
 tsconfig.json     : typescript configuration
 package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
                     ~version : “Approximately equivalent to version”
@@ -901,14 +903,12 @@ example:
 @VIEWCHILD / @VIEWCHILDREN
 ================================
 It provides reference to HTML DOM, similar to "document.getElementById()" in core JS.
-This concept can be used in following ways:-
+This works only for HTML elements within comp.HTML and NOT for those that come from <child-selector></child-selector> OR <ng-content></ng-content>
 1. Native HTML Element Reference              (Component .TS ==> <== Component .HTML)
-// used ngAfterViewInit and not ngOnInit() in example as this is called when DOM/template is constructed.
-// example
-// component.html
+component.html
    <input type='text' #nameElementReference [(ngModel)]='nameFilter' />
    <input type='text' #locationElementReference [(ngModel)]='locationFilter' />
-// component.ts
+component.ts
    @ViewChild("nameElementReference", {static: false}) nameElementRefVAR: ElementRef;
    @ViewChildren("nameElementReference, locationElementReference") filterElementRefsVARLIST: QueryList<ElementRef>;
    ngAfterViewInit() {
@@ -918,9 +918,7 @@ This concept can be used in following ways:-
     }
 
 2. Angular Form/Model Reference               (Component .TS ==> <== Component .HTML)
-// used for reference to form having ngForm/ngModel reference
-// example
-// component.ts
+component.ts
    @ViewChild(NgForm, {static: false}) addUserFormReferenceVAR: NgForm;              // 1. Only the first ngForm is returned.
    @ViewChild("formRef", {static: false}) addUserFormReferenceVAR: NgForm;           // specific ngForm i.e.    <form #formRef="ngForm">
                                                                                      // usage eg:- addUserFormReferenceVAR.submitted | addUserFormReferenceVAR.dirty
@@ -940,15 +938,12 @@ This concept can be used in following ways:-
      }
 
 3. Variable/Method Reference                  (Child Component ==> Parent Component)
-// this concept is similar to @Output
-// example
-A) parent.html
-   <p>{{employeesRefTEMPLATE.METHOD()_OR_VAR}}</p>
-   <employees #employeesRefTEMPLATE></employees>
- 
-B) parent.ts
+parent.html
+   <p>{{employeesRefTEMPLATE.METHOD()_OR_VAR}}</p>         // VAR can be @ViewChild var of child-comp too
+   <employees #employeesRefTEMPLATE></employees>           // This allows to access HTML of child from parent
+parent.ts
    @ViewChild('employeesRefTEMPLATE', {static: false}) employeesComponentRefVAR: EmployeesComponent;
-C) @ViewChild(EmployeesComponent, {static: false}) employeesComponentRefVAR: EmployeesComponent;
+   @ViewChild(EmployeesComponent, {static: false}) employeesComponentRefVAR: EmployeesComponent;
     ngAfterViewInit(): void {
        console.log(`Logging through template reference => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
        console.log(`Logging through Child Component => ${this.employeesComponentRefVAR.METHOD()_OR_VAR}`);
