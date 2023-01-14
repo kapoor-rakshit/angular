@@ -598,8 +598,8 @@ angular.json      : CLI configuration defaults
 		   	   So now, when we create new component, it's selector will be `NEW_PREFIX-comp-name`
 tsconfig.json     : typescript configuration
 package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
-                    ~version : “Approximately equivalent to version”
-                    ^version : “Compatible with version”
+                    ~version : “tilde: freezes major version and minor version, updates bug fixes i.e. 8.3.X”
+                    ^version : “caret: freezes major version, updates minor version and bug fixes i.e. 8.X.X”
 package-lock.json : a derivative of package.json which has exact library version(s) you are using for this app.
                     `npm install` uses 'package-lock.json' (if available) else 'package.json' to install required dependencies.
                     
