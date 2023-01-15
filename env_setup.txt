@@ -2041,7 +2041,20 @@ b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | shareRep
 Example:
 this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
 - concatMap()
-  It takes the first Observable and use its values, wait for it to complete and then we use the next Observable, etc. until all Observables complete.
+  It takes the first Observable and use its values, concatMap never hits next http request until previous one completes.
+  It is useful when we have nested observables which depend on outer values.
+  Eg:
+  COMP.TS
+    SERVICEMETHOD().pipe(			       //outer observable
+    	concatMap((data_1) => {
+      		return SERVICEMETHOD(data_1);          //inner observable_1 returns another OBSERVABLE to observable_2
+    	}),
+	concatMap((data_2) => {
+      		return SERVICEMETHOD(data_2);          //inner observable_2
+    	})
+    ).subscribe((data) => {
+    	console.log(data)
+    });
 - mergeMap()
   It is similar to Promise.all([p1, p2]) i.e. The result Observable will not be completed until all the merged Observables are completed.
   mergeMap don't wait for the previous inner Observable to complete before triggering the next innner Observable i.e. it subscribes to all observables in parallel.
