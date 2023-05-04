@@ -1546,6 +1546,7 @@ This concept is used when we have a common class for data that can be used by mu
    In child-comp.ts
    --------------------
    @Input('EXTERNAL_VAR_NAME') INTERNAL_VAR_NAME: string = "DefaultValue";
+   @Input({ required: true, alias: 'EXTERNAL_VAR_NAME' }) INTERNAL_VAR_NAME: string = "DefaultValue";   // v16, @Input() values can be made required
    
    In child-comp.html
    ---------------------
@@ -1553,7 +1554,8 @@ This concept is used when we have a common class for data that can be used by mu
    
    In parent-comp.html
    ---------------------
-   <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts" > default text if child component not available </child-selector-tag>
+   <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"> default text if child component not available </child-selector-tag>
+   <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"/>     // v16, SELF-CLOSING tags
    
 NOTE: USE OF @Attribute(), when any child comp properties value is static and it will never change
       Accessing property using @Attribute() means, the value will be evaluated only once (during the first change detection) and
@@ -2005,19 +2007,22 @@ C. // dispose the observable, inside ngOnDestroy()
    this.unsubscribe.next();
    this.unsubscribe.complete();
    
-a.1) pipe() | skip() | take() | takeUntil() | takeWhile() |
+a.1) pipe() | skip() | take() | takeUntil() | takeUntilDestroyed() | takeWhile() |
      retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
 skip() allows to ignore first x emissions from the source. It is oppposite to take().
 take() operator specify how many values to receive from Observable before unsubscribe i.e. when received specified number of values, unsubscribe automatically.
 takeUntil() operator receive values from Observable until other specified Observable emits new value i.e. .next() and .complete() from other obsv.
+takeUntilDestroyed() from v16, complete an observable when calling context (component, directive, service, or a pipe) is destroyed.
 takeWhile() operator continue receiving values until specified func returns true. Once it becomes false, unsubscribe automatically.
 retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
 catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
+private destroyRef = inject(DestroyRef);
 const apiData = ajax('/api/data').pipe(
   skip(5),
   take(10),
+  takeUntilDestroyed(this.destroyRef),
   takeWhile((val) => { return val < 3}),
   map((res: any) => {
     if (!res.response) {
