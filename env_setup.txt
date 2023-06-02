@@ -2330,7 +2330,45 @@ Eg:
  > .service.TS
    import { environment } from 'PATH-TO-DEV-ENVIRONMENT.TS-FILE';
    let endpoint = `${environment.API_URL}/login`;
-
+   
+NOTE: By default, Angular comes with a production and development environment.
+      Different custom environments can be added according to requirement of project like staging, QA, etc.
+      1. Create a file under environments folder i.e. environments/environment.staging.ts
+         export const environment = {
+	   staging: true,
+	   apiUrl: "http://localhost:8000"
+	 };
+      2. Update angular.json file
+         A) projects-> PROJECT-NAME -> architect -> build -> configurations
+	 Here add another object for "staging", along with "production" and "development" already present.
+	 This will allow to replace environment.ts when using `ng build --configuration=staging`
+	 "staging": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.staging.ts"
+                }
+              ]
+          }
+	 B) projects-> PROJECT-NAME -> architect -> serve -> configurations
+	 Here add another object for "staging", along with "production" and "development" already present.
+	 "staging": {
+              "browserTarget": "PROJECT-NAME:build:staging"
+          }
+	 C) projects-> PROJECT-NAME -> architect -> e2e -> configurations
+	 Here add another object for "staging", along with "production" and "development" already present.
+	 "staging": {
+              "devServerTarget": "PROJECT-NAME:serve:staging"
+          }
+      3. Build and Serve
+         ng serve                         // It will run the project for the development URL
+	 ng serve --configuration=staging // It will run the project for the staging environment
+	 ng serve --prod                  // It will run the project for the production environment
+	 
+	 ng build                         // It will build the project for the development environment
+	 ng build --configuration=staging // It will build the project for the staging environment
+	 ng build --prod                  // It will build the project for the production environment
+      
 
 COMMUNICATION with SERVICE
 ---------------------------
