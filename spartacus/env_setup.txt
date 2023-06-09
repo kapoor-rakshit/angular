@@ -52,10 +52,13 @@ MODULES / COMPONENTS / LAYOUT
 > ng g m custom-pdp
 > ng g c custom-pdp/custom-product-intro
 
-// import these feature modules to `app.module.TS`
-// To use feature components that are available via Spartacus Storefront, they are to be imported
+// DO NOT import these feature modules to `APP.MODULE.TS` directly, but
+// import them to  `spartacus-features.MODULE.TS` which is imported by  `spartacus.MODULE.TS` which is imported by `APP.MODULE.TS`
+// This allows for LAZY-LOADING of modules that is handled by spartacus.
+
+// To use feature components that are available via Spartacus Storefront, they are to be imported.
 // `withConfig` defines that it is a CMS component.
-    // flexType or typeCode value that we receive from backend is used for mapping to our SPARTACUS component
+// flexType or typeCode value that we receive from backend is used for mapping to our SPARTACUS component
 custom-pdp.module.TS
 ----------------------
 @NgModule({
@@ -122,13 +125,13 @@ contentSlots: {
           component: [
             {
               uid: "CustomTileWithTextResponsiveBannerComponent",
-              typeCode: "FFCMSContainerComponent",                        // typecode: mapping to custom spartacus component
-              flexType: "FFCMSContainerComponent"
+              typeCode: "FFCMSContainerComponent",                        // typecode or flexType: mapping to custom spartacus component in MODULE file
+              flexType: "FFCMSContainerComponent"                         // NOTE: It depends on backend config, which one to use from these two
             }
           ]
       }
       name: "Tile With Text Banner Slot",
-      position: "TileWithTextBanner",                                     // position: included in <cx-page-slot>
+      position: "TileWithTextBanner",                                     // position: included in <cx-page-slot> and used in layout-config.TS
       slotId: "TileWithTextBannerSlot",
       slotShared: false,
       slotUuid: "eyJpdG"
@@ -146,6 +149,37 @@ uuid: "eyJp==="
 
 ROUTING
 ============
+Many routes are built-in with SPARTACUS, and render templates accordingly.
+However, we can create CUSTOM routes too.
+APP.MODULE.TS
+-----------------
+imports: [
+    ConfigModule.withConfig({
+      routing: {
+        routes: {
+          FE_PATH_1: { paths: ['BACKEND_PATH_FOR_PAGE_1'] },
+          FE_PATH_2: { paths: ['BACKEND_PATH_FOR_PAGE_2'] },
+        }
+      }
+    })
+]
+
+SPARTACUS-FEATURES.MODULE.TS
+-------------------------------
+imports: [
+    CUSTOM_MODULE_1,
+    CUSTOM_MODULE_2
+]
+
+.COMP.TS
+-------------------
+import { RoutingService } from '@spartacus/core';
+constructor(private routingService: RoutingService) {}
+navigateFabricSamples() {
+    this.routingService.go({
+      cxRoute: 'FE_PATH_2',
+    });
+}
 
 
 STYLES
@@ -157,5 +191,5 @@ src/styles.scss
 $primary: #e502bf                                                          // if any new value to scss variables, has to be re-assigned.
 $font-weight-normal: 500;                                                  // this is done before Sparta library import.
 
-@import '~@spartacus/styles/index';                                        // Sparta lib import
+@import '@spartacus/styles/scss/cxbase/mixins';
 
