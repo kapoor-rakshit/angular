@@ -18,6 +18,43 @@ NOTE: YOUR_API_KEY is a key secret generated from   https://developers.google.co
   <script src="https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js"></script>         /* for marker cluster */
 </head>
 
+IMPORTANT: Make sure to load scripts before initing <google-map> component.
+This can be done via observable that will next(true) on `onload` event of JS.
+addJS(
+    scriptSRC: string, scriptID: string, refreshScript = false, insertToHead = true, elemRef?: ElementRef
+  ): Observable<boolean> {
+      return new Observable((observer) => {
+          if (this.alreadyExists(scriptID)) {
+            if (refreshScript) {
+              this.removeElem(scriptID);
+            } else {
+              observer.next(true);
+              observer.complete();
+              return;
+            }
+          }
+
+          const s = this.windowRef.document.createElement('script');
+          if (s) {
+            s.type = 'text/javascript';
+            s.src = scriptSRC;
+            s.id = scriptID;
+
+            insertToHead ? this.windowRef?.document?.head?.appendChild(s) : elemRef?.nativeElement?.appendChild(s);
+
+            s.onload = () => {
+              observer.next(true);
+              observer.complete();
+            };
+
+            s.onerror = () => {
+              observer.error();
+              observer.complete();
+            };
+          }
+      });
+}
+
 
 .MODULE.TS
 ================
@@ -30,7 +67,18 @@ public mapOptions: google.maps.MapOptions = {};
 public srcStore!: google.maps.LatLngLiteral;
 public markerClusterStyle!: any[];
 public readonly storeLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+public showGoogleMaps: boolean = false;
 @ViewChild(MapInfoWindow, { static: false }) gMapInfoWindow!: MapInfoWindow;
+ngOnInit() {
+    this.windowUtils.addJS(
+      scriptSRC, scriptID, refreshScript, insertToHead, elemRef
+    ).pipe(takeUntil(this.destroyed$)).subscribe((data) => {
+        if(data) {
+            this.showGoogleMaps = true;
+        }
+    });
+}
+
 this.mapOptions = {
    mapTypeId: 'roadmap',
    streetViewControl: false,
@@ -66,27 +114,29 @@ showMarkerInfo(evt: google.maps.MapMouseEvent, marker: MapMarker, data: any) {
 
 .COMP.HTML
 ==============
-<google-map
-   height="100%"
-   width="100%"
-   [options]="mapOptions"
-   [center]="srcStore"
->
-   <map-marker-clusterer [styles]="markerClusterStyle">
-          <map-marker
-            #markerElem="mapMarker"
-            *ngFor="let store of storeList; let ind = index"
-            [position]="{ lat: store.geoPoint.latitude, lng: store.geoPoint.longitude }"
-            [label]="{ color: 'white', text: storeLabels.charAt(ind), fontWeight: 'bold' }"
-            [title]="store.name"
-            icon="assets/images/store-marker.png"
-            (mapClick)="showMarkerInfo($event, markerElem, store)"
-          >
-          </map-marker>
-   </map-marker-clusterer>
-   <map-info-window>
-          <div class="markerStoreInfo">
-            TEXT TO BE SHOWN ON INFO WINDOW, WHEN CLICKED ON MARKER
-          </div>
-   </map-info-window>        
-</google-map>
+<ng-container *ngIf="showGoogleMaps">
+    <google-map
+       height="100%"
+       width="100%"
+       [options]="mapOptions"
+       [center]="srcStore"
+    >
+       <map-marker-clusterer [styles]="markerClusterStyle">
+              <map-marker
+                #markerElem="mapMarker"
+                *ngFor="let store of storeList; let ind = index"
+                [position]="{ lat: store.geoPoint.latitude, lng: store.geoPoint.longitude }"
+                [label]="{ color: 'white', text: storeLabels.charAt(ind), fontWeight: 'bold' }"
+                [title]="store.name"
+                icon="assets/images/store-marker.png"
+                (mapClick)="showMarkerInfo($event, markerElem, store)"
+              >
+              </map-marker>
+       </map-marker-clusterer>
+       <map-info-window>
+              <div class="markerStoreInfo">
+                TEXT TO BE SHOWN ON INFO WINDOW, WHEN CLICKED ON MARKER
+              </div>
+       </map-info-window>        
+    </google-map>
+</ng-container>
