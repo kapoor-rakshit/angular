@@ -1,0 +1,90 @@
+Refer: https://github.com/angular/components/tree/main/src/google-maps
+
+INSTALL
+===========
+> npm install @angular/google-maps
+
+
+LOAD API with YOUR_API_KEY
+============================
+NOTE: YOUR_API_KEY is a key secret generated from   https://developers.google.com/maps/gmp-get-started
+      Ensure to whitelist the host on google console from where request will be made
+<!doctype html>
+<head>
+  <script type='text/javascript'>function initMap() {}</script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"></script>
+  <script src="https://unpkg.com/@googlemaps/markerclustererplus/dist/index.min.js"></script>         /* for marker cluster */
+</head>
+
+
+.MODULE.TS
+================
+import { GoogleMapsModule } from '@angular/google-maps';
+
+
+.COMP.TS
+=============
+public mapOptions: google.maps.MapOptions = {};
+public srcStore!: google.maps.LatLngLiteral;
+public markerClusterStyle!: any[];
+public readonly storeLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+@ViewChild(MapInfoWindow, { static: false }) gMapInfoWindow!: MapInfoWindow;
+this.mapOptions = {
+   mapTypeId: 'roadmap',
+   streetViewControl: false,
+   mapTypeControl: false,
+   fullscreenControlOptions: {
+     position: google.maps.ControlPosition.LEFT_TOP,
+   },
+   zoom: 15,
+   minZoom: 3,
+};
+
+this.srcStore = { 
+  lat: data?.searchPageData?.sourceLatitude ?? 0,
+  lng: data?.searchPageData?.sourceLongitude ?? 0
+};
+
+this.markerClusterStyle = [{
+    url: 'assets/images/ff-chair.png',                     /* URL for image to be shown on cluster */
+    height: 46,
+    width: 46,
+    className: 'markerCluster',
+    fontWeight: 'bold',
+    textSize: 14,
+    textColor: '#FFF',
+    fontFamily: 'Fantastic',
+}];
+
+showMarkerInfo(evt: google.maps.MapMouseEvent, marker: MapMarker, data: any) {
+    this.srcStore = { lat: evt.latLng?.lat() ?? 0, lng: evt.latLng?.lng() ?? 0 };
+    this.gMapInfoWindow.open(marker);
+}
+
+
+.COMP.HTML
+==============
+<google-map
+   height="100%"
+   width="100%"
+   [options]="mapOptions"
+   [center]="srcStore"
+>
+   <map-marker-clusterer [styles]="markerClusterStyle">
+          <map-marker
+            #markerElem="mapMarker"
+            *ngFor="let store of storeList; let ind = index"
+            [position]="{ lat: store.geoPoint.latitude, lng: store.geoPoint.longitude }"
+            [label]="{ color: 'white', text: storeLabels.charAt(ind), fontWeight: 'bold' }"
+            [title]="store.name"
+            icon="assets/images/store-marker.png"
+            (mapClick)="showMarkerInfo($event, markerElem, store)"
+          >
+          </map-marker>
+   </map-marker-clusterer>
+   <map-info-window>
+          <div class="markerStoreInfo">
+            TEXT TO BE SHOWN ON INFO WINDOW, WHEN CLICKED ON MARKER
+          </div>
+   </map-info-window>        
+</google-map>
