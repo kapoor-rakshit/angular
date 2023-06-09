@@ -3,6 +3,8 @@ Refer: https://github.com/angular/components/tree/main/src/google-maps
 INSTALL
 ===========
 > npm install @angular/google-maps
+  OR
+> ng add @angular/google-maps
 
 
 LOAD API with YOUR_API_KEY
