@@ -1,0 +1,35 @@
+REFER: https://github.com/angular/components/tree/main/src/youtube-player
+
+INSTALL
+============
+> npm install @angular/youtube-player
+OR
+> ng add @angular/youtube-player
+
+
+NOTE: Make sure to add YOUTUBE IFRAME API before initing component.
+<script src="https://www.youtube.com/iframe_api"></script>
+
+
+.MODULE.TS
+==============
+import {YouTubePlayerModule} from '@angular/youtube-player';
+
+
+.COMP.HTML
+==============
+// If your video is found at https://www.youtube.com/watch?v=PRQCAL_RMVo, then your video id is PRQCAL_RMVo
+<ng-container *ngIf="apiLoaded">
+    <youtube-player videoId="PRQCAL_RMVo"></youtube-player>
+</ng-container>
+
+
+.COMP.TS
+==============
+// Take refernce from `google-maps.txt` for .next() event on script loaded successfully observable code
+ngOnInit() {
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(tag);
+  apiLoaded = true;
+}
