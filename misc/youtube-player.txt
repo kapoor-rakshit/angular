@@ -7,7 +7,10 @@ OR
 > ng add @angular/youtube-player
 
 
+LOAD API
+=============
 NOTE: Make sure to add YOUTUBE IFRAME API before initing component.
+Take refernce from `google-maps.txt` file here in repo for .next() event on script loaded successfully observable code
 <script src="https://www.youtube.com/iframe_api"></script>
 
 
@@ -26,7 +29,7 @@ import {YouTubePlayerModule} from '@angular/youtube-player';
 
 .COMP.TS
 ==============
-// Take refernce from `google-maps.txt` for .next() event on script loaded successfully observable code
+// Take refernce from `google-maps.txt` file here in repo for .next() event on script loaded successfully observable code
 ngOnInit() {
   const tag = document.createElement('script');
   tag.src = 'https://www.youtube.com/iframe_api';
