@@ -671,8 +671,10 @@ app.component.html        --   displayed to BROWSER
 
 
 
-Misc. Event binding example (similar to `this` in JS)
-=============================
+Misc. Event/Element binding/reference example (similar to `this` in JS)
+========================================================================
+A. using `$event`
+---------------------
 In '.comp.html'
 - <input matInput type="text" (keyup)="applyFilter($event)" placeholder="search">
 
@@ -680,6 +682,16 @@ In '.comp.ts'
 -  applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.products.filter = filterValue.trim().toLowerCase();
+   }
+
+B. using Template Reference variables
+---------------------------------------
+In '.comp.html'
+- <input type="text" (keyup)="applyFilter(inputRef)" #inputRef>
+
+In '.comp.ts'
+-  applyFilter(elem: Element) {
+    const filterValue = elem.value;
    }
 
      
