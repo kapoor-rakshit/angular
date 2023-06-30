@@ -2229,8 +2229,9 @@ NOTES:
 1. Adding `?` operator makes that prop as optional.
    OR
    Use `Partial<INTERFACE>`, to specify that ALL properties within INTERFACE are optional, regardless of use of '?' operator against each prop.
-2. Use `Pick<INTERFACE, KEY-1 | KEY-2>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
-3. Extend an interface by declaring it again, it will have all properties within it's same name.
+2. Use `Pick<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
+3. Use `Omit<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by excluding a set of properties specified as KEYS from INTERFACE.
+4. Extend an interface by declaring it again, it will have all properties within it's same name.
    OR
    Use `extends` keyword to inherit from parent INTERFACE props.
 Eg:
@@ -2241,9 +2242,16 @@ export interface BirdInterface {
 export interface BirdInterface {
     tail: boolean;
 }
+export interface Peacock extends Pick<INTERFACE, 'KEY-1' | 'KEY-2'> {
+  colourful: boolean;
+}
+export interface Peacock extends Omit<INTERFACE, 'KEY-1' | 'KEY-2'> , Pick<INTERFACE, 'KEY-1' | 'KEY-2'> {    // NOTE: use of ',' if multiple extends required
+  colourful: boolean;
+}
 export interface Peacock extends BirdInterface {
   colourful: boolean;
   flies: boolean;
+  wings: string;     // ERROR: `wings` is already defined with type `number`. If same keys used they must be of same type.
 }
 let peacock: Partial<Peacock> = { tail: false };
 const sparw: Pick<BirdInterface, 'nose' | 'tail'> = { tail: true };    // 'nose' is optional in BirdInterface, so here also optional
