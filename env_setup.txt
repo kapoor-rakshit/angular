@@ -456,17 +456,22 @@ A sample code for estimating FCP time, write in index.html of your app
 - server-side rendered (SSR) version of our app is served using
   > npm run build:ssr && npm run serve:ssr
   These run script configuartions are available in package.json
+                          OR
+  build:ssr
+  > (cp server.prod.ts server.ts || copy server.prod.ts server.ts) && ng build --configuration production && ng run <PROJECT_NAME>:server:production
+  serve:ssr
+  > node dist/<PROJECT_NAME>/server/main.js
   The SSR app is available on port 4000 (default), which can be changed in the generated `server.ts` file.
 
   To run SSR app in development mode, that will automatically recompile the client and server bundles and live-reload the browser.
-  > npm run dev:ssr
+  > npm run dev:ssr       OR       > ng run <PROJECT_NAME>:serve-ssr
   
 - SSG/pre-rendered version of our app
   Pages that don’t need to be rendered server-side or rendered on the client every time a user makes a request. 
   Angular Universal 9 now allows you to cache these pages as static files, which can then be served to the client via your CDN or a simple server.
   Set up
   1- pre-rendered files are found at `dist/<project-name>/browser` after running following command
-     > npm run prerender
+     > npm run prerender  OR       > ng run <PROJECT_NAME>:prerender
      This will look for all static routes using guess-parser and prerender it. Prerendering also renders the data received from API response.
      Guess-parser is able to detect static routes, but it is unable to detect parameterized routes, so use following step.
   2- In `angular.json` file and look for the "prerender" builder (at the very end of the default angular.json). 
