@@ -184,6 +184,7 @@ navigateFabricSamples() {
 
 STYLES
 ============
+A.
 Spartacus provides default styling library called Sparta in the @spartacus/styles package.
 This package should be imported into project through the `styles.scss` file.
 src/styles.scss
@@ -192,4 +193,24 @@ $primary: #e502bf                                                          // if
 $font-weight-normal: 500;                                                  // this is done before Sparta library import.
 
 @import '@spartacus/styles/scss/cxbase/mixins';
+
+B.
+Spartacus provides BreakpointService, which allows same control as media queries, within TS files.
+It is better to use as it responds to resize event.
+Create a `responsive.SERVICE.TS` file, that can be injected in any COMPONENT.
+import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
+import { WindowRef } from '@spartacus/core';
+import { BREAKPOINT, BreakpointService, LayoutConfig } from '@spartacus/storefront';
+import { Observable } from 'rxjs';
+@Injectable({
+  providedIn: 'root',
+})
+export class ResponsiveService extends BreakpointService {
+  constructor(protected winRef: WindowRef, layoutConfig: LayoutConfig, @Inject(PLATFORM_ID) platform: any) {
+    super(winRef, layoutConfig, platform);
+  }
+  isMobile$: Observable<boolean> = this.isDown(BREAKPOINT.sm);  // when referring DOWN, it picks up limit of next breakpoint, here sm < 768px
+  isDesktop$: Observable<boolean> = this.isUp(BREAKPOINT.lg);   // when referring UP, it picks up limit of same breakpoint, here lg >= 992px
+}
+
 
