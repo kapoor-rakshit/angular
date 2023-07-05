@@ -1,3 +1,4 @@
+# NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a REPOSITORY directory.
 # Node.js with Angular
 # Build a Node.js project that uses Angular.
 # Add steps that analyze code, save build artifacts, deploy, and more:
