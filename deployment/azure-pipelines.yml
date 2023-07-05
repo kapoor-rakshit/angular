@@ -1,4 +1,5 @@
-# NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a REPOSITORY directory.
+# NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a REPOSITORY directory 
+# i.e. <PROJECT_NAME> directory and this YML file are at same level.
 # Node.js with Angular
 # Build a Node.js project that uses Angular.
 # Add steps that analyze code, save build artifacts, deploy, and more:
