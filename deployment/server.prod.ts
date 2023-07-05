@@ -1,3 +1,4 @@
+// NOTE: This file is placed inside <PROJECT_NAME> directory, i.e. at same level of `package.json`
 import 'zone.js/dist/zone-node';
 
 import { ngExpressEngine as engine } from '@nguniversal/express-engine';
