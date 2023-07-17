@@ -146,6 +146,28 @@ typeCode: "ContentPage"
 uid: "search"
 uuid: "eyJp==="
 
+Add component/data from Slot, inside Angular component
+----------------------------------------------------------
+.comp.HTML
+--------------
+<ng-container *ngIf="component.data$ | async as data">
+ <!-- add component using typecode / uid -->
+ <ng-container
+   [cxComponentWrapper]="{
+     flexType: data?.productBrochure?.typeCode,
+     typeCode: data?.productBrochure?.typeCode,
+     uid: data?.productBrochure?.uid
+    }">
+ </ng-container>
+
+ <!-- add data using key from response -->
+ <span>{{data?.detailErrorMessage}}</span>
+</ng-container>
+
+.comp.TS
+------------
+constructor(public component: CmsComponentData<CmsTabComponent>)
+
 
 ROUTING
 ============
