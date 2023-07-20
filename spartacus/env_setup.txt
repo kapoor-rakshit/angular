@@ -146,8 +146,8 @@ typeCode: "ContentPage"
 uid: "search"
 uuid: "eyJp==="
 
-Add component/data from Slot, inside Angular component
-----------------------------------------------------------
+ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
+=========================================================
 .comp.HTML
 --------------
 <ng-container *ngIf="component.data$ | async as data">
@@ -167,6 +167,52 @@ Add component/data from Slot, inside Angular component
 .comp.TS
 ------------
 constructor(public component: CmsComponentData<CmsTabComponent>)
+
+
+LAUNCH-DIALOG SERVICE (POPUP)
+=================================
+.model.TS
+--------------
+import '@spartacus/storefront';
+declare module '@spartacus/storefront' {
+  const enum LAUNCH_CALLER {
+    FABRIC_SELECT = 'FABRIC_SELECT',
+    NEAREST_STORES = 'NEAREST_STORES'
+  }
+}
+
+.module.TS
+---------------
+export const defaultLaunchConfig: LayoutConfig = {
+  launch: {
+    [LAUNCH_CALLER.FABRIC_SELECT]: {
+      inlineRoot: true,
+      component: FabricSelectorModalComponent,
+      dialogType: DIALOG_TYPE.DIALOG,
+    },
+    [LAUNCH_CALLER.NEAREST_STORES]: {
+      inlineRoot: true,
+      component: NearestStoresComponent,
+      dialogType: DIALOG_TYPE.DIALOG,
+    }
+  },
+};
+
+@NgModule({
+  declarations: [],
+  imports: [],
+  providers: [provideDefaultConfig(defaultLaunchConfig)],
+})
+
+.comp.TS
+-------------
+import { LaunchDialogService, LAUNCH_CALLER } from '@spartacus/storefront';
+@ViewChild('NearestStoreModalOpen') private dialogTriggerRef!: ElementRef;
+constructor(private launchDialogService: LaunchDialogService) {}
+this.launchDialogService.openDialogAndSubscribe(LAUNCH_CALLER.NEAREST_STORES, this.dialogTriggerRef, {
+  data_key_1: data_value_1,
+  data_key_2: data_value_2
+});
 
 
 ROUTING
