@@ -187,17 +187,15 @@ export const defaultLaunchConfig: LayoutConfig = {
   launch: {
     [LAUNCH_CALLER.FABRIC_SELECT]: {
       inlineRoot: true,
-      component: FabricSelectorModalComponent,
+      component: PopupComponent_1,
       dialogType: DIALOG_TYPE.DIALOG,
     },
     [LAUNCH_CALLER.NEAREST_STORES]: {
       inlineRoot: true,
-      component: NearestStoresComponent,
+      component: PopupComponent_2,
       dialogType: DIALOG_TYPE.DIALOG,
     }
-  },
-};
-
+}};
 @NgModule({
   declarations: [],
   imports: [],
@@ -209,7 +207,24 @@ export const defaultLaunchConfig: LayoutConfig = {
 import { LaunchDialogService, LAUNCH_CALLER } from '@spartacus/storefront';
 @ViewChild('NearestStoreModalOpen') private dialogTriggerRef!: ElementRef;
 constructor(private launchDialogService: LaunchDialogService) {}
+// A.
 this.launchDialogService.openDialogAndSubscribe(LAUNCH_CALLER.NEAREST_STORES, this.dialogTriggerRef, {
+  data_key_1: data_value_1,
+  data_key_2: data_value_2
+});
+// B.
+this.launchDialogService.dialogClose.pipe(takeUntil(this.destroyed$)).subscribe((data: any) => {
+  // TODO: data received from .popup.comp.TS on closing dialog
+});
+
+.popup.comp.TS
+------------------
+// A.
+this.launchDialogService.data$.pipe(takeUntil(this.destroyed$)).subscribe((data: any) => {
+  // TODO: data received from .comp.TS on opening dialog
+});
+// B.
+this.launchDialogService.closeDialog({
   data_key_1: data_value_1,
   data_key_2: data_value_2
 });
