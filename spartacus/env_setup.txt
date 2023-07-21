@@ -148,7 +148,7 @@ uuid: "eyJp==="
 
 ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
 =========================================================
-.comp.HTML
+1. .COMP.HTML
 --------------
 <ng-container *ngIf="component.data$ | async as data">
  <!-- add component using typecode / uid -->
@@ -163,15 +163,14 @@ ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
  <!-- add data using key from response -->
  <span>{{data?.detailErrorMessage}}</span>
 </ng-container>
-
-.comp.TS
+2. .COMP.TS
 ------------
 constructor(public component: CmsComponentData<CmsTabComponent>)
 
 
 LAUNCH-DIALOG SERVICE (POPUP)
 =================================
-.model.TS
+1. .MODEL.TS
 --------------
 import '@spartacus/storefront';
 declare module '@spartacus/storefront' {
@@ -180,8 +179,7 @@ declare module '@spartacus/storefront' {
     NEAREST_STORES = 'NEAREST_STORES'
   }
 }
-
-.module.TS
+2. .MODULE.TS
 ---------------
 export const defaultLaunchConfig: LayoutConfig = {
   launch: {
@@ -201,40 +199,48 @@ export const defaultLaunchConfig: LayoutConfig = {
   imports: [],
   providers: [provideDefaultConfig(defaultLaunchConfig)],
 })
-
-.comp.TS
+3. .COMP.TS
 -------------
 import { LaunchDialogService, LAUNCH_CALLER } from '@spartacus/storefront';
 @ViewChild('NearestStoreModalOpen') private dialogTriggerRef!: ElementRef;
 constructor(private launchDialogService: LaunchDialogService) {}
-// A.
+A.
 this.launchDialogService.openDialogAndSubscribe(LAUNCH_CALLER.NEAREST_STORES, this.dialogTriggerRef, {
   data_key_1: data_value_1,
   data_key_2: data_value_2
 });
-// B.
+B.
 this.launchDialogService.dialogClose.pipe(takeUntil(this.destroyed$)).subscribe((data: any) => {
   // TODO: data received from .popup.comp.TS on closing dialog
 });
-
-.popup.comp.TS
+4. .POPUP.COMP.TS
 ------------------
-// A.
+A.
 this.launchDialogService.data$.pipe(takeUntil(this.destroyed$)).subscribe((data: any) => {
   // TODO: data received from .comp.TS on opening dialog
 });
-// B.
+B.
 this.launchDialogService.closeDialog({
   data_key_1: data_value_1,
   data_key_2: data_value_2
 });
 
 
+GLOBAL MESSAGE SERVICE (BANNER MESSAGE SHOWN AT TOP)
+=========================================================
+import { GlobalMessageService, GlobalMessageType } from '@spartacus/core';
+constructor(private globalMsgService: GlobalMessageService) {}
+this.globalMsgService.add(
+  'MSG-STRING' || { key: 'KEY-FROM-TRANSLATIONS-FILE' },
+  GlobalMessageType.MSG_TYPE_CONFIRMATION                                 // MSG_TYPE_CONFIRMATION, MSG_TYPE_ERROR, MSG_TYPE_INFO, MSG_TYPE_WARNING
+);
+
+
 ROUTING
 ============
 Many routes are built-in with SPARTACUS, and render templates accordingly.
 However, we can create CUSTOM routes too.
-APP.MODULE.TS
+1. APP.MODULE.TS
 -----------------
 imports: [
     ConfigModule.withConfig({
@@ -246,15 +252,13 @@ imports: [
       }
     })
 ]
-
-SPARTACUS-FEATURES.MODULE.TS
+2. SPARTACUS-FEATURES.MODULE.TS
 -------------------------------
 imports: [
     CUSTOM_MODULE_1,
     CUSTOM_MODULE_2
 ]
-
-.COMP.TS
+3. .COMP.TS
 -------------------
 import { RoutingService } from '@spartacus/core';
 constructor(private routingService: RoutingService) {}
@@ -274,7 +278,6 @@ src/styles.scss
 ------------------
 $primary: #e502bf                                                          // if any new value to scss variables, has to be re-assigned.
 $font-weight-normal: 500;                                                  // this is done before Sparta library import.
-
 @import '@spartacus/styles/scss/cxbase/mixins';
 
 B.
