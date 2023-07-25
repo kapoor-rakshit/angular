@@ -274,9 +274,9 @@ readonly defaultUserId = OCC_USER_ID_ANONYMOUS;                                 
 constructor(public httpClient: HttpClient, public occEndpointsService: OccEndpointsService) { }
 A.
 serviceMethod() {
-  const url = this.occEndpointsService.buildUrl('KEY-FROM-ENDPOINTS-CONFIG-FILE', {       // eg:'KEY_4' , file configured in `spartacus-configuration.MODULE.TS`
+  const url = this.occEndpointsService.buildUrl('KEY-FROM-ENDPOINTS-CONFIG-FILE', {       // eg:'KEY_2' , file configured in `spartacus-configuration.MODULE.TS`
     urlParams: {
-      PARAM_1: this.defaultUserId,
+      PARAM_1: this.defaultUserId,                                                        // variables in URL i.e. ${PARAM_1}
       PARAM_2: VAL_2,
     }
   });
@@ -302,16 +302,12 @@ export const storeEndpoints = {
     occ: {
       endpoints: {
         KEY_1: 'basesites?fields=FULL',
-        KEY_2: 'products/search?fields=FULL',
-        KEY_3: 'products/${PARAM_1}?fields=FULL',
-        KEY_4: 'users/${PARAM_1}/carts/${PARAM_2}?fields=FULL',
-        KEY_5: 'products/${PARAM_1}?fields=BASIC',
+        KEY_2: 'users/${PARAM_1}/carts/${PARAM_2}?fields=FULL'
       },
     },
   },
   endpointURL_1: 'payment-token',
-  endpointURL_2: 'users/${PARAM_1}/orders?cartId=${cartid}&fields=FULL',
-  endpointURL_3: 'online-payment?fields=FULL',
+  endpointURL_2: 'users/${PARAM_1}/orders?cartId=${cartid}&fields=FULL'
 };
 
 
@@ -346,6 +342,49 @@ navigateFabricSamples() {
       cxRoute: 'FE_PATH_2',
     });
 }
+
+
+CART SERVICES
+===================
+import { ActiveCartService, UserIdService, MultiCartService } from '@spartacus/core';
+constructor(private activeCartService: ActiveCartService,
+            private userIdService: UserIdService,
+            private multiCartService: MultiCartService) {}
+A.
+// Subscribe to any cart related changes and get cart data
+this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe((cart: CART-TYPE) => {
+  this.cartID = cart?.guid || cart?.code;
+  this.cdRef.markForCheck();
+});
+B.
+// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
+this.activeCartService.requireLoadedCart().pipe(
+    concatMap((cartState) => {
+        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
+    })
+).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
+    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
+}, (err: Error) => {
+    // TODO: ERROR OF HTTP-SERVICE-METHOD
+});
+C.
+// Reload/Refresh cart at app level to have changes if any reflected in getActive() cart subscription (REFER: A point)
+this.reloadSub = combineLatest([
+    this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
+]).subscribe(([userId, cartId]: [string, string]) => {
+      if (cartId && userId) {
+        this.multiCartService.loadCart({
+          userId,
+          cartId,
+          extraData: {
+            active: true,
+          },
+        });
+        if (this.reloadSub) {
+          this.reloadSub.unsubscribe();
+        }
+      }
+});
 
 
 STYLES
