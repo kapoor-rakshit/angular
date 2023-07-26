@@ -357,17 +357,6 @@ this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe(
   this.cdRef.markForCheck();
 });
 B.
-// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
-this.activeCartService.requireLoadedCart().pipe(
-    concatMap((cartState) => {
-        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
-    })
-).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
-    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
-}, (err: Error) => {
-    // TODO: ERROR OF HTTP-SERVICE-METHOD
-});
-C.
 // Reload/Refresh cart at app level to have changes if any reflected in getActive() cart subscription (REFER: A point)
 this.reloadSub = combineLatest([
     this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
@@ -384,6 +373,17 @@ this.reloadSub = combineLatest([
           this.reloadSub.unsubscribe();
         }
       }
+});
+C.
+// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
+this.activeCartService.requireLoadedCart().pipe(
+    concatMap((cartState) => {
+        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
+    })
+).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
+    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
+}, (err: Error) => {
+    // TODO: ERROR OF HTTP-SERVICE-METHOD
 });
 
 
