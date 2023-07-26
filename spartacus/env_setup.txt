@@ -136,7 +136,13 @@ export const layoutConfig: LayoutConfig = {
         slots: ['Footer']                                          // <cx-page-slot class="Footer" position="Footer"></cx-page-slot>
       },
       LandingPage2Template: {                                      // <cx-page-layout class="LandingPage2Template"></cx-page-layout>
-        pageFold: 'Section2B',                                     // indication to speed up initial creation of this(Section2B),previous,sibling slots
+        lg: {
+          pageFold: 'UpSelling',                                   // Above-the-fold loading is an indication to speed up initial creation of slots
+                                                                   // pageFold: indicates last page slot that should be rendered above the fold.
+                                                                   // and are prioritized ahead of page slots that are “below the fold”/after this slot
+          slots: ['Summary', 'UpSelling', 'Section2B']
+        },
+        pageFold: 'Section2B',
         slots: []
       },
       SearchResultsListPageTemplate: {
