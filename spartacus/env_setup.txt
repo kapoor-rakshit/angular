@@ -1,14 +1,32 @@
 Spartacus is Angular-based JavaScript storefront for SAP Commerce Cloud.
 Spartacus talks to SAP Commerce Cloud exclusively through the Commerce REST API.
+Starting with version 5.0, “SAP Commerce Cloud, composable storefront” is name for official release of project “Spartacus” libraries published by SAP.
+
+REFERENCE: https://github.com/SAP/spartacus#requirements
+    For which version of    Node, Angular, Yarn, NPM    to use, refer above website for suitable Spartacus(Composable Storefront) version
+
+To install composable storefront, need to set up access to composable storefront libraries in Repository Based Shipment Channel (RBSC)
+    RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
+    Create an S-user for RBSC that has the appropriate licenses to download the composable storefront libraries.
+    An S-user account can see Composable Storefront License in list of licenses.
+    If the Composable Storefront License does not appear in this list, there will be an error when downloading the packages.
+    Click on Add User and create a technical user.
+    In User Management tab of RBSC website, select the technical user and copy the generated NPM Base64 Credentials, required for .npmrc file in project
 
 SETUP
 =============
-> ng new <APP_NAME>
-> ng add @spartacus/schematics --baseUrl <BACKEND_URL> --baseSite=<CONFIG> --ssr --pwa
-  --baseUrl: url of backend
-  --baseSite: name of storefront
-  --ssr: enable SSR features of app
-  --pwa: enable PWA features of app
+> ng new <APP_NAME> --style=scss --routing=false
+> cd <APP_NAME>
+> create an .npmrc file with following content | NOTE: // in second line | NOTE: NPM-CREDENTIALS-FROM-RBSC copied as in above steps
+      @spartacus:registry=https://73554900100900004337.npmsrv.base.repositories.cloud.sap/
+      //73554900100900004337.npmsrv.base.repositories.cloud.sap/:_auth=NPM-CREDENTIALS-FROM-RBSC
+      always-auth=true
+> ng add @spartacus/schematics@VERSION --baseUrl <BACKEND_URL> --baseSite=<CONFIG> --ssr --pwa
+      --baseUrl: url of backend
+      --baseSite: name of storefront
+      --ssr: enable SSR features of app
+      --pwa: enable PWA features of app
+> npm install
 
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
