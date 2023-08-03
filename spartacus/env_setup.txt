@@ -1,9 +1,14 @@
 Spartacus is Angular-based JavaScript storefront for SAP Commerce Cloud.
 Spartacus talks to SAP Commerce Cloud exclusively through the Commerce REST API.
-Starting with version 5.0, “SAP Commerce Cloud, composable storefront” is name for official release of project “Spartacus” libraries published by SAP.
+Starting with version 5.0, “SAP Commerce Cloud, Composable Storefront” is name for official release of project “Spartacus” libraries published by SAP.
 
 REFERENCE: https://github.com/SAP/spartacus#requirements
-    For which version of    Node, Angular, Yarn, NPM    to use, refer above website for suitable Spartacus(Composable Storefront) version
+    For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
+
+HAC (Hybris Administrative Console or BackOffice Admin Console)
+It is for administrator to handle entire functions and operations in website like:
+ImpEx (Import-Export), Groovy Script, Configuration, Cache, Cron Job
+    Use-Case-1: CORS issue: Check property 'allowedHeaders' through HAC , delete web application services for CORS , rerun CORS impex
 
 To install composable storefront, need to set up access to composable storefront libraries in Repository Based Shipment Channel (RBSC)
     RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
@@ -26,7 +31,10 @@ SETUP
       --baseSite: name of storefront
       --ssr: enable SSR features of app
       --pwa: enable PWA features of app
-> npm install
+  OR
+  ng update @spartacus/schematics@VERSION         // After update is done, inspect your code for comments that begin with TODO:Spartacus
+> check `package.json` for correct version of @spartacus libs , delete node_modules(if already exists) and then run:
+  npm install
 
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
@@ -200,30 +208,47 @@ typeCode: "ContentPage"
 uid: "search"
 uuid: "eyJp==="
 
+
 ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
 =========================================================
-1. .COMP.HTML
---------------
-<ng-container *ngIf="component.data$ | async as data">
- <!-- add component using typecode / uid -->
+1. MODULE.TS                                    // NOTE: import this module, in COMP's MODULE,
+--------------                                  // so that COMP-NAME can render when matches [cxComponentWrapper]
+@NgModule({
+  providers: [
+    provideDefaultConfig(<CmsConfig>{
+      cmsComponents: {
+        TYPE-CODE: {                            // TYPE-CODE is same value as given to  [cxComponentWrapper]  typeCode in COMP.HTML
+          component: COMP-NAME,                 // COMP-NAME is component to render, when this typecode matches with [cxComponentWrapper]
+        },
+      },
+    }),
+  ],
+  declarations: [COMP-NAME],
+  exports: [COMP-NAME],
+})
+export class COMP-NAME-MODULE {}
+2. COMP.HTML
+---------------
+<ng-container *ngIf="component.data$ | async as compData">
+ <!-- A. add component using typecode / uid -->
  <ng-container
    [cxComponentWrapper]="{
-     flexType: data?.productBrochure?.typeCode,
-     typeCode: data?.productBrochure?.typeCode,
-     uid: data?.productBrochure?.uid
+     flexType: compData?.productBrochure?.typeCode,
+     typeCode: compData?.productBrochure?.typeCode,
+     uid: compData?.productBrochure?.uid
     }">
  </ng-container>
 
- <!-- add data using key from response -->
- <span>{{data?.detailErrorMessage}}</span>
+ <!-- B. add data using key from response -->
+ <span>{{ compData?.detailErrorMessage }}</span>
 </ng-container>
-2. .COMP.TS
-------------
+3. COMP.TS
+-------------
 constructor(public component: CmsComponentData<CmsTabComponent>)
 
 
-LAUNCH-DIALOG SERVICE (POPUP)
-=================================
+LAUNCH-DIALOG SERVICE (POPUP/MODAL/DIALOG)
+=============================================
 1. .MODEL.TS
 --------------
 import '@spartacus/storefront';
@@ -288,6 +313,50 @@ this.globalMsgService.add(
   'MSG-STRING' || { key: 'KEY-FROM-TRANSLATIONS-FILE' },
   GlobalMessageType.MSG_TYPE_CONFIRMATION                         // MSG_TYPE_CONFIRMATION | MSG_TYPE_ERROR | MSG_TYPE_INFO | MSG_TYPE_WARNING
 );
+
+
+PAGINATION WIDGET
+========================
+1. MODULE.TS
+-----------------
+import { GenericLinkModule, IconModule, ListNavigationModule, PageComponentModule } from '@spartacus/storefront';
+@NgModule({
+    imports: [
+        PageComponentModule
+    ]
+})
+export class MyPLPModule {}
+2. COMP.HTML
+-----------------
+<div *ngIf="(searchResult.pagination?.totalPages ?? 0) > 1">
+    <cx-pagination [pagination]="searchResult.pagination" queryParam="currentPage" [defaultPage]="0"></cx-pagination>
+</div>
+3. COMP.TS
+------------------
+this.searchResult = data;                // data from API response of /search , it will have
+                                         // object "pagination": {"currentPage": 1,"pageSize": 24,"sort": "clear","totalPages": 3,"totalResults": 60} 
+
+BASESITE SERVICE
+=========================
+import { BaseSiteService } from '@spartacus/core';
+constructor(private baseSiteService: BaseSiteService) { }
+public showReviewsWidget: boolean = false;
+private activeSiteUID: string = '';
+this.baseSiteService.get().pipe(takeUntil(this.destroyed$)).subscribe((baseSite) => {
+    this.showReviewsWidget = (baseSite as BASESITE-INTERFACE).KEY-FROM-BASESITE;
+    this.activeSiteUID = baseSite?.uid ?? '';
+});
+
+
+CMS SERVICE
+==========================
+import { CmsService, Page } from '@spartacus/core';
+constructor(private cmsService: CmsService) { }
+public pageData!: Page;
+this.cmsService.getCurrentPage().pipe(takeUntil(this.destroyed$)).subscribe((data) => {
+    this.pageData = data;
+});
+this.pageData?.template === PageTemplateENUM.VALUE-FROM-PAGES-API-TEMPLATE;
 
 
 HTTP REQUESTS (services)
