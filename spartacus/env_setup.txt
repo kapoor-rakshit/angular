@@ -2,6 +2,10 @@ Spartacus is Angular-based JavaScript storefront for SAP Commerce Cloud.
 Spartacus talks to SAP Commerce Cloud exclusively through the Commerce REST API.
 Starting with version 5.0, “SAP Commerce Cloud, Composable Storefront” is name for official release of project “Spartacus” libraries published by SAP.
 
+Spartacus Code Repo, must be cloned on development machine, to have reference for builtin core features like cart, search etc.
+GITHUB REPO: https://github.com/SAP/spartacus
+REFERENCE  : https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/cfcf687ce2544bba9799aa6c8314ecd0/e38d45609de04412920a7fc9c13d41e3.html
+
 REFERENCE: https://github.com/SAP/spartacus#requirements
     For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
 
@@ -33,7 +37,8 @@ SETUP
       --pwa: enable PWA features of app
   OR
   ng update @spartacus/schematics@VERSION         // After update is done, inspect your code for comments that begin with TODO:Spartacus
-> check `package.json` for correct version of @spartacus libs , delete node_modules(if already exists) and then run:
+> check `package.json` for correct version of @spartacus libs and
+  delete node_modules(if already exists) and then run:
   npm install
 
 1. It creates a directory named `spartacus` and inside it:
@@ -101,6 +106,10 @@ SETUP
 NOTE: if missed some config, while creating app, it can be done later too
 > ng g @spartacus/schematics:add-pwa                    // adds spartacus-specific PWA module
 > ng g @spartacus/schematics:add-ssr                    // adds SSR configuration
+
+NOTE: If not installed particular integration lib / feature lib (package) during initial set up of storefront like
+@spartacus/cart | @spartacus/checkout | @spartacus/product | @spartacus/smartedit | @spartacus/styles | @spartacus/user   install later using:
+> ng add <package-name>
 
 
 MODULES / COMPONENTS / LAYOUT
@@ -359,6 +368,39 @@ this.cmsService.getCurrentPage().pipe(takeUntil(this.destroyed$)).subscribe((dat
 this.pageData?.template === PageTemplateENUM.VALUE-FROM-PAGES-API-TEMPLATE;
 
 
+ROUTING
+==============
+Many routes are built-in with SPARTACUS, and render templates accordingly.
+However, we can create CUSTOM routes too.
+1. APP.MODULE.TS
+-------------------
+imports: [
+    ConfigModule.withConfig({
+      routing: {
+        routes: {
+          FE_PATH_1: { paths: ['BACKEND_PATH_FOR_PAGE_1'] },
+          FE_PATH_2: { paths: ['BACKEND_PATH_FOR_PAGE_2'] },
+        }
+      }
+    })
+]
+2. SPARTACUS-FEATURES.MODULE.TS
+----------------------------------
+imports: [
+    CUSTOM_MODULE_1,
+    CUSTOM_MODULE_2
+]
+3. COMP.TS
+-------------------
+import { RoutingService } from '@spartacus/core';
+constructor(private routingService: RoutingService) {}
+navigateFabricSamples() {
+    this.routingService.go({
+      cxRoute: 'FE_PATH_2',
+    });
+}
+
+
 HTTP REQUESTS (services)
 ===========================
 1. SERVICE.TS
@@ -390,6 +432,7 @@ serviceMethod() {
 }
 2. ENDPOINTS.CONST.TS
 ------------------------
+// NOTE: This file is configured in `spartacus-configuration.MODULE.TS`
 // NOTE: If KEY is NOT found from here, it is referred from configs from SPARTACUS builtin like `defaultOccCartConfig`
 export const storeEndpoints = {
   backend: {
@@ -405,39 +448,6 @@ export const storeEndpoints = {
 };
 
 
-ROUTING
-============
-Many routes are built-in with SPARTACUS, and render templates accordingly.
-However, we can create CUSTOM routes too.
-1. APP.MODULE.TS
------------------
-imports: [
-    ConfigModule.withConfig({
-      routing: {
-        routes: {
-          FE_PATH_1: { paths: ['BACKEND_PATH_FOR_PAGE_1'] },
-          FE_PATH_2: { paths: ['BACKEND_PATH_FOR_PAGE_2'] },
-        }
-      }
-    })
-]
-2. SPARTACUS-FEATURES.MODULE.TS
--------------------------------
-imports: [
-    CUSTOM_MODULE_1,
-    CUSTOM_MODULE_2
-]
-3. .COMP.TS
--------------------
-import { RoutingService } from '@spartacus/core';
-constructor(private routingService: RoutingService) {}
-navigateFabricSamples() {
-    this.routingService.go({
-      cxRoute: 'FE_PATH_2',
-    });
-}
-
-
 CART SERVICES
 ===================
 import { ActiveCartService, UserIdService, MultiCartService } from '@spartacus/core';
@@ -445,13 +455,25 @@ constructor(private activeCartService: ActiveCartService,
             private userIdService: UserIdService,
             private multiCartService: MultiCartService) {}
 A.
+// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
+this.activeCartService.requireLoadedCart().pipe(
+    concatMap((cartState) => {
+        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
+    })
+).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
+    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
+}, (err: Error) => {
+    // TODO: ERROR OF HTTP-SERVICE-METHOD
+});
+B.1.
 // Subscribe to any cart related changes and get cart data
 this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe((cart: CART-TYPE) => {
   this.cartID = cart?.guid || cart?.code;
   this.cdRef.markForCheck();
 });
-B.
+B.2.
 // Reload/Refresh cart at app level to have changes if any reflected in getActive() cart subscription (REFER: A point)
+// Eg: A product is added to cart, and we need some UI change depending on updated cart data after this product is added to cart.
 this.reloadSub = combineLatest([
     this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
 ]).subscribe(([userId, cartId]: [string, string]) => {
@@ -469,21 +491,23 @@ this.reloadSub = combineLatest([
       }
 });
 C.
-// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
-this.activeCartService.requireLoadedCart().pipe(
-    concatMap((cartState) => {
-        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
-    })
-).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
-    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
-}, (err: Error) => {
-    // TODO: ERROR OF HTTP-SERVICE-METHOD
+// Cart can be updated using builtin endpoint KEYS like 'addEntries', 'updateEntries', 'removeEntries' from defaultOccCartConfig of spartacus
+// i.e. we need NOT to specify URL endpoints in the endpoints file provided in `spartacus-configuration.MODULE.TS`
+// Other KEYS and URLs value and what all path params (urlParams) it expects, can be checked from spartacus code repo.
+const url = this.occEndpointsService.buildUrl('updateEntries', {
+    urlParams: {
+        userId: this.defaultUserId,
+        cartId: CART_ID,
+        entryNumber: ENTRY_NUMBER,
+    }
 });
+D.
+// A cart and all it's associated data is deleted from BackOffice/HAC, depending on GUID or CODE
 
 
 STYLES
 ============
-A.
+A. SPARTA LIB + MIXINS
 Spartacus provides default styling library called Sparta in the @spartacus/styles package.
 This package should be imported into project through the `styles.scss` file.
 src/styles.scss
@@ -492,7 +516,7 @@ $primary: #e502bf                                                          // if
 $font-weight-normal: 500;                                                  // this is done before Sparta library import.
 @import '@spartacus/styles/scss/cxbase/mixins';
 
-B.
+B. BREAKPOINT SERVICE
 Spartacus provides BreakpointService, which allows same control as media queries, within TS files.
 It is better to use as it responds to resize event.
 Create a `responsive.SERVICE.TS` file, that can be injected in any COMPONENT.
