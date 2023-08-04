@@ -10,7 +10,7 @@ export const checkSearchAndContentPageUrl = (server: any, indexHtml: string) => 
     let urlToTest = req.originalUrl.split('?')[0];
     res.append('UrlToTest', urlToTest);
 
-    if (urlToTest === '/' || urlToTest === '/cx-preview') {
+    if (urlToTest === '/' || urlToTest === '/cx-preview' || (urlToTest.includes('/search') && req.params.searchtext)) {
       render(req, res, indexHtml);
       return;
     }
@@ -36,7 +36,7 @@ export const checkSearchAndContentPageUrl = (server: any, indexHtml: string) => 
 };
 
 export const checkCategoryPageUrl = (server: any, indexHtml: string) => {
-  server.get(['*/c/:subCat', '*/c/:subCat?query=*'], (req: any, res: any) => {
+  server.get(['*/c/:subCat', '*/c/:subCat\\?*'], (req: any, res: any) => {
     if (!req.params.subCat) {
       res.redirect(301, notFoundUrl);
       res.end();
@@ -57,7 +57,7 @@ export const checkCategoryPageUrl = (server: any, indexHtml: string) => {
 };
 
 export const checkPDPPageUrl = (server: any, indexHtml: string) => {
-  server.get(['*/p/:productCode'], (req: any, res: any) => {
+  server.get(['*/p/:productCode', '*/p/:productCode\\?*'], (req: any, res: any) => {
     if (!req.params.productCode) {
       res.redirect(301, notFoundUrl);
       res.end();
