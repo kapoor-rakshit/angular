@@ -6,8 +6,12 @@ Spartacus Code Repo, must be cloned on development machine, to have reference fo
 GITHUB REPO: https://github.com/SAP/spartacus
 REFERENCE  : https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/cfcf687ce2544bba9799aa6c8314ecd0/e38d45609de04412920a7fc9c13d41e3.html
 
+Storefront Version
 REFERENCE: https://github.com/SAP/spartacus#requirements
-    For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
+For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
+
+SmartEdit
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/dc259a9f232a469ca8da3cf22f34839c.html
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 It is for administrator to handle entire functions and operations in website like:
@@ -343,7 +347,27 @@ export class MyPLPModule {}
 3. COMP.TS
 ------------------
 this.searchResult = data;                // data from API response of /search , it will have
-                                         // object "pagination": {"currentPage": 1,"pageSize": 24,"sort": "clear","totalPages": 3,"totalResults": 60} 
+                                         // object "pagination": {"currentPage": 1,"pageSize": 24,"sort": "clear","totalPages": 3,"totalResults": 60}
+
+INFINITE SCROLL
+=========================
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/d37bd1496c6c42d5b7a17740ba155e94.html
+When infinite scroll is enabled in composable storefront, it applies to product search page, as well as category pages in both list and grid views.
+When infinite scroll is disabled, composable storefront uses pagination instead. By default, infinite scroll is disabled in composable storefront.
+1. APP.MODULE.TS
+----------------------
+imports: [
+    ConfigModule.withConfig({
+        view: {
+            infiniteScroll: {
+                active: true,             // enable / disable infinite scroll
+                productLimit: 50,         // number of products user can scroll through before they are prompted to load more items using SHOW MORE button
+                showMoreButton: false,    // true: sets "productLimit" : 10  i.e. value for productLimit key is ignored  |  false: productLimit key considered
+            },
+        },
+    })
+]
+
 
 BASESITE SERVICE
 =========================
