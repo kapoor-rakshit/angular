@@ -73,7 +73,7 @@ SETUP
                 },
              }),
              provideConfig(<I18nConfig>{
-                i18n: { resources: myTranslations },   // translations config file
+                i18n: { resources: appTranslations },   // translations config file
 
                 state: {                               // Spartacus runs XHR requests on server, and then again on client-side when application bootstraps.
                   ssrTransfer: {                       // Spartacus includes part of the NgRx state with the server-side rendered HTML
@@ -367,6 +367,38 @@ imports: [
         },
     })
 ]
+
+
+TRANSLATION SERVICE
+=========================
+1. MODULE.TS
+--------------
+import { I18nModule } from '@spartacus/core';
+imports: [I18nModule]
+export class COMP-MODULE {}
+2. appTranslations.TS                                 // file configured in `spartacus-configuration.MODULE.TS`
+------------------------
+export const appTranslations = {
+    en: {
+        HEADER: {                                     // NOTE: same HEADER name inside HEADER
+            HEADER: {
+                KEY_1: 'VAL_1',
+                KEY_2: 'VAL_2 {{VARIABLE}} VAL_2',    // NOTE: use of VARIABLE
+            }
+        }
+    }
+}
+3.A. COMP.TS
+----------------
+import { TranslationService } from '@spartacus/core';
+constructor(private translationService: TranslationService) { }
+this.translationService.translate('HEADER.KEY_1').pipe(first()).subscribe((tData) => { this.val = tData; });
+this.translationService.translate('HEADER.KEY_2', {VARIABLE: VAL-OF-VARIABLE}).pipe(first()).subscribe((tData) => { this.val = tData; });
+OR
+3.B. COMP.HTML
+----------------
+{{ 'HEADER.KEY_1' | cxTranslate }}
+{{ 'HEADER.KEY_2' | cxTranslate: {VARIABLE: VAL-OF-VARIABLE} }}
 
 
 BASESITE SERVICE
