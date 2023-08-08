@@ -2232,6 +2232,17 @@ export class MyComponent {
 }
 
 
+VIEWPORT SCROLLER
+====================
+This is similar to using document.body.scrollIntoView({})
+Eg:
+import { ViewportScroller } from '@angular/common';
+constructor(private viewportScroller: ViewportScroller) { }
+this.viewportScroller.getScrollPosition();                        // returns current scroll position i.e. [x,y]
+this.viewportScroller.scrollToPosition([0, 0]);			  // set scroll position [x,y]
+this.viewportScroller.scrollToAnchor('ID-OF-ANCHOR-TAG');	  // ID of   <a id="ID-OF-ANCHOR-TAG"></a>   on page
+
+
 INTERFACEs
 ====================
 Create "interface.ts"  file and export interface
@@ -2340,7 +2351,45 @@ B.2.) declare this service class in "providers" array of LAZY LOADED SUB module 
    
 C) declare this service class in "providers" array of COMPONENT metadata to have different instance, but same within component & it's child components only.
    eg: if service provided in both providers array of ROOT module and component, we will have two instances of that service
-   
+
+PROVIDERS ARRAY
+--------------------------
+Dependency providers can be configured in following ways:
+useValue: Inject a value or a function , Often used to set the initial configuration.
+useClass: Returns another class, specified by “useClass” when component asks for class specified in "provide".
+	  Using this, we can implement "provide" service's methods in different way. Also, this new CUSTOM service may or may not extend "provide" service.
+useExisting: First token is an alias for service associated with second token, creating two ways to access same service object.
+	     Eg: LoggerService had a large number of API methods. But we might want to shrink that API to just members actually needed.
+	     Since in constructor logger parameter is typed as MinimalLogger, so only logs and logInfo members are visible in a TypeScript-aware editor.
+	     Behind scenes, Angular sets logger parameter to full service registered, which happens to be DateLoggerService.
+multi: true  option tells Angular that HTTP_INTERCEPTORS is a token for a multiprovider that injects an array of values, rather than a single value.
+       In absence of multi: true, when we register multiple providers with same token, last one wins i.e. it overrides previously registered directives.
+       To avoid this, multi: true is set on all providers for same token.
+Eg:
+MODULE.TS
+providers: [
+  { provide: 'KEY', useValue: '/esp/kapoor/rakshit' },
+  { provide: 'FUNC', useValue: () => { return 'hello'; } },
+  { provide: ProductListComponentService, useClass: CUSTOM-ProductListComponentService },
+  { provide: LoggerService, useClass: DateLoggerService },
+  { provide: MinimalLogger, useExisting: LoggerService },
+  { provide: PageMetaResolver, useClass: CUSTOM-CategoryPageMetaResolver, multi: true },
+  { provide: PageMetaResolver, useClass: CUSTOM-DepartmentPageMetaResolver, multi: true }
+]
+MINIMAL-LOGGER.SERVICE.TS
+export abstract class MinimalLogger {
+  abstract logs: string[];
+  abstract logInfo: (msg: string) => void;
+}
+COMP.TS
+constructor(@Inject('KEY') public someKey: string , @Inject('FUNC') public someFunc: any,
+	    private productListComponentService: ProductListComponentService,
+	    private logger: MinimalLogger) {
+  console.log(this.someKey);
+  console.log(this.someFunc());
+  this.searchResult$ = this.productListComponentService.model$;
+  logger.logInfo('starting up');
+}
    
 ENVIRONMENT PROPERTIES
 --------------------------
@@ -2675,7 +2724,9 @@ REST APIs have certain types of parameters:
   using [queryParams] in <a></a> OR in router.navigate([]) OR in HTTP options in a ".service.ts" to attach Query string params with route.
   queryParamsHandling, allow to handle query params while navigation, which in default behavior discards previous navigation route query params.
        'merge': Merge previous navigation route queryParams with given query params, i.e. both are provided to URL
-       'preserve': Preserve previous navigation route query params only, i.e. discard given query params, only previous route query params provided to URL
+		In case of same key name, NEW value is used for that key
+       'preserve': Preserve previous navigation route query params only, i.e. discard given query params, only previous route query params provided to URL.
+		   In case of same key name, OLD value is used for that key.
   Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [queryParams]="{q1: 'mapcolumns', q2: [163, 592, 586]}"></a>
                                     , <a [routerLink]="['/user/bob']" [queryParams]="{debug: true}" queryParamsHandling="merge"></a>
                                     OR
@@ -2743,7 +2794,6 @@ A better approach is to use APP_BASE_HREF as follows:
   providers: [{provide: APP_BASE_HREF, useValue: '/esp/kapoor/rakshit'}]
 
 
-
 LOCATION STRATEGIES
 =====================
 REFERENCE   :   https://codecraft.tv/courses/angular/routing/routing-strategies/
@@ -2785,7 +2835,6 @@ HTTP INTERCEPTORS
   Multiple interceptors can be chained, NOTE : The interceptors will be called in the order in which they were provided.
   It is useful for logging, authentication etc.
   If interceptor was not there, the code has to be duplicated in each HttpClient method call.
-  
 - Steps
   1) Create an Injectable class for each type of interceptor implementing interface HttpInterceptor
   2) In the interface method, intercept, handle the request appropriately and call next so that the next interceptor in the chain can handle until the last interceptor
@@ -2794,7 +2843,6 @@ HTTP INTERCEPTORS
           next is the http handler, of type HttpHandler. The handler has a handle method that returns our desired HttpEvent observable.
      HttpRequest objects are immutable, The request object’s clone method is used to first make a copy, then modify the copy and call handle on the modified copy.
   3) The class implementing HttpInterceptor should be mentioned in 'providers' array in AppModule.ts.
-     multi: true option tells Angular that HTTP_INTERCEPTORS is a token for a multiprovider that injects an array of values, rather than a single value.
   // example
   // 1. log-interceptor.ts
   @Injectable()
