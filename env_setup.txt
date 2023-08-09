@@ -2382,6 +2382,7 @@ export abstract class MinimalLogger {
   abstract logInfo: (msg: string) => void;
 }
 COMP.TS
+import { Inject } from '@angular/core';
 constructor(@Inject('KEY') public someKey: string , @Inject('FUNC') public someFunc: any,
 	    private productListComponentService: ProductListComponentService,
 	    private logger: MinimalLogger) {
