@@ -2040,7 +2040,7 @@ take() operator specify how many values to receive from Observable before unsubs
 takeUntil() operator receive values from Observable until other specified Observable emits new value i.e. .next() and .complete() from other obsv.
 takeUntilDestroyed() from v16, complete an observable when calling context (component, directive, service, or a pipe) is destroyed.
 takeWhile() operator continue receiving values until specified func returns true. Once it becomes false, unsubscribe automatically.
-pluck()
+pluck() operator is similar to map(), difference is that it has a builtin null check, whereas map() does not have it.
 retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
 catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
@@ -2057,6 +2057,8 @@ const apiData = ajax('/api/data').pipe(
     }
     return res.response;
   }),
+  map((object) => object?.employee?.address?.houseNumber),	      // NOTE: use of nullish operator `?` ,absence of this may cause error and halt program exec
+  pluck('employee', 'address', 'houseNumber'),                        // this is equivalent to   object?.employee?.address?.houseNumber
   retry(3),                                                           // Retry up to 3 times before failing
   catchError((err: Error) => { return throwError(err.message); })
 );
