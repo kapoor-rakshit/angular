@@ -369,6 +369,61 @@ imports: [
 ]
 
 
+SPINNER WIDGET (LOADER)
+===========================
+1. loader.MODULE.TS                                            // import this module in `APP.MODULE.TS`
+----------------------
+import { SpinnerModule } from '@spartacus/storefront';
+@NgModule({
+  declarations: [LoaderOverlayComponent],
+  imports: [SpinnerModule],
+  exports: [LoaderOverlayComponent],
+})
+export class LoaderOverlayModule { }
+2. loader.COMP.HTML
+-----------------------
+<div class="spinner-wrapper" (click)="overlayClick($event)">
+  <div class="cx-spinner">
+    <cx-spinner></cx-spinner>
+  </div>
+</div>
+3. loader.COMP.TS
+-----------------------
+overlayClick(evt: Event) {
+  evt.preventDefault();
+  evt.stopPropagation();
+}
+4. loader.SERVICE.TS                                            // Inject this loaderService in constructor of any component and use   .show() | .hide()
+-----------------------
+export class LoaderService {
+  public loader$: BehaviorSubject<boolean>  = new BehaviorSubject<boolean>(true);
+  show(): void {
+    this.loader$.next(true);
+  }
+  hide(): void {
+    this.loader$.next(false);
+  }
+}
+5. APP.COMP.HTML
+---------------------
+<ff-loader-overlay *ngIf="loading"></ff-loader-overlay>
+<cx-storefront></cx-storefront>
+6. APP.COMP.TS
+---------------------
+constructor(private routingService: RoutingService, private loaderService: LoaderService) { }
+this.loaderService.loader$.pipe(takeUntil(this.destroyed$)).subscribe((loading: boolean) => {
+    this.loading = loading;
+    this.cd.markForCheck();
+});
+this.routingService.isNavigating().pipe(takeUntil(this.destroyed$)).subscribe((nav: boolean) => {
+    if(nav) {
+        this.loaderService.show();
+    } else {
+        this.loaderService.hide();
+    }
+});
+
+
 TRANSLATION SERVICE
 =========================
 1. MODULE.TS
@@ -564,6 +619,7 @@ D.
 STYLES
 ============
 A. SPARTA LIB + MIXINS
+-------------------------
 Spartacus provides default styling library called Sparta in the @spartacus/styles package.
 This package should be imported into project through the `styles.scss` file.
 src/styles.scss
@@ -573,6 +629,7 @@ $font-weight-normal: 500;                                                  // th
 @import '@spartacus/styles/scss/cxbase/mixins';
 
 B. BREAKPOINT SERVICE
+-------------------------
 Spartacus provides BreakpointService, which allows same control as media queries, within TS files.
 It is better to use as it responds to resize event.
 Create a `responsive.SERVICE.TS` file, that can be injected in any COMPONENT.
