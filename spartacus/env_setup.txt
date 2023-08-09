@@ -410,6 +410,7 @@ export class LoaderService {
 <cx-storefront></cx-storefront>
 6. APP.COMP.TS
 ---------------------
+import { RoutingService } from '@spartacus/core';
 constructor(private routingService: RoutingService, private loaderService: LoaderService) { }
 this.loaderService.loader$.pipe(takeUntil(this.destroyed$)).subscribe((loading: boolean) => {
     this.loading = loading;
