@@ -2032,6 +2032,7 @@ C. // dispose the observable, inside ngOnDestroy()
    this.unsubscribe.complete();
    
 a.1) pipe() | skip() | take() | takeUntil() | takeUntilDestroyed() | takeWhile() |
+     pluck() |
      retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
 skip() allows to ignore first x emissions from the source. It is oppposite to take().
@@ -2039,6 +2040,7 @@ take() operator specify how many values to receive from Observable before unsubs
 takeUntil() operator receive values from Observable until other specified Observable emits new value i.e. .next() and .complete() from other obsv.
 takeUntilDestroyed() from v16, complete an observable when calling context (component, directive, service, or a pipe) is destroyed.
 takeWhile() operator continue receiving values until specified func returns true. Once it becomes false, unsubscribe automatically.
+pluck()
 retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
 catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
@@ -2066,7 +2068,7 @@ a.2) debounceTime() delays values emitted by source for given due time.
      Example:
      this.searchForm.get("search").valueChanges.pipe(debounceTime(1000)).subscribe((val) => {console.log(val)});
 
-b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | shareReplay()
+b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | combineLatest() | shareReplay()
 Example:
 this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
 - concatMap()
@@ -2098,15 +2100,30 @@ this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course
   and finally return that observable array.
   Eg:
   SERVICE.TS
-    let response1 = this.http.get(requestUrl1);
-    let response2 = this.http.get(requestUrl2);
-    let response3 = this.http.get(requestUrl3);
-    return forkJoin([response1, response2, response3]);
+    let obsv1 = this.http.get(requestUrl1);
+    let obsv2 = this.http.get(requestUrl2);
+    let obsv3 = this.http.get(requestUrl3);
+    return forkJoin([obsv1, obsv2, obsv3]);
   COMP.TS  
     SERVICEMETHOD().subscribe((responseList) => {
         this.responseData1 = responseList[0];
         this.responseData2 = responseList[1];
     	this.responseData3 = responseList[2];
+    });
+- combineLatest()
+  Combines multiple Observables to create an Observable whose values are calculated from latest values of each of its input Observables.
+  It emits latest values from all observables in specified order, if at least one input observable emits.
+  If an error emitted from one observable, the combineLatest throws an error and completes.
+  It is same as forkJoin(), only difference is that forkJoin() waits for all obsvs to emit, but combineLatest() emits value if atleast one obsv emit.
+  Eg:
+  SERVICE.TS
+    let obsv1 = this.http.get(requestUrl1);
+    let obsv2 = this.http.get(requestUrl2);
+    return combineLatest([obsv1, obsv2]);
+  COMP.TS  
+    SERVICEMETHOD().subscribe((responseList) => {
+        this.responseData1 = responseList[0];
+        this.responseData2 = responseList[1];
     });
 - shareReplay()
   It is similar to ReplaySubject. Share source and replay last specified number of emissions on subscription.
