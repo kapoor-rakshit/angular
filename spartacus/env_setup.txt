@@ -157,10 +157,10 @@ custom-product-intro.comp.HTML
     </cx-star-rating>
 </ng-container>
 
-layout-config.TS                                       // a custom layout file to be provided to `spartacus-configuration-module.TS`
----------------------                                  // layouts are rendered in <CX-PAGE-LAYOUT> and slots(POSITION keys from backend) in <CX-PAGE-SLOT>
+layout-config.TS                    // a custom layout file to be provided to `spartacus-configuration-module.TS`
+---------------------               // layouts(TEMPLATE key from pages API) rendered in <CX-PAGE-LAYOUT> and slots(POSITION keys from pages API) in <CX-PAGE-SLOT>
 import { LayoutConfig } from '@spartacus/storefront';
-export const layoutConfig: LayoutConfig = {
+export const layoutConfig: LayoutConfig = {                        // some layouts are pre-defined from SPARTACUS like header, navigation, footer
   layoutSlots: {
       header: {                                                    // <cx-page-layout class="header"></cx-page-layout>
         lg: { slots: ['PreHeader', 'SiteLogo', 'SearchBox'] },     // <cx-page-slot  class="PreHeader" position="PreHeader"></cx-page-slot>
@@ -352,6 +352,7 @@ this.searchResult = data;                // data from API response of /search , 
 INFINITE SCROLL
 =========================
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/d37bd1496c6c42d5b7a17740ba155e94.html
+           https://microlearning.opensap.com/media/Infinite+Scroll+-+SAP+Commerce+Cloud/1_crd2801x
 When infinite scroll is enabled in composable storefront, it applies to product search page, as well as category pages in both list and grid views.
 When infinite scroll is disabled, composable storefront uses pagination instead. By default, infinite scroll is disabled in composable storefront.
 1. APP.MODULE.TS
@@ -360,9 +361,9 @@ imports: [
     ConfigModule.withConfig({
         view: {
             infiniteScroll: {
-                active: true,             // enable / disable infinite scroll
+                active: true,             // enable / disable infinite scroll , auto loads without any limit/button until products are not found
                 productLimit: 50,         // number of products user can scroll through before they are prompted to load more items using SHOW MORE button
-                showMoreButton: false,    // true: sets "productLimit" : 10  i.e. value for productLimit key is ignored  |  false: productLimit key considered
+                showMoreButton: false,    // true: auto sets "productLimit": 10  i.e. value for productLimit key is ignored | false: productLimit key considered
             },
         },
     })
