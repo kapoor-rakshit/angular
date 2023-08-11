@@ -24,6 +24,7 @@ provideConfig(<SmartEditConfig>{
 ASM (Assisted Service Mode)
 Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
 `AsmFeatureModule` module is imported in `spartacus-features.module.ts`.
+This can be seen by appending `?asm=true` to website. Eg: https://HOSTNAME?asm=true
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 It is for administrator to handle entire functions and operations in website like:
@@ -202,7 +203,6 @@ export const layoutConfig: LayoutConfig = {                        // some layou
       }
   }
 }
-
 NOTE: Components come from backend side.
 An API call , /pages?lang=EN&curr=AUD , gets all components that are used.
 Depending on current browser route URL, this API payload's QUERY-PARAMS change:
