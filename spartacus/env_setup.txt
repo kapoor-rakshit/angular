@@ -12,11 +12,23 @@ For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Compos
 
 SmartEdit
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/dc259a9f232a469ca8da3cf22f34839c.html
+Available via @spartacus/smartedit, it allows for creating new pages on website via an interactive GUI.
+`SmartEditFeatureModule` module is imported in `spartacus-features.module.ts`.
+Inside `SmartEditFeatureModule`, it is provided with config for allowed origins:
+provideConfig(<SmartEditConfig>{
+    smartEdit: {
+        allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.WEBSITE-HOSTNAME:443',
+    },
+})
+
+ASM (Assisted Service Mode)
+Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
+`AsmFeatureModule` module is imported in `spartacus-features.module.ts`.
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 It is for administrator to handle entire functions and operations in website like:
 ImpEx (Import-Export), Groovy Script, Configuration, Cache, Cron Job
-    Use-Case-1: CORS issue: Check property 'allowedHeaders' through HAC , delete web application services for CORS , rerun CORS impex
+Use-Case-1: CORS issue: Check property 'allowedHeaders' through HAC , delete web application services for CORS , rerun CORS impex
 
 To install composable storefront, need to set up access to composable storefront libraries in Repository Based Shipment Channel (RBSC)
     RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
@@ -112,7 +124,7 @@ NOTE: if missed some config, while creating app, it can be done later too
 > ng g @spartacus/schematics:add-ssr                    // adds SSR configuration
 
 NOTE: If not installed particular integration lib / feature lib (package) during initial set up of storefront like
-@spartacus/cart | @spartacus/checkout | @spartacus/product | @spartacus/smartedit | @spartacus/styles | @spartacus/user   install later using:
+@spartacus/asm | @spartacus/cart | @spartacus/checkout | @spartacus/product | @spartacus/smartedit | @spartacus/styles | @spartacus/user   install later using:
 > ng add <package-name>
 
 
@@ -192,7 +204,15 @@ export const layoutConfig: LayoutConfig = {                        // some layou
 }
 
 NOTE: Components come from backend side.
-An API call , /pages?lang=EN&curr=AUD , gets all components that are used. It returns:
+An API call , /pages?lang=EN&curr=AUD , gets all components that are used.
+Depending on current browser route URL, this API payload's QUERY-PARAMS change:
+A. ContentPage  ( Eg: https://HOSTNAME/ROUTE )
+   pageType: ContentPage, pageLabelOrId: /ROUTE
+B. CategoryPage ( Eg: https://HOSTNAME/Categories/Kids/c/SUBCATEGORY )
+   pageType: CategoryPage, code: SUBCATEGORY
+C. ProductPage  ( Eg: https://HOSTNAME/Categories/Kids/Nursery/Dreambaby-Bed-Rail/p/PRODUCT-CODE )
+   pageType: ProductPage, code: PRODUCT-CODE
+It returns:
 contentSlots: {
   contentSlot: [
     {
@@ -514,6 +534,20 @@ navigateFabricSamples() {
 }
 
 
+ROUTE GUARDS
+===========================
+It is similar to Angular route guards i.e. guard is a service which has canActivate() etc. methods, only difference is how we include these guards.
+In Spartacus, it is added with config for mapping components, plus provide builtin guards like    AuthGuard | CheckoutDetailsLoadedGuard | CartNotEmptyGuard
+ConfigModule.withConfig({
+    cmsComponents: {
+        TYPE-CODE: {
+            component: FE-COMPONENT,
+            guards: [CUSTOM-CheckoutAuthGuard, CartNotEmptyGuard]
+        }
+    }
+})
+
+
 HTTP REQUESTS (services)
 ===========================
 1. SERVICE.TS
@@ -618,8 +652,12 @@ D.
 // A cart and all it's associated data is deleted from BackOffice/HAC, depending on GUID or CODE
 
 
+NORMALIZERS
+===============
+
+
 STYLES
-============
+===============
 A. SPARTA LIB + MIXINS
 -------------------------
 Spartacus provides default styling library called Sparta in the @spartacus/styles package.
