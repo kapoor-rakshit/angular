@@ -568,7 +568,7 @@ constructor(private activeCartService: ActiveCartService,
             private userIdService: UserIdService,
             private multiCartService: MultiCartService) {}
 A.
-// Create new cart if not exists, else return existing cart (REFER: localstorage of browser for cartID)
+// Create new cart if not exists by calling API, else return existing cart (REFER: localstorage of browser for cartID)
 this.activeCartService.requireLoadedCart().pipe(
     concatMap((cartState) => {
         return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
@@ -585,7 +585,7 @@ this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe(
   this.cdRef.markForCheck();
 });
 B.2.
-// Reload/Refresh cart at app level to have changes if any reflected in getActive() cart subscription (REFER: A point)
+// Reload/Refresh cart at app level by calling API, to have changes if any reflected in getActive() cart subscription (REFER: B.1. point)
 // Eg: A product is added to cart, and we need some UI change depending on updated cart data after this product is added to cart.
 this.reloadSub = combineLatest([
     this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
