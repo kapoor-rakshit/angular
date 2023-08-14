@@ -671,6 +671,7 @@ export class CUSTOM-PageNormalizer implements Converter<CmsPage, CmsStructureMod
 
 PAGE META RESOLVERS
 ======================
+These allow for adding/changing page meta data like title, description, canonical url etc. , which is useful for SEO
 1. APP.MODULE.TS
 ---------------------
 { provide: SeoMetaService, useExisting: CUSTOM-SeoService },
