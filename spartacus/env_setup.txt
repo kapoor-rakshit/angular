@@ -654,6 +654,34 @@ D.
 
 NORMALIZERS
 ===============
+Normalizers are used for data mapping that suits requirement of project.
+1. APP.MODULE.TS
+--------------------
+{ provide: CMS_PAGE_NORMALIZER, useClass: CUSTOM-PageNormalizer, multi: true }
+2. CUSTOM-PageNormalizer.TS
+-------------------------------
+import { Converter } from '@spartacus/core';
+@Injectable({ providedIn: 'root' })
+export class CUSTOM-PageNormalizer implements Converter<CmsPage, CmsStructureModel> {
+  convert(source: CmsPage, target: CmsStructureModel = {}): CmsStructureModel {
+    return { ...target, page: {...target.page, description: source.description, seoTitle: source.seoTitle} };
+  }
+}
+
+
+PAGE META RESOLVERS
+======================
+1. APP.MODULE.TS
+---------------------
+{ provide: SeoMetaService, useExisting: CUSTOM-SeoService },
+{ provide: PageMetaService, useExisting: CUSTOM-PageMetaService },
+{ provide: ProductPageMetaResolver, useExisting: CUSTOM-ProductPageMetaResolver },
+{ provide: PageMetaResolver, useExisting: CUSTOM-CategoryPageMetaResolver, multi: true },
+{ provide: PageMetaResolver, useExisting: CUSTOM-DepartmentPageMetaResolver, multi: true },
+{ provide: SearchPageMetaResolver, useExisting: CUSTOM-SearchPageMetaResolver }
+2. CUSTOM-RESOLVERS.TS
+-------------------------
+NOTE: For CUSTOM-RESOLVERS implementations, refer SPARTACUS DEMO-CODE REPO, cloned from GITHUB
 
 
 STYLES
