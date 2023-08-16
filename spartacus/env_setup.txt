@@ -655,6 +655,7 @@ D.
 NORMALIZERS
 ===============
 Normalizers are used for data mapping that suits requirement of project.
+Here in this example, seoTitle and description of page is modified, which is useful for SEO.
 1. APP.MODULE.TS
 --------------------
 { provide: CMS_PAGE_NORMALIZER, useClass: CUSTOM-PageNormalizer, multi: true }
@@ -682,7 +683,29 @@ These allow for adding/changing page meta data like title, description, canonica
 { provide: SearchPageMetaResolver, useExisting: CUSTOM-SearchPageMetaResolver }
 2. CUSTOM-RESOLVERS.TS
 -------------------------
-NOTE: For CUSTOM-RESOLVERS implementations, refer SPARTACUS DEMO-CODE REPO, cloned from GITHUB
+NOTE: For CUSTOM-RESOLVERS implementations defined in `useExisting`, refer SPARTACUS DEMO-CODE REPO, cloned from GITHUB
+Eg:
+A. resolveTitle(): Observable<string> {
+    return this.categoryItem$.pipe(
+      switchMap((c: CategoryItem) =>
+        of(c?.seoTitle ? c?.seoTitle : c?.categoryCode ? c?.categoryCode : '')));
+   }
+B. resolveDescription(): Observable<string> {
+    return this.productData$.pipe(
+      switchMap((product) =>
+        this.translation.translate('pageMetaResolver.product.description', {
+          description: product.metaDescription,
+        })));
+   }
+C. resolveCanonicalUrl(): Observable<string> {
+    return combineLatest([this.baseSiteService.get(), this.product$]).pipe(
+      map(([baseSite, product]) => {
+        const baseUrl = (baseSite as any).configMap.entry.find(
+          (obj: any) => obj.key === 'canonicalBaseUrl'
+        ).value;
+        const url = `${baseUrl}${product.url}`;
+        return this.pageLinkService.getCanonicalUrl({}, url);}));
+   }
 
 
 STYLES
