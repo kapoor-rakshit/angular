@@ -1,4 +1,5 @@
 // NOTE: This file has reference in `SERVER/SERVER-API.TS`
+// Here in this example, `axios` (third party lib) is used for making API call, however, we can also use JS builtin `fetch`
 
 import { BaseSite, JavaRegExpConverter } from '@spartacus/core';
 import axios from 'axios';
