@@ -1,5 +1,6 @@
 // NOTE: This file is placed inside <PROJECT_NAME> directory, i.e. at same level of `package.json`
-// This file is used in 'build:ssr' command of package.json
+// This file is used in 'build:ssr' command of package.json i.e.
+// "build:ssr": "(cp server.prod.ts server.ts || copy server.prod.ts server.ts) && ng build --configuration production && ng run <PROJECT_NAME>:server:production"
 
 import 'zone.js/dist/zone-node';
 
