@@ -1,0 +1,19 @@
+// This setup will guide to run localhost:4200 on https
+
+1. cd <PROJECT_NAME> and create a new folder `certs` where we have `package.json` file for this directory.
+2. Inside `certs` directory, create a new file `certificate.config`
+3. Copy code contents from   https://digitaldrummerj.me/angular-local-ssl/   and paste it in this file.
+4. cd to `certs` directory and run command:
+   $> openssl req -new -x509 -newkey rsa:2048 -sha256 -nodes -keyout localhost.key -days 3560 -out localhost.crt -config certificate.config
+   NOTE: If this openssl command fails, probably openssl is not installed.
+   Download OpenSSL   https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/openssl-for-windows/openssl-0.9.8k_X64.zip
+   and follow         https://www.stechies.com/installing-openssl-windows-10-11/      for installing openSSL and then run openssl command as above.
+5. This will create `localhost.crt` and `localhost.key` files inside `certs` directory.
+6. Modify `package.json` for running angular on local i.e. $> npm run start  i.e.
+   "start": "ng serve --ssl --ssl-key .\\certs\\localhost.key --ssl-cert .\\certs\\localhost.crt"
+7. Follow remaining steps from    https://digitaldrummerj.me/angular-local-ssl/
+   To prevent Warning on browser and add this certificate as trusted.
+
+
+NOTE: If while running on local, compiler throws some error, we may try modifying `package.json` for 'start' command:
+      "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
