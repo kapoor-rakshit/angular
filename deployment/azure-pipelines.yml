@@ -1,4 +1,4 @@
-# NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a REPOSITORY directory 
+# NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a `js-storefront` REPOSITORY 
 # i.e. <PROJECT_NAME> directory and this YML file are at same level.
 
 # Node.js with Angular
