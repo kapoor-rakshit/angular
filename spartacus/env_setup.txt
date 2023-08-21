@@ -296,9 +296,9 @@ declare module '@spartacus/storefront' {
 export const defaultLaunchConfig: LayoutConfig = {
   launch: {
     [LAUNCH_CALLER.FABRIC_SELECT]: {
-      inlineRoot: true,
-      component: PopupComponent_1,
-      dialogType: DIALOG_TYPE.DIALOG,
+      inlineRoot: true,                          // Renders component directly inside <cx-storefront>, i.e. a global dialog
+      component: PopupComponent_1,               // component to render
+      dialogType: DIALOG_TYPE.DIALOG,            // POPOVER(no backdrop) | POPOVER_CENTER_BACKDROP(backdrop) | DIALOG(backdrop) | SIDEBAR_START | SIDEBAR_END
     },
     [LAUNCH_CALLER.NEAREST_STORES]: {
       inlineRoot: true,
