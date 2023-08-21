@@ -1,0 +1,20 @@
+// NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a `js-storefront` REPOSITORY 
+// i.e. <PROJECT_NAME> directory and this JSON file are at same level.
+
+{
+  "applications": [
+    {
+      "name": "PROJECT_NAME",
+      "path": "PROJECT_NAME",
+      "nodeVersion": "18",
+      "ssr": {
+        "enabled": true,
+        "path": "dist/PROJECT_NAME/server/main.js"
+      },
+      "csr": {
+        "webroot": "dist/PROJECT_NAME/browser/"
+      }
+    }
+  ],
+  "nodeVersion": "18"
+}
