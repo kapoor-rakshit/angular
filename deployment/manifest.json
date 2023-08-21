@@ -1,5 +1,4 @@
-// NOTE: This file is placed outside <PROJECT_NAME> directory, but inside a `js-storefront` REPOSITORY 
-// i.e. <PROJECT_NAME> directory and this JSON file are at same level.
+{ "NOTE": "This file is placed outside <PROJECT_NAME> directory, but inside a `js-storefront` REPOSITORY i.e. <PROJECT_NAME> directory and this JSON file are at same level"}
 
 {
   "applications": [
