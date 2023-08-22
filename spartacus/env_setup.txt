@@ -667,6 +667,30 @@ D.
 // A cart and all it's associated data is deleted from BackOffice/HAC, depending on GUID or CODE
 
 
+LOGIN / LOGOUT SERVICES
+=============================
+import {AuthService} from '@spartacus/core';
+constructor(protected auth: AuthService) { }
+A.
+API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/token
+          REQUEST BODY: {username, password} | RESPONSE: {access_token:'', refresh_token:'', expires_in:'', token_type:'', scope:''}
+Redirect to: `` on successful login
+from(this.auth.loginWithCredentials(email.toLowerCase(), password)).pipe(        // backend accepts lowercase emails only
+    withLatestFrom(this.auth.isUserLoggedIn()),
+    tap(([_, isLoggedIn]) => {
+        if (isLoggedIn) {
+            this.globalMsgService.remove(GlobalMessageType.MSG_TYPE_ERROR);      // Remove error message on successful login (bad username/password combination)
+        }
+        this.cd.markForCheck();
+    })
+).subscribe((res) => {}, (err) => {});
+B.
+API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/revoke
+          REQUEST BODY: {baseSite:'', token_type_hint:'', token:''} | RESPONSE: NA
+Redirect to: `/login` on successful logout
+this.auth.logout();
+
+
 NORMALIZERS
 ===============
 Normalizers are used for data mapping that suits requirement of project.
