@@ -2030,6 +2030,18 @@ C. // dispose the observable, inside ngOnDestroy()
    //   OR
    this.unsubscribe.next();
    this.unsubscribe.complete();
+
+PROMISE to OBSERVABLE (from)
+--------------------------------
+from() operator can be used to convert a array, promise, or iterable to an observable.
+For arrays and iterables, all contained values will be emitted as a sequence.
+This operator can also be used to emit a string as a sequence of characters.
+Eg:
+from([1, 2, 3, 4, 5]).subscribe((val) => console.log(val));		// 1,2,3,4,5
+from('Hello World').subscribe((val) => console.log(val));		// 'H','e','l','l','o',' ','W','o','r','l','d'
+from(new Promise((resolve, reject) => {
+	resolve('Hello World!');
+})).subscribe((val) => console.log(val));				// Hello World
    
 a.1) pipe() | skip() | take() | takeUntil() | takeUntilDestroyed() | takeWhile() |
      pluck() |
@@ -2070,7 +2082,7 @@ a.2) debounceTime() delays values emitted by source for given due time.
      Example:
      this.searchForm.get("search").valueChanges.pipe(debounceTime(1000)).subscribe((val) => {console.log(val)});
 
-b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | combineLatest() | shareReplay()
+b) concatMap() | mergeMap() | switchMap() | exhaustMap() | forkJoin() | combineLatest() | withLatestFrom() | shareReplay()
 Example:
 this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course/${courseId}`, formValue))).subscribe();
 - concatMap()
@@ -2127,6 +2139,12 @@ this.form.valueChanges.pipe(MAP_OPERATOR(formValue => this.http.put(`/api/course
         this.responseData1 = responseList[0];
         this.responseData2 = responseList[1];
     });
+- withLatestFrom()
+  withLatestFrom only emits a value when main observable emits, and after each additional observable has emitted at least once.
+  i.e. both sources must emit at least 1 value before emitting from withLatestFrom
+  Here primary observable takes the lead and other observables just chime in with their most recent values.
+  Eg:
+  OBSERVABLE_1.pipe(withLatestFrom(OBSERVABLE_2)).subscribe((respList) => { respList[0], respList[1] }, () => { });
 - shareReplay()
   It is similar to ReplaySubject. Share source and replay last specified number of emissions on subscription.
   It is used to cache HTTP response in app to avoid computations run again i.e. late subscribers to a stream that needs access to previously emitted values.
