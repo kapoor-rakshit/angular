@@ -260,22 +260,28 @@ ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
   exports: [COMP-NAME],
 })
 export class COMP-NAME-MODULE {}
-2. COMP.HTML
+2. COMP.MODULE.TS
+----------------------
+import {PageComponentModule} from '@spartacus/storefront';
+@NgModule({
+    imports: [PageComponentModule, COMP-NAME-MODULE]
+})
+3. COMP.HTML
 ---------------
 <ng-container *ngIf="component.data$ | async as compData">
- <!-- A. add component using typecode / uid -->
- <ng-container
+  <!-- A. add component using typecode / uid -->
+  <ng-container
    [cxComponentWrapper]="{
      flexType: compData?.productBrochure?.typeCode,
      typeCode: compData?.productBrochure?.typeCode,
      uid: compData?.productBrochure?.uid
-    }">
- </ng-container>
+   }">
+  </ng-container>
 
- <!-- B. add data using key from response -->
- <span>{{ compData?.detailErrorMessage }}</span>
+  <!-- B. add data using key from response -->
+  <span>{{ compData?.detailErrorMessage }}</span>
 </ng-container>
-3. COMP.TS
+4. COMP.TS
 -------------
 constructor(public component: CmsComponentData<CmsTabComponent>)
 
@@ -367,13 +373,10 @@ PAGINATION WIDGET
 ========================
 1. MODULE.TS
 -----------------
-import { GenericLinkModule, IconModule, ListNavigationModule, PageComponentModule } from '@spartacus/storefront';
+import {ListNavigationModule} from '@spartacus/storefront';
 @NgModule({
-    imports: [
-        PageComponentModule
-    ]
+    imports: [ListNavigationModule]
 })
-export class MyPLPModule {}
 2. COMP.HTML
 -----------------
 <div *ngIf="(searchResult.pagination?.totalPages ?? 0) > 1">
@@ -475,7 +478,7 @@ export const appTranslations = {
         HEADER: {                                     // NOTE: same HEADER name inside HEADER
             HEADER: {
                 KEY_1: 'VAL_1',
-                KEY_2: 'VAL_2 {{VARIABLE}} VAL_2',    // NOTE: use of VARIABLE
+                KEY_2: 'VAL_2 {{VARIABLE}} VAL_2',    // NOTE: use of VARIABLE in {{ }}
             }
         }
     }
@@ -590,6 +593,13 @@ serviceMethod() {
       PARAM_2: VAL_2,
     }
   });
+  return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
+}
+OR
+C.
+serviceMethod() {
+  const baseUrl = this.occEndpointsService.getBaseUrl();                                // baseUrl from occ service
+  const url = `${this.baseUrl}/users/${this.defaultUserId}/carts/${cartID}/findStore`;
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
 2. ENDPOINTS.CONST.TS
