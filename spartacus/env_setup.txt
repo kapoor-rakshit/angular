@@ -74,6 +74,7 @@ SETUP
                 backend: {
                   occ: {
                     baseUrl: environment.occBaseUrl,
+                    prefix: '/app/v2/'
                   },
                 },
              }),
@@ -82,7 +83,7 @@ SETUP
                 context: {
                    currency: ['AUD'],
                    language: ['en'],
-                   baseSite: ['PROJECT_NAME-spa'],
+                   baseSite: ['PROJECT_NAME'],
                 },
              }),
              provideConfig(<I18nConfig>{
@@ -598,7 +599,8 @@ serviceMethod() {
 OR
 C.
 serviceMethod() {
-  const baseUrl = this.occEndpointsService.getBaseUrl();                                // baseUrl from occ service
+  const baseUrl = this.occEndpointsService.getBaseUrl();                                                    // baseUrl + prefix + baseSite from occ service
+  const baseUrl = this.occEndpointsService.getBaseUrl({ baseUrl: true, prefix: false, baseSite: false });   // specified `false` for value that is not required
   const url = `${this.baseUrl}/users/${this.defaultUserId}/carts/${cartID}/findStore`;
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
