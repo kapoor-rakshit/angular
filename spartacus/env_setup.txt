@@ -73,8 +73,10 @@ SETUP
              provideConfig(<OccConfig>{                 // base URL config
                 backend: {
                   occ: {
-                    baseUrl: environment.occBaseUrl,
-                    prefix: '/app/v2/'
+                    baseUrl: environment.occBaseUrl,    // value is only defined in `environment.ts`, however in `environment.prod.ts` it is `undefined`
+                                                           // For prod deployment use meta tag in INDEX.HTML,`content` attr is replaced with URL from CCv2 config
+                                                           // i.e.  <meta name="occ-backend-base-url" content="OCC_BACKEND_BASE_URL_VALUE" />
+                    prefix: '/app/v2/'                  // if not specified, the default('/occ/v2/') comes from Spartacus `defaultOccConfig`
                   },
                 },
              }),
@@ -499,6 +501,12 @@ OR
 
 BASESITE SERVICE
 =========================
+A.
+On website initial load, a GET API call is made to `/basesites` i.e. `https://BASE-URL/PREFIX/basesites?fields=FULL&lang=en&curr=USD`
+This is handled by spartacus default url mapping, however, we can specify key `baseSites` inside ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
+    backend: { occ: { endpoints: { baseSites: 'basesites?fields=FULL' } } }
+It returns all basesite related config and our application can use values depending on UID of basesite data.
+B.
 import { BaseSiteService } from '@spartacus/core';
 constructor(private baseSiteService: BaseSiteService) { }
 public showReviewsWidget: boolean = false;
