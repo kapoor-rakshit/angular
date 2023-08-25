@@ -14,21 +14,22 @@ SmartEdit
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/a4b1ea8d8a7249d28ec4aa0e58ff5518.html
            https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/
 Available via @spartacus/smartedit, it allows for creating new pages on website via an interactive GUI.
+To access SmartEdit : https://backoffice.HOST-ENV-public.model-t.cc.commerce.ondemand.com/smartedit
 `SmartEditFeatureModule` module is imported in `spartacus-features.module.ts`. Inside `SmartEditFeatureModule`, it is provided with config for allowed origins.
 1. add browserURL for storefront be allowed inside `whiteListedStorefronts` of Configuration Editor(Settings icon in top right) of SmartEdit with admin login.
 2. ensure that WCMS Cockpit Preview URL is set in BackOffice(Website > yoursite > WCMS Properties > WCMS Cockpit Preview URL),same as browserURL for storefront
-3. from CCv2 -> Security -> HTTP Response Header Set -> Create
-       Code: jsapps
-       Name: Header for JSapps
-       Description: Additional response header set for service jsapps
-       HeaderName: X-Frame-Options
-       HeaderValue: ''(leave this blank)
-       ApplyAction: UNSET
-       ApplyCondition: ALWAYS
-   Now move to Environments -> yourenvironemt -> JS-Storefront -> Add this `Header for JSapps` from dropdown to this environment
+3. a. from CCv2 -> Security -> HTTP Response Header Set -> Create
+        Code: jsapps
+        Name: Header for JSapps
+        Description: Additional response header set for service jsapps
+        HeaderName: X-Frame-Options
+        HeaderValue: ''(leave this blank)
+        ApplyAction: UNSET
+        ApplyCondition: ALWAYS
+   b. now move to Environments -> yourenvironemt -> JS-Storefront -> Add this `Header for JSapps` from dropdown to this environment
 4. allowOrigin adds SmartEdit to storefront's list of permitted domains, so that it can be used to edit storefront in a cross-origin setup.
-   NOTE: Port must be specified with origin (https is 443).
-         `*` wildcard can only replace just one subdomain and cannot replace `.`(dot), so any `.`(dot) in origin is to be added explicitly.
+   NOTE: a. Port must be specified with origin (https is 443).
+         b. Any `.`(dot) in origin should be added explicitly , because `*` wildcard can only replace just one subdomain and cannot replace `.`(dot)
    provideConfig(<SmartEditConfig>{
            smartEdit: { allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443' }
    })
