@@ -15,16 +15,23 @@ REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e52655
            https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/
 Available via @spartacus/smartedit, it allows for creating new pages on website via an interactive GUI.
 `SmartEditFeatureModule` module is imported in `spartacus-features.module.ts`. Inside `SmartEditFeatureModule`, it is provided with config for allowed origins.
-allowOrigin adds SmartEdit to storefront's list of permitted domains, so that it can be used to edit storefront in a cross-origin setup.
-Also, add storefronts to be allowed inside `whiteListedStorefronts` of Configuration Editor(Settings icon in top right) of SmartEdit with admin login.
-Also, ensure that WCMS Cockpit Preview URL is set in BackOffice(Website > yoursite > WCMS Properties > WCMS Cockpit Preview URL),same as browserURL for storefront
-NOTE: Port must be specified with origin (https is 443).
-      `*` wildcard can only replace just one subdomain and cannot replace `.`(dot), so any `.`(dot) in origin is to be added explicitly.
-provideConfig(<SmartEditConfig>{
-    smartEdit: {
-        allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443',
-    },
-})
+1. add browserURL for storefront be allowed inside `whiteListedStorefronts` of Configuration Editor(Settings icon in top right) of SmartEdit with admin login.
+2. ensure that WCMS Cockpit Preview URL is set in BackOffice(Website > yoursite > WCMS Properties > WCMS Cockpit Preview URL),same as browserURL for storefront
+3. from CCv2 -> Security -> HTTP Response Header Set -> Create
+       Code: jsapps
+       Name: Header for JSapps
+       Description: Additional response header set for service jsapps
+       HeaderName: X-Frame-Options
+       HeaderValue: ''(leave this blank)
+       ApplyAction: UNSET
+       ApplyCondition: ALWAYS
+   Now move to Environments -> yourenvironemt -> JS-Storefront -> Add this `Header for JSapps` from dropdown to this environment
+4. allowOrigin adds SmartEdit to storefront's list of permitted domains, so that it can be used to edit storefront in a cross-origin setup.
+   NOTE: Port must be specified with origin (https is 443).
+         `*` wildcard can only replace just one subdomain and cannot replace `.`(dot), so any `.`(dot) in origin is to be added explicitly.
+   provideConfig(<SmartEditConfig>{
+           smartEdit: { allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443' }
+   })
 
 ASM (Assisted Service Mode)
 Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
