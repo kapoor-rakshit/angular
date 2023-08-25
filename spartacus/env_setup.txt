@@ -11,13 +11,18 @@ REFERENCE: https://github.com/SAP/spartacus#requirements
 For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
 
 SmartEdit
-REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/dc259a9f232a469ca8da3cf22f34839c.html
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/a4b1ea8d8a7249d28ec4aa0e58ff5518.html
+           https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/
 Available via @spartacus/smartedit, it allows for creating new pages on website via an interactive GUI.
-`SmartEditFeatureModule` module is imported in `spartacus-features.module.ts`.
-Inside `SmartEditFeatureModule`, it is provided with config for allowed origins:
+`SmartEditFeatureModule` module is imported in `spartacus-features.module.ts`. Inside `SmartEditFeatureModule`, it is provided with config for allowed origins.
+allowOrigin adds SmartEdit to storefront's list of permitted domains, so that it can be used to edit storefront in a cross-origin setup.
+Also, add storefronts to be allowed inside `whiteListedStorefronts` of Configuration Editor(Settings icon in top right) of SmartEdit with admin login.
+Also, ensure that WCMS Cockpit Preview URL is set in BackOffice(Website > yoursite > WCMS Properties > WCMS Cockpit Preview URL),same as browserURL for storefront
+NOTE: Port must be specified with origin (https is 443).
+      `*` wildcard can only replace just one subdomain and cannot replace `.`(dot), so any `.`(dot) in origin is to be added explicitly.
 provideConfig(<SmartEditConfig>{
     smartEdit: {
-        allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.WEBSITE-HOSTNAME:443',
+        allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443',
     },
 })
 
