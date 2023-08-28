@@ -30,14 +30,16 @@ To access SmartEdit : https://backoffice.HOST-ENV-public.model-t.cc.commerce.ond
 4. allowOrigin adds SmartEdit to storefront's list of permitted domains, so that it can be used to edit storefront in a cross-origin setup.
    NOTE: a. Port must be specified with origin (https is 443).
          b. Any `.`(dot) in origin should be added explicitly , because `*` wildcard can only replace just one subdomain and cannot replace `.`(dot)
-   provideConfig(<SmartEditConfig>{
-           smartEdit: { allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443' }
-   })
+         provideConfig(<SmartEditConfig>{
+           smartEdit: {
+             storefrontPreviewRoute: 'cx-preview',
+             allowOrigin: 'localhost:9002, *.*.model-t.cc.commerce.ondemand.com:443, *.HOSTNAME.com:443' }
+         })
 
 ASM (Assisted Service Mode)
 Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
 `AsmFeatureModule` module is imported in `spartacus-features.module.ts`.
-This can be seen by appending `?asm=true` to website. Eg: https://HOSTNAME?asm=true
+To access ASM : append `?asm=true` to website. Eg: https://HOSTNAME.com?asm=true
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 It is for administrator to handle entire functions and operations in website like:
@@ -107,6 +109,13 @@ SETUP
                 },
              }),
              provideConfig(<I18nConfig>{
+                 i18n: {
+                   resources: translations,
+                   chunks: translationChunksConfig,
+                   fallbackLang: 'en',
+                 },
+             }),
+             provideConfig(<I18nConfig>{
                 i18n: { resources: appTranslations },   // translations config file
 
                 state: {                               // Spartacus runs XHR requests on server, and then again on client-side when application bootstraps.
@@ -148,6 +157,9 @@ NOTE: if missed some config, while creating app, it can be done later too
 NOTE: If not installed particular integration lib / feature lib (package) during initial set up of storefront like
 @spartacus/asm | @spartacus/cart | @spartacus/checkout | @spartacus/product | @spartacus/smartedit | @spartacus/styles | @spartacus/user   install later using:
 > ng add <package-name>
+NOTE: a. Follow additional steps as per documentation for each package which is added later,
+         as it might require some changes to `angular.json` and other config file(s), which had been done automatically, if added earlier while adding schematics.
+      b. Adding these packages(whether earlier or later),adds `@import '..\..\styles-config';` to these features, which may cause ERROR, we can remove this import
 
 
 MODULES / COMPONENTS / LAYOUT
@@ -227,11 +239,11 @@ export const layoutConfig: LayoutConfig = {                        // some layou
 NOTE: Components come from backend side.
 An API call , /pages?lang=EN&curr=AUD , gets all components that are used.
 Depending on current browser route URL, this API payload's QUERY-PARAMS change:
-A. ContentPage  ( Eg: https://HOSTNAME/ROUTE )
+A. ContentPage  ( Eg: https://HOSTNAME.com/ROUTE )
    pageType: ContentPage, pageLabelOrId: /ROUTE
-B. CategoryPage ( Eg: https://HOSTNAME/Categories/Kids/c/SUBCATEGORY )
+B. CategoryPage ( Eg: https://HOSTNAME.com/Categories/Kids/c/SUBCATEGORY )
    pageType: CategoryPage, code: SUBCATEGORY
-C. ProductPage  ( Eg: https://HOSTNAME/Categories/Kids/Nursery/Dreambaby-Bed-Rail/p/PRODUCT-CODE )
+C. ProductPage  ( Eg: https://HOSTNAME.com/Categories/Kids/Nursery/Dreambaby-Bed-Rail/p/PRODUCT-CODE )
    pageType: ProductPage, code: PRODUCT-CODE
 It returns:
 contentSlots: {
