@@ -1492,6 +1492,7 @@ STYLE
 					   [style.background-color]="'blue'"
 					   [style.font-size]="Boolean_VAR_EXPRESSION ? '20px' : '12px'"
 					   [ngStyle] = "{'font-style' : styleVAR , 'font-weight' : 'bold'}"
+					   [ngStyle]="OBJECT-VAR-FROM-TS"					// OBJECT-VAR-FROM-TS = {'font-style' : '16px'};
 					   
 VIEW ENCAPSULATION
 ========================
@@ -2487,7 +2488,13 @@ NOTE: By default, Angular comes with a production and development environment.
 	 ng build                         // It will build the project for the development environment
 	 ng build --configuration=staging // It will build the project for the staging environment
 	 ng build --prod                  // It will build the project for the production environment
-      
+
+NOTE: From angular v15, `src\environments` folder is not available by default in our project. To generate it manually via CLI:
+> ng generate environments
+This will create project's src/environments/ directory and contains by default two env files:
+- `environment.ts` : provides configuration for production, the default environment.    i.e.     export const environment = {production: true, KEY_1: VAL_1};
+- `environment.development.ts` : provides configuration for development mode(ng serve)  i.e.     export const environment = {production: false, KEY_1: VAL_1};
+
 
 COMMUNICATION with SERVICE
 ---------------------------
