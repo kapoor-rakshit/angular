@@ -74,6 +74,11 @@ SETUP
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
        // This will have all configs for spartacus like baseUrl, baseSite etc.
+       import { environment } from 'src/environments/environment';
+       import { storeEndpoints } from '../core/config/endpoints/store-endpoints.const';
+       import { layoutConfig } from '../core/config/layout-config';
+       import { appTranslations } from '../core/constants/translations';
+       import { mediaConfig } from '../shared/media/media.config';
        @NgModule({
           declarations: [],
           imports: [],
