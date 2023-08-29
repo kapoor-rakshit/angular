@@ -623,7 +623,6 @@ serviceMethod() {
   });
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
-OR
 B.
 serviceMethod() {
   const endpointURL = storeEndpoints.endpointURL_2;
@@ -635,7 +634,6 @@ serviceMethod() {
   });
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
-OR
 C.
 serviceMethod() {
   const baseUrl = this.occEndpointsService.getBaseUrl();                                                    // baseUrl + prefix + baseSite from occ service
@@ -796,6 +794,50 @@ C. resolveCanonicalUrl(): Observable<string> {
         const url = `${baseUrl}${product.url}`;
         return this.pageLinkService.getCanonicalUrl({}, url);}));
    }
+
+
+OUTLETS
+======================
+REFERENCE: https://vranjan.dev/posts/sap-spartacus-overriding-components-using-outlets/
+           https://sap.github.io/spartacus-docs/outlets/
+It allows to customize UI that is provided by default and to plug custom UI into DOM.
+It can be used in two ways Template-Driven Outlets and Component-Driven Outlets.
+A. Template-Driven Outlets (via .HTML)
+   - cxOutletRef: It is used to add reference to outlet. The cxOutletRef directive expects slot position or template name.
+   - cxOutletPos: It is used to define where should the outlet render with respect to cxOutletRef defined, i.e.
+                  [cxOutletPos]="outletPositionVAR.BEFORE" | [cxOutletPos]="outletPositionVAR.AFTER" | [cxOutletPos]="outletPositionVAR.REPLACE"
+A.1 .module.TS
+    ----------------
+    import { OutletRefModule } from '@spartacus/storefront';
+    imports: [ OutletRefModule ]
+A.2 .comp.TS
+    ----------------
+    import { OutletPosition } from "@spartacus/storefront";
+    outletPositionVAR = OutletPosition;
+A.3 .comp.HTML
+    ----------------
+    <ng-template cxOutletRef="Section1" [cxOutletPos]="outletPositionVAR.BEFORE">
+           <h1>Hot SALE</h1>
+    </ng-template>
+B. Component-Driven Outlets (via .TS)
+   - id: Where we want change i.e. similar to `cxOutletRef`
+   - positon: What we want to do with outlet i.e. replace, add before or add after i.e. similar to `cxOutletPos`
+   - component: Which component we want to show.
+B.1 .module.TS
+    ----------------
+    import { provideOutlet, OutletPosition } from '@spartacus/storefront';
+    providers: [
+      provideOutlet({
+           id: 'ContentPage1Template',
+           position: OutletPosition.REPLACE,
+           component: CustomOutletsComponent,
+      })
+    ]
+
+
+PAGE NOT FOUND REDIRECTION
+==============================
+REFER: code sample in `server.prod.ts`, `server/server-api`, `server/node.helper`, `server/baseurl-mappings` in `deployment` folder.
 
 
 STYLES
