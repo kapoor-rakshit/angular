@@ -46,13 +46,14 @@ It is for administrator to handle entire functions and operations in website lik
 ImpEx (Import-Export), Groovy Script, Configuration, Cache, Cron Job
 Use-Case-1: CORS issue: Check property 'allowedHeaders' through HAC , delete web application services for CORS , rerun CORS impex
 
-To install composable storefront, need to set up access to composable storefront libraries in Repository Based Shipment Channel (RBSC)
-    RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
-    Create an S-user for RBSC that has the appropriate licenses to download the composable storefront libraries.
-    An S-user account can see Composable Storefront License in list of licenses.
-    If the Composable Storefront License does not appear in this list, there will be an error when downloading the packages.
-    Click on Add User and create a technical user.
-    In User Management tab of RBSC website, select the technical user and copy the generated NPM Base64 Credentials, required for .npmrc file in project
+RBSC (Repository Based Shipment Channel)
+To install composable storefront, need to set up access to composable storefront libraries.
+RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
+- Create an S-user for RBSC that has the appropriate licenses to download the composable storefront libraries.
+- An S-user account can see Composable Storefront License in list of licenses.
+  If the Composable Storefront License does not appear in this list, there will be an error when downloading the packages.
+- Click on Add User and create a technical user.
+- In User Management tab of RBSC website, select the technical user and copy the generated NPM Base64 Credentials, required for .npmrc file in project
 
 SETUP
 =============
