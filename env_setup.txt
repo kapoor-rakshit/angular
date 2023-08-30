@@ -591,7 +591,6 @@ JIT / AOT
   NOTE : this parameter is configured in 'angular.json' with `AOT`.
 
 
-
 Structure of Angular Application
 ==========================================
 e2e               : end to end tests
@@ -603,7 +602,15 @@ src/index.html    : the starting point, the page which browser reads and loads w
 src/main.ts       : the entry point from a code perpective for your angular app. (contains  platformBrowserDynamic().bootstrapModule(AppModule))
 angular.json      : CLI configuration defaults
 		    	1. To change default prefix(app-) for selector value, change `prefix` value under `projects`.
-		   	   So now, when we create new component, it's selector will be `NEW_PREFIX-comp-name`
+		   	   So now, when we create new component, using `ng g c comp-name`, it's selector will be `NEW_PREFIX-comp-name`
+			2. To configure budget size and optimization strategy for production BUILD
+			   "production": { "budgets": [{ "type": "initial", "maximumWarning": "10mb", "maximumError": "10mb" },
+                				       { "type": "anyComponentStyle", "maximumWarning": "20kb", "maximumError": "25kb" }],
+              				   "outputHashing": "all",
+              				   "optimization": { "scripts": true, "styles": { "minify": true, "inlineCritical": false }, "fonts": true }
+            				 }
+			3. To configure optimization strategy for production SERVER
+			   "production": { "outputHashing": "media", "optimization": true, "sourceMap": false }
 tsconfig.json     : typescript configuration
 package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
                     ~version : “tilde: freezes major version and minor version, updates bug fixes i.e. 8.3.X”
@@ -611,7 +618,6 @@ package.json      : configures the npm package dependencies ie which libraries w
 package-lock.json : a derivative of package.json which has exact library version(s) you are using for this app.
                     `npm install` uses 'package-lock.json' (if available) else 'package.json' to install required dependencies.
                     
-
 
 commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
 index.html     loads   main.ts   loads   app.module.ts   .... so on as below
