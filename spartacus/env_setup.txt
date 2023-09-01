@@ -718,6 +718,18 @@ D.
 // A cart and all it's associated data is deleted from BackOffice/HAC, depending on GUID or CODE
 
 
+PRODUCT SERVICES
+============================
+A.
+import { ProductService } from '@spartacus/core';
+constructor(private productService: ProductService) { }
+this.selectedProduct$: Observable<ProductDetails> = this.productService.get(PRODUCT-CODE) as Observable<ProductDetails>;
+B.
+import { CurrentProductService } from '@spartacus/storefront';
+constructor(private currentProductSerice: CurrentProductService) { }
+this.productData$: Observable<ProductDetails> = this.currentProductSerice.getProduct() as Observable<ProductDetails>;
+
+
 LOGIN / LOGOUT SERVICES
 =============================
 import {AuthService} from '@spartacus/core';
