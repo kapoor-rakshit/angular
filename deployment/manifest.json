@@ -1,4 +1,7 @@
-{ "NOTE": "This file is placed outside <PROJECT_NAME> directory, but inside a `js-storefront` REPOSITORY i.e. <PROJECT_NAME> directory and this JSON file are at same level"}
+{ "NOTE": "This file is placed outside <PROJECT_NAME> dir, but inside `js-storefront` REPOSITORY i.e. <PROJECT_NAME> directory and this JSON file are at same level",
+  "NOTE": "For each application defined here in `manifest.json`, build process checks if `<application.path>/dist` dir exists. If it doesn’t exist, build process runs commands",
+  "NOTE": "For Client-Side Rendering (CSR) => yarn install && yarn build   |   For Server Side Rendering (SSR) => yarn install && yarn build:ssr"
+}
 
 {
   "applications": [
