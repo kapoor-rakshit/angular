@@ -777,20 +777,50 @@ PAGE META RESOLVERS
 These allow for adding/changing page meta data like title, description, canonical url etc. , which is useful for SEO
 1. APP.MODULE.TS
 ---------------------
-{ provide: SeoMetaService, useExisting: CUSTOM-SeoService },
-{ provide: PageMetaService, useExisting: CUSTOM-PageMetaService },
-{ provide: ProductPageMetaResolver, useExisting: CUSTOM-ProductPageMetaResolver },
-{ provide: PageMetaResolver, useExisting: CUSTOM-CategoryPageMetaResolver, multi: true },
-{ provide: PageMetaResolver, useExisting: CUSTOM-DepartmentPageMetaResolver, multi: true },
-{ provide: SearchPageMetaResolver, useExisting: CUSTOM-SearchPageMetaResolver }
-2. CUSTOM-RESOLVERS.TS
+providers: [
+  provideConfig(CUSTOM-PageMetaConfig),
+  { provide: SeoMetaService, useExisting: CUSTOM-SeoService },
+  { provide: PageMetaService, useExisting: CUSTOM-PageMetaService },
+  { provide: ProductPageMetaResolver, useExisting: CUSTOM-ProductPageMetaResolver },
+  { provide: PageMetaResolver, useExisting: CUSTOM-CategoryPageMetaResolver, multi: true },
+  { provide: PageMetaResolver, useExisting: CUSTOM-DepartmentPageMetaResolver, multi: true },
+  { provide: SearchPageMetaResolver, useExisting: CUSTOM-SearchPageMetaResolver }
+]
+2. CUSTOM-PageMetaConfig.TS
+------------------------------
+import { PageMetaConfig } from "@spartacus/core";
+export const CUSTOM-PageMetaConfig: PageMetaConfig = {
+  pageMeta: {
+    resolvers: [
+      { property: 'title', method: 'resolveTitle'},
+      { property: 'heading', method: 'resolveHeading'},
+      { property: 'breadcrumbs', method: 'resolveBreadcrumbs' },
+      { property: 'description', method: 'resolveDescription' },
+      { property: 'image', method: 'resolveImage' },
+      { property: 'robots', method: 'resolveRobots' },
+      { property: 'canonicalUrl', method: 'resolveCanonicalUrl' }
+    ],
+    canonicalUrl: {
+      forceHttps: true,
+      forceWww: false,
+      removeQueryParams: true,
+      forceTrailingSlash: false,
+    },
+    enableInDevMode: false,
+  }
+};
+3. CUSTOM-RESOLVERS.TS
 -------------------------
 NOTE: For CUSTOM-RESOLVERS implementations defined in `useExisting`, refer SPARTACUS DEMO-CODE REPO, cloned from GITHUB
 Eg:
+constructor(protected productSearchService: ProductSearchService, protected cms: CmsService, protected translation: TranslationService,
+            protected basePageMetaResolver: BasePageMetaResolver) {
+   super(productSearchService, cms, translation, basePageMetaResolver);
+   this.pageType = PageType.CATEGORY_PAGE;
+   this.pageTemplate = 'DepartmentPageTemplate';                                 // connect page resolver to specific pageTemplate
+}
 A. resolveTitle(): Observable<string> {
-    return this.categoryItem$.pipe(
-      switchMap((c: CategoryItem) =>
-        of(c?.seoTitle ? c?.seoTitle : c?.categoryCode ? c?.categoryCode : '')));
+    return of('Custom title');
    }
 B. resolveDescription(): Observable<string> {
     return this.productData$.pipe(
