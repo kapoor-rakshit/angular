@@ -2401,12 +2401,14 @@ PROVIDERS ARRAY
 Dependency providers can be configured in following ways:
 useValue: Inject a value or a function , Often used to set the initial configuration.
 useClass: Returns another class, specified by “useClass” when component asks for class specified in "provide".
+	  It Replaces existing "provide" service.
 	  Using this, we can implement "provide" service's methods in different way. Also, this new CUSTOM service may or may not extend "provide" service.
 useExisting: First token is an alias for service associated with second token, creating two ways to access same service object.
+	     It Adds new service, along with already existing.
 	     Eg: LoggerService had a large number of API methods. But we might want to shrink that API to just members actually needed.
 	     Since in constructor logger parameter is typed as MinimalLogger, so only logs and logInfo members are visible in a TypeScript-aware editor.
 	     Behind scenes, Angular sets logger parameter to full service registered, which happens to be DateLoggerService.
-multi: true  option tells Angular that HTTP_INTERCEPTORS is a token for a multiprovider that injects an array of values, rather than a single value.
+multi: true  option tells Angular that "provide" service is a token for a multiprovider that injects an array of values, rather than a single value.
        In absence of multi: true, when we register multiple providers with same token, last one wins i.e. it overrides previously registered directives.
        To avoid this, multi: true is set on all providers for same token.
 Eg:
