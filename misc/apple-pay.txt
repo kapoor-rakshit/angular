@@ -1,0 +1,205 @@
+REFER: https://developer.apple.com/documentation/apple_pay_on_the_web
+       https://developer.apple.com/apple-pay/sandbox-testing/
+NOTE:  Apple pay works only on Safari browser(MacOS, iOS) AND
+       Only in certain regions/countries as mentioned in above documents.
+
+1. LOAD APPLE PAY JS
+=============================
+NOTE: Refer `google-maps.txt` here in misc folder, for how to add JS using windowUtils method on OnInit and remove on OnDestroy
+<script type="text/javascript" src="https://applepay.cdn-apple.com/jsapi/v1/apple-pay-sdk.js" async>
+
+2. COMP.HTML
+==============================
+<button (click)="redirect()"> Pay with Apple Pay </button>
+
+3. COMP.TS
+==============================
+A.
+declare global {
+  interface Window {
+    ApplePaySession?: any;
+  }
+}
+B.
+this.windowUtils.addJS(environment.applePayJS, this.APPLE_PAY_SCRIPT_ID, false, true, this.elemRef)
+.pipe(takeUntil(this.destroyed$)).subscribe((_) => {
+    this.enableDisableApplePayButtons();
+});
+private enableDisableApplePayButtons() {
+    try {
+      if (
+        this.windowRef?.nativeWindow?.ApplePaySession &&
+        this.windowRef.nativeWindow.ApplePaySession.canMakePayments()
+      ) {
+        this.showApplePayOption = true;
+      } else {
+        this.showApplePayOption = false;
+      }
+    } catch (_) {
+      this.showApplePayOption = false;
+    }
+}
+C.
+if (this.windowRef?.nativeWindow?.ApplePaySession) {
+    this.initApplePay();
+}
+private initApplePay() {
+    let shippingTypeApple = '';
+    if (this.userCart.orderType === 'home_delivery') {
+      shippingTypeApple = 'delivery';
+    } else {
+      shippingTypeApple = 'storePickup';
+    }
+
+    let cartItemsInfoApple: any[] = [];
+    for (let entry of this.userCart?.entries ?? []) {
+      if (entry.product) {
+        const lineItem = {
+          label: `${entry.product.name}`,
+          amount: `${entry.totalPrice?.value}`,
+        };
+        cartItemsInfoApple.push(lineItem);
+      }
+    }
+
+    if (this.userCart.deliveryCost && (this.userCart.deliveryCost?.value ?? 0) > 0) {
+      const lineItem = {
+        label: 'Shipping Cost',
+        amount: `${this.userCart.deliveryCost.value}`,
+      };
+      cartItemsInfoApple.push(lineItem);
+    }
+
+    // Define ApplePayPaymentRequest
+    const request = {
+      countryCode: 'AU',
+      currencyCode: 'AUD',
+      merchantCapabilities: ['supports3DS', 'supportsDebit', 'supportsCredit'],
+      shippingType: shippingTypeApple,
+      supportedNetworks: ['visa', 'masterCard'],
+      lineItems: cartItemsInfoApple,
+      total: {
+        label: 'Total Amount',
+        amount: this.userCart.totalPriceWithTax?.value,
+        type: 'final',
+      },
+    };
+
+    let APPLEPAY_VERSION = 3;
+    const session = new window.ApplePaySession(APPLEPAY_VERSION, request);
+
+    session.onvalidatemerchant = (event: any) => {
+      // Call your own server to request a new merchant session.
+      this.validateMerchant(session, event.validationURL);
+    };
+
+    session.onpaymentmethodselected = () => {
+      // Define ApplePayPaymentMethodUpdate based on the selected payment method.
+      // No updates or errors are needed, pass an empty object.
+      const update = {
+        newLineItems: cartItemsInfoApple,
+        newTotal: {
+          label: 'Total Amount',
+          amount: this.userCart.totalPriceWithTax?.value,
+          type: 'final',
+        },
+      };
+      session.completePaymentMethodSelection(update);
+    };
+
+    session.onpaymentauthorized = (event: any) => {
+      // Define ApplePayPaymentAuthorizationResult
+      this.authorizePayment(session, event);
+    };
+
+    session.oncancel = () => {
+      // Payment cancelled by WebKit
+    };
+
+    session.begin();
+}
+private validateMerchant(session: any, url: string) {
+    this.applePayService
+      .authorizeMerchantSession(url)
+      .pipe(take(1))
+      .subscribe(
+        (merchantSession: any) => {
+          session.completeMerchantValidation(JSON.parse(merchantSession));
+        },
+        (_) => {
+          session.completeMerchantValidation(null);
+        }
+      );
+}
+private authorizePayment(session: any, event: any) {
+    this.applePayService
+      .authorizeAndCapture(event)
+      .pipe(take(1))
+      .subscribe(
+        (response: any) => {
+          const result = {
+            status: this.windowRef.nativeWindow?.ApplePaySession.STATUS_SUCCESS,
+          };
+          // return a status and redirect to a confirmation page
+          session.completePayment(result);
+          this.router.navigate(['/order-confirmation']);
+        },
+        (_) => {
+          const result = {
+            status: this.windowRef.nativeWindow?.ApplePaySession.STATUS_FAILURE,
+          };
+          // return a status and redirect to a failure page
+          session.completePayment(result);
+          this.router.navigate(['/order-confirmation-failure']);
+        }
+      );
+}
+
+4. SERVICE.TS
+===========================
+A.
+private getAuthToken(): Observable<any> {
+    const url = `${this.baseUrl}/authorizationserver/oauth/token?grant_type=client_credentials&client_id=CLIENT_ID&client_secret=secret`;
+    return this.httpClient.post(url, {}, {});
+}
+getAuthToken().pipe().subscribe((data) => {
+    const tokenType = data.token_type;
+    const checkoutAccessToken = data.access_token;
+});
+B.
+public authorizeMerchantSession(validationurl: string) {
+    const url = `${this.baseUrl}/users/${this.defaultUserId}/carts/${cartID}/authorizeMerchantSession`;
+    const data = {
+      apiUrl: validationurl ?? '',
+      initiativeContext: this.windowRef?.nativeWindow?.location?.hostname ?? '',
+    };
+    const qParams = {
+      fields: 'FULL',
+    };
+    const httpOptions = {
+      params: new HttpParams({ fromObject: qParams }),
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `${tokenType} ${checkoutAccessToken}`,
+      }),
+    };
+    return this.httpClient.post(url, data, httpOptions).pipe(catchError((err) => throwError(err)));
+}
+public authorizeAndCapture(evt: any) {
+    const url = `${this.baseUrl}/users/${this.defaultUserId}/carts/${cartID}/authorizeAndCapture`;
+    const data = {
+      paymentData: JSON.stringify(evt.payment.token.paymentData) ?? '',
+      cardType: evt.payment.token.paymentMethod.network ?? '',
+    };
+    const qParams = {
+      fields: 'FULL',
+    };
+    const httpOptions = {
+      params: new HttpParams({ fromObject: qParams }),
+      headers: new HttpHeaders({
+        Authorization: `${tokenType} ${checkoutAccessToken}`,
+      }),
+    };
+    return this.httpClient.post(url, data, httpOptions).pipe(catchError((err) => throwError(err)));
+}
