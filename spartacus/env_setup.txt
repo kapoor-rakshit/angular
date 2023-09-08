@@ -734,7 +734,8 @@ HAMBURGER-MENU SERVICE (navigation drawer)
 ==============================================
 import { HamburgerMenuService } from '@spartacus/storefront';
 constructor(private hamburgerMenuService: HamburgerMenuService) { }
-this.hamburgerMenuService.isExpanded.subscribe((isExpanded: boolean) => { });
+A. check if navigation drawer is opened or closed
+   this.hamburgerMenuService.isExpanded.pipe(takeUntil(this.unsubscribe$)).subscribe((isExpanded: boolean) => { });
 
 
 LOGIN / LOGOUT SERVICES
