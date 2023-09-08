@@ -730,6 +730,13 @@ constructor(private currentProductSerice: CurrentProductService) { }
 this.productData$: Observable<ProductDetails> = this.currentProductSerice.getProduct() as Observable<ProductDetails>;
 
 
+HAMBURGER-MENU SERVICE (navigation drawer)
+==============================================
+import { HamburgerMenuService } from '@spartacus/storefront';
+constructor(private hamburgerMenuService: HamburgerMenuService) { }
+this.hamburgerMenuService.isExpanded.subscribe((isExpanded: boolean) => { });
+
+
 LOGIN / LOGOUT SERVICES
 =============================
 import {AuthService} from '@spartacus/core';
@@ -915,5 +922,3 @@ export class ResponsiveService extends BreakpointService {
   isMobile$: Observable<boolean> = this.isDown(BREAKPOINT.sm);  // when referring DOWN, it picks up limit of next breakpoint, here sm < 768px
   isDesktop$: Observable<boolean> = this.isUp(BREAKPOINT.lg);   // when referring UP, it picks up limit of same breakpoint, here lg >= 992px
 }
-
-
