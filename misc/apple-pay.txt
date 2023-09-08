@@ -40,8 +40,10 @@ private enableDisableApplePayButtons() {
     }
 }
 C.
-if (this.windowRef?.nativeWindow?.ApplePaySession) {
-    this.initApplePay();
+public redirect() {
+    if (this.windowRef?.nativeWindow?.ApplePaySession) {
+      this.initApplePay();
+    }
 }
 private initApplePay() {
     let shippingTypeApple = '';
