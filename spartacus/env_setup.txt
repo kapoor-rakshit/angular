@@ -215,7 +215,7 @@ export const layoutConfig: LayoutConfig = {                        // some layou
         lg: { slots: ['PreHeader', 'SiteLogo', 'SearchBox'] },     // <cx-page-slot  class="PreHeader" position="PreHeader"></cx-page-slot>
         slots: ['PreHeader', 'SearchBox']                             // less than lg breakpoint, these slots will be rendered
       },
-      navigation: {                                                // <cx-page-layout class="navigation"></cx-page-layout>
+      navigation: {                                                // <cx-page-layout class="navigation"></cx-page-layout>, for NAVIGATION DRAWER container
         lg: { slots: ['MegaMenu'] },                               // lg(>=992px), these slots(position vals) will be rendered in <cx-page-slot>
         md: { slots: ['PreHeader', 'SearchBox', 'MegaMenu'] },     // md(>=768px)
         sm: { slots: ['PreHeader', 'SearchBox', 'MegaMenu'] },     // sm(>=576px)
@@ -732,10 +732,30 @@ this.productData$: Observable<ProductDetails> = this.currentProductSerice.getPro
 
 HAMBURGER-MENU SERVICE (navigation drawer)
 ==============================================
+1. COMP.HTML
+--------------------
+<ng-container
+   [cxComponentWrapper]="{
+      flexType: 'HamburgerMenuComponent',
+      typeCode: 'HamburgerMenuComponent'
+   }">
+</ng-container>
+2. COMP.SCSS
+--------------------
+::ng-deep {
+  cx-hamburger-menu {
+    .hamburger-inner,
+    .hamburger-inner::before,
+    .hamburger-inner::after {
+      background-color: var(--black);
+    }
+  }
+}
+3. COMP.TS
+---------------------
 import { HamburgerMenuService } from '@spartacus/storefront';
 constructor(private hamburgerMenuService: HamburgerMenuService) { }
-A. check if navigation drawer is opened or closed
-   this.hamburgerMenuService.isExpanded.pipe(takeUntil(this.unsubscribe$)).subscribe((isExpanded: boolean) => { });
+this.hamburgerMenuService.isExpanded.pipe(takeUntil(this.unsubscribe$)).subscribe((isExpanded: boolean) => { });
 
 
 LOGIN / LOGOUT SERVICES
@@ -795,7 +815,7 @@ providers: [
   { provide: SearchPageMetaResolver, useExisting: CUSTOM-SearchPageMetaResolver }
 ]
 2. CUSTOM-PageMetaConfig.TS
-------------------------------
+------------------------------                                            // import in APP.MODULE.TS
 import { PageMetaConfig } from "@spartacus/core";
 export const CUSTOM-PageMetaConfig: PageMetaConfig = {
   pageMeta: {
