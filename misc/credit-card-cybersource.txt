@@ -1,0 +1,15 @@
+REFERENCE: 
+
+1. LOAD CYBERSOURCE JS
+===============================
+NOTE: Refer `google-maps.txt` here in misc folder, for how to add JS using windowUtils method on OnInit and remove on OnDestroy
+<script type="text/javascript" src="https://flex.cybersource.com/cybersource/assets/microform/0.11/flex-microform.min.js" async>
+
+2. COMP.HTML
+===============================
+
+3. COMP.TS
+===============================
+
+4. SERVICE.TS
+===============================
