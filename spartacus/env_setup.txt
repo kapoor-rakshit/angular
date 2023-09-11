@@ -534,11 +534,23 @@ OR
 
 BASESITE SERVICE
 =========================
-A.
+A.1.
 On website initial load, a GET API call is made to `/basesites` i.e. `https://BASE-URL/PREFIX/basesites?fields=FULL&lang=en&curr=USD`
 This is handled by spartacus default url mapping, however, we can specify key `baseSites` inside ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
-    backend: { occ: { endpoints: { baseSites: 'basesites?fields=FULL' } } }
+backend: { occ: { endpoints: { baseSites: 'basesites?fields=FULL' } } }
 It returns all basesite related config and our application can use values depending on UID of basesite data.
+A.2.
+NOTE: If we specify `baseSite` value in `spartacus-configuration.module.ts`,
+that baseSite gets picked up as an active basesite and components are returned accordingly from backoffice in /pages API response.
+However, To have multiple domains(websites) having common/shared components, Eg: https://www.freedom.com.au/    and     https://www.freedomfurniture.co.nz/
+we need only ONE code repository, also:
+- Do NOT specify any basesite in `spartacus-configuration.module.ts` file
+- Specify urlPatterns that are returned /basesite API response from backoffice that will determine,
+  which domain is being hit from browser, and spartacus will pick it as an active basesite.
+- There will be N components(N header, N footer, N banners) created from backoffice, one for each basesite,
+  and only one of those will get returned in /pages API response, depending on active basesite.
+- To ensure reusability of components, make sure to have colors, text, widgets to be shown/hidden as configurable in FE components that can work for all sites
+  and relevant keys available in /pages API response for that component.
 B.
 import { BaseSiteService } from '@spartacus/core';
 constructor(private baseSiteService: BaseSiteService) { }
