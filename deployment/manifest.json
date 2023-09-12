@@ -6,16 +6,30 @@
 {
   "applications": [
     {
-      "name": "PROJECT_NAME",
-      "path": "PROJECT_NAME",
+      "name": "PROJECT_NAME_1",
+      "path": "PROJECT_NAME_1",
       "nodeVersion": "18",
       "ssr": {
         "enabled": true,
-        "path": "dist/PROJECT_NAME/server/main.js"
+        "path": "dist/PROJECT_NAME_1/server/main.js"
       },
       "csr": {
-        "webroot": "dist/PROJECT_NAME/browser/"
-      }
+        "webroot": "dist/PROJECT_NAME_1/browser/"
+      },
+      "enabledRepositories": ["spartacus-6"]
+    },
+    {
+      "name": "PROJECT_NAME_2",
+      "path": "PROJECT_NAME_2",
+      "nodeVersion": "18",
+      "ssr": {
+        "enabled": true,
+        "path": "dist/PROJECT_NAME_2/server/main.js"
+      },
+      "csr": {
+        "webroot": "dist/PROJECT_NAME_2/browser/"
+      },
+      "enabledRepositories": ["spartacus-6"]
     }
   ],
   "nodeVersion": "18"
