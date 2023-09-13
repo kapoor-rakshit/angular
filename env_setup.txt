@@ -601,20 +601,27 @@ src/styles.css    : define styling classes which can be used by all components i
 src/index.html    : the starting point, the page which browser reads and loads when running angular app. (contains <selector></selector> for bootstrap component)
 src/main.ts       : the entry point from a code perpective for your angular app. (contains  platformBrowserDynamic().bootstrapModule(AppModule))
 angular.json      : CLI configuration defaults
-		    	1. To change default prefix(app-) for selector value, change `prefix` value under `projects`.
-		   	   So now, when we create new component, using `ng g c comp-name`, it's selector will be `NEW_PREFIX-comp-name`
-			2. To configure budget size and optimization strategy for production BUILD
-			   "production": { "budgets": [{ "type": "initial", "maximumWarning": "10mb", "maximumError": "10mb" },
-                				       { "type": "anyComponentStyle", "maximumWarning": "20kb", "maximumError": "25kb" }],
-              				   "outputHashing": "all",
-              				   "optimization": { "scripts": true, "styles": { "minify": true, "inlineCritical": false }, "fonts": true }
-            				 }
-			3. To configure optimization strategy for production SERVER
-			   "production": { "outputHashing": "media", "optimization": true, "sourceMap": false }
+		    1. To change default prefix(app-) for selector value, change `prefix` value under `projects`.
+		       So now, when we create new component, using `ng g c comp-name`, it's selector will be `NEW_PREFIX-comp-name`
+		    2. To configure budget size and optimization strategy for production BUILD
+		       "production": { "budgets": [{ "type": "initial", "maximumWarning": "10mb", "maximumError": "10mb" },
+                				   { "type": "anyComponentStyle", "maximumWarning": "20kb", "maximumError": "25kb" }],
+              				"outputHashing": "all",
+              				"optimization": { "scripts": true, "styles": { "minify": true, "inlineCritical": false }, "fonts": true }
+            			     }
+		    3. To configure optimization strategy for production SERVER
+		       "production": { "outputHashing": "media", "optimization": true, "sourceMap": false }
 tsconfig.json     : typescript configuration
 package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
-                    ~version : “tilde: freezes major version and minor version, updates bug fixes i.e. 8.3.X”
-                    ^version : “caret: freezes major version, updates minor version and bug fixes i.e. 8.X.X”
+                    1. ~version : “tilde: freezes major version and minor version, updates bug fixes i.e. 8.3.X”
+                       ^version : “caret: freezes major version, updates minor version and bug fixes i.e. 8.X.X”
+		    2. dependencies    : consists of packages used in project. `npm i <package name>` , it goes in `dependencies` object.
+		       devDependencies : consists of packages used in project's DEVELOPMENT PHASE only and NOT in production or testing environment.
+					 `npm i <package name> --save-dev` , it goes in `devDependencies` object, like '@angular/cli' for `ng g module <MODULE>`
+		       peerDependencies: specifies that our package is compatible with a particular version of an npm package.
+					 they are only encountered when publishing own package, i.e. code that will be used by other programs.
+					 they are not automatically installed, manually modify package.json file to add a Peer Dependency.
+					 "peerDependencies": { "@angular/common": "^15.2.0", "@angular/core": "^15.2.0" }
 package-lock.json : a derivative of package.json which has exact library version(s) you are using for this app.
                     `npm install` uses 'package-lock.json' (if available) else 'package.json' to install required dependencies.
                     
