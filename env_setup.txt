@@ -1710,11 +1710,77 @@ NOTE: use of <ng-content></ng-content>, when some HTML is required to be passed 
       }
 
 
-LIBRARIES/PACKAGES from ANGULAR project
-============================================
+LIBRARIES/PACKAGES from ANGULAR project + PUBLISH to AZURE ARTIFACTS
+===========================================================================
 REFERENCE: https://medium.com/digikare/create-angular-library-in-your-private-npm-registry-on-azuredevops-5d6891cb93dd
            https://angular.io/guide/creating-libraries
            https://learn.microsoft.com/en-us/azure/devops/artifacts/npm/publish?view=azure-devops
+A. Create, Publish, Install
+------------------------------------
+1.
+> ng g library <LIBRARY-NAME>
+This will create directory `projects/LIBRARY-NAME`.
+`angular.json` is updated with a project of type library.
+2.
+DELETE default files created under `projects/LIBRARY-NAME/src/lib`
+And CREATE own modules and components under `projects/LIBRARY-NAME/src/lib`
+> ng g m <MODULE-NAME> --project <LIBRARY-NAME>
+> ng g c <COMP-NAME> --project <LIBRARY-NAME>
+3.
+Make sure <COMP-NAME> is added inside <MODULE-NAME> directory.
+Export <COMP-NAME> from <MODULE-NAME>, using   exports: [COMP-NAME]
+4.
+Create a file named `public-api.ts` inside <MODULE-NAME> directory and export module + component, using
+export * from './MODULE-NAME.module';
+export * from './COMP-NAME.component';
+5.
+Create a file named `index.ts` inside <MODULE-NAME> directory and export public-api, using
+export * from './public-api';
+6.
+Now in `projects/LIBRARY-NAME/src/public-api.ts`, export all module into our library, using
+export * from './lib/MODULE-NAME';
+7.
+NOTE: Above steps are one time, when creating new module/component, along with below steps.
+However, whenever there is a code change in existing module/component, follow only below steps.
+7.a.
+By running command from ROOT of project, build this library
+> ng build <LIBRARY-NAME>
+7.b.
+Test this build, by importing <MODULE-NAME> from `LIBRARY-NAME`,
+in relevant parent module & using selector in relevant parent comp of own angular ROOT project.
+- parent-module.MODULE.TS
+  import { MODULE-NAME } from 'LIBRARY-NAME';
+  imports: [MODULE-NAME]
+- parent-comp.HTML
+  <lib-COMP-NAME></lib-COMP-NAME>
+7.c.
+If all is well, change `version` of library in `projects/LIBRARY-NAME/package.json`
+and run final build  `ng build <LIBRARY-NAME>`
+because same version libraries cannot be published to cloud.
+8.
+Now we can publish this build. NOTE: For reference to setup Azure, refer B. below
+> cd dist/LIBRARY-NAME
+> copy .npmrc having AUTH TOKEN and REGISTRY info of AZURE, here in `dist/LIBRARY-NAME`
+> npm publish
+OR
+Create a script key like 'Opublish' in root level `package.json` with value
+"Opublish": "copy .npmrc dist\\olympus-components\\.npmrc && cd dist\\olympus-components && npm publish"
+and run command  `npm run Opublish`
+9.
+To use this library in another angular project
+> npm install <LIBRARY-NAME>
+And import module + use selector of component from library
+- host-module.MODULE.TS
+  import { MODULE-NAME } from 'LIBRARY-NAME';
+  imports: [MODULE-NAME]
+- host-comp.HTML
+  <lib-COMP-NAME></lib-COMP-NAME>
+
+B. Setup Azure and configure .npmrc
+------------------------------------------
+C. Using assets in libraries
+------------------------------------------
+In order to make assets like images etc. available in HOST angular project, follow steps:
 
 
 LIFECYCLE methods
