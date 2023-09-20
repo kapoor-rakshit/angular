@@ -1764,7 +1764,7 @@ Now we can publish this build. NOTE: For reference to setup Azure, refer B. belo
 > npm publish
 OR
 Create a script key like 'Opublish' in root level `package.json` with value
-"Opublish": "copy .npmrc dist\\olympus-components\\.npmrc && cd dist\\olympus-components && npm publish"
+"Opublish": "copy .npmrc dist\\LIBRARY-NAME\\.npmrc && cd dist\\LIBRARY-NAME && npm publish"
 and run command  `npm run Opublish`
 9.
 To use this library in another angular project
