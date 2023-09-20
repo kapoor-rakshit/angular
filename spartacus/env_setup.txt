@@ -280,7 +280,7 @@ uuid: "eyJp==="
 
 ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
 =========================================================
-1. MODULE.TS                                    // NOTE: import this module, in COMP's MODULE,
+1. MODULE.TS                                    // NOTE: import this module, in SPARTACUS-FEATURES MODULE,
 --------------                                  // so that COMP-NAME can render when matches [cxComponentWrapper]
 @NgModule({
   providers: [
@@ -305,16 +305,16 @@ import {PageComponentModule} from '@spartacus/storefront';
 3. COMP.HTML
 ---------------
 <ng-container *ngIf="component.data$ | async as compData">
-  <!-- A. add component using typecode / uid -->
-  <ng-container
-   [cxComponentWrapper]="{
+ <!-- A. add component using typecode / uid -->
+  <ng-container                                // `[cxComponentWrapper]` provides a position for component to render, using `typeCode` value of comp in /pages API
+   [cxComponentWrapper]="{                     // this is same as using `slots: ['SLOT-NAME']` in `layout.config.TS`, using `position` value of slot in /pages API
      flexType: compData?.productBrochure?.typeCode,
      typeCode: compData?.productBrochure?.typeCode,
      uid: compData?.productBrochure?.uid
    }">
   </ng-container>
 
-  <!-- B. add data using key from response -->
+ <!-- B. add data using key from response -->
   <span>{{ compData?.detailErrorMessage }}</span>
 </ng-container>
 4. COMP.TS
