@@ -1585,30 +1585,36 @@ PASSING VARIABLES/VALUES TO and FROM COMPONENTS
 This concept is used when we have a common class for data that can be used by multiple components (child components)
 -- OUTER COMPONENT (parent) to INNER COMPONENT (child)
    In child-comp.ts
-   --------------------
+   -----------------------
    @Input('EXTERNAL_VAR_NAME') INTERNAL_VAR_NAME: string = "DefaultValue";
    @Input({ required: true, alias: 'EXTERNAL_VAR_NAME' }) INTERNAL_VAR_NAME: string = "DefaultValue";   // v16, @Input() values can be made required
-   
    In child-comp.html
-   ---------------------
+   ------------------------
    {{INTERNAL_VAR_NAME}}
-   
    In parent-comp.html
-   ---------------------
+   -------------------------
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"> default text if child component not available </child-selector-tag>
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"/>     // v16, SELF-CLOSING tags
    
-NOTE: USE OF @Attribute(), when any child comp properties value is static and it will never change
+NOTE: use of @Attribute(), when any child comp properties value is static and it will never change
       Accessing property using @Attribute() means, the value will be evaluated only once (during the first change detection) and
       it will be injected in constructor phase itself, and will not be checked on subsequent change detection cycle run of that component,
       as otherwise would happen in @Input() properties. Therefore, making performance improvised.
       In child-comp.ts
       --------------------
       constructor(@Attribute('EXTERNAL_VAR_NAME') public INTERNAL_VAR_NAME: string) { }
-   
       In parent-comp.html
       ---------------------
       <child-selector-tag  EXTERNAL_VAR_NAME="VALUE_NOT_FROM-TS-FILE">VALUE here is a string, number directly passed in HTML</child-selector-tag>
+
+NOTE: use of <ng-content></ng-content>, when some HTML is required to be passed from PARENT to CHILD
+      In child-comp.HTML
+      -----------------------
+      <ng-content></ng-content>
+      <ng-content select="[IDENTIFIER-FROM-PARENT]"></ng-content>
+      In parent-comp.HTML
+      -----------------------
+      <child-selector> <span ngProjectAs="[IDENTIFIER-FROM-PARENT]"></span> </child-selector>
 
 
 -- INNER COMPONENT (child) to OUTER COMPONENT (parent)
@@ -1617,15 +1623,12 @@ NOTE: USE OF @Attribute(), when any child comp properties value is static and it
    ----------------------
    import {EventEmitter} from '@angular/core';
    @Output() outputVarName: EventEmitter<string> = new EventEmitter<string>();
-   
    functionOnEvent() {
        this.outputVarName.emit(dataToEmit);
    }
-   
    In parent-comp.html
    ----------------------
    <child-selector-tag  (outputVarName)='functionReceiveMessage($event)' > default text if child component not available </child-selector-tag>
-   
    In parent-comp.ts
    ----------------------
    functionReceiveMessage($event): void {
@@ -1647,21 +1650,17 @@ NOTE: USE OF @Attribute(), when any child comp properties value is static and it
          timerValue: EventEmitter<any> = new EventEmitter<any>();
          timerStatus: EventEmitter<any> = new EventEmitter<any>();
       }
-      
       COMP1.component.TS
       ----------------------
       export class TimerV2ConfigComponent implements OnInit, OnDestroy {
       	  constructor(private timerService: TimerV2Service) { }
-	  
 	  this.timerService.timerValue.emit(0);
 	  this.timerService.timerStatus.emit("pause");
       }
-      
       COMP2.component.TS
       ----------------------
       export class TimerV2Component implements OnInit {
            constructor(private timerService: TimerV2Service) { }
-	   
 	   ngOnInit(): void {
                this.timerService.timerValue.subscribe((count: number)=> {
                this.timerVal = count;
@@ -1683,26 +1682,20 @@ NOTE: USE OF @Attribute(), when any child comp properties value is static and it
           timerValue: Subject<any> = new Subject<any>();
   	  timerStatus: Subject<any> = new Subject<any>();
       }
-      
       COMP1.component.TS
       ---------------------
       export class TimerV2ConfigComponent implements OnInit, OnDestroy {
       	  constructor(private timerService: TimerV2Service) { }
-	  
 	  this.timerService.timerValue.next(0);
 	  this.timerService.timerStatus.next("pause");
       }
-      
       COMP2.component.TS
       ---------------------
       import { Component, OnDestroy, OnInit } from '@angular/core';
       import { Subscription } from 'rxjs';
       export class TimerV2ClicksComponent implements OnInit, OnDestroy {
-      
       	timerStatSub!: Subscription;
-	
 	constructor(private timerService: TimerV2Service) { }
-	
 	ngOnInit(): void {
           this.timerStatSub = this.timerService.timerValue.subscribe((count: number)=> {
                this.timerVal = count;
@@ -1711,11 +1704,17 @@ NOTE: USE OF @Attribute(), when any child comp properties value is static and it
                console.log(`ERROR in receving time value ==> ${err.message}`);
              });
         }
-      	
 	ngOnDestroy() {
     	  this.timerStatSub.unsubscribe();
   	}
       }
+
+
+LIBRARIES/PACKAGES from ANGULAR project
+============================================
+REFERENCE: https://medium.com/digikare/create-angular-library-in-your-private-npm-registry-on-azuredevops-5d6891cb93dd
+           https://angular.io/guide/creating-libraries
+           https://learn.microsoft.com/en-us/azure/devops/artifacts/npm/publish?view=azure-devops
 
 
 LIFECYCLE methods
