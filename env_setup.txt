@@ -1783,18 +1783,37 @@ and run command  `npm run Opublish`
 To use this library in another angular project
 > npm install <LIBRARY-NAME>
 And import module + use selector of component from library
-- host-module.MODULE.TS
+- other-project-module.MODULE.TS
   import { MODULE-NAME } from 'LIBRARY-NAME';
   imports: [MODULE-NAME]
-- host-comp.HTML
+- other-project-comp.HTML
   <lib-COMP-NAME></lib-COMP-NAME>
 
 B. Setup Azure and configure .npmrc
 ------------------------------------------
+- Navigate to Azure Artifacts.
+- Create a FEED, which is like a page that allows users to store their packages and control who can access them.
+- Click on Connect to FEED, and choose NPM for project setup steps.
+- Under Project Setup, choose Other.
+- Create a `.npmrc` file at same level of ROOT `package.json` for both angular projects which is PUBLISHING and INSTALLING library.
+- Copy REGISTRY url of FEED to .npmrc, this will be used for publishing/downloading all NPM packages and not default npm registry.
+- Copy AUTH tokens of FEED to .npmrc, this is used to validate user/machine which is publishing/downloading libraries via Azure REGISTRY
+- Create a PAT(Personal Access Token) and base64 encode it, required in .npmrc file _password value.
+- .npmrc file will look something like this:
+registry=https://pkgs.dev.azure.com/ORGANIZATION_NAME/PROJECT_NAME/_packaging/FEED_NAME/npm/registry/
+always-auth=true
+; begin auth token
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:username=ORGANIZATION_NAME
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:_password=[BASE64_ENCODED_PERSONAL_ACCESS_TOKEN]
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:email=npm requires email to be set but doesn't use the value
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:username=ORGANIZATION_NAME
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:_password=[BASE64_ENCODED_PERSONAL_ACCESS_TOKEN]
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:email=npm requires email to be set but doesn't use the value
+; end auth token
 
 C. Using assets in libraries
 ------------------------------------------
-In order to make assets like images etc. from library, available in HOST angular project, follow steps:
+In order to make assets like images etc. from library, available in OTHER angular project, which is installing LIBRARY, follow steps:
 1.
 In file `projects/LIBRARY-NAME/ng-package.json` , add path to assets dir being used in components
 {
@@ -1806,8 +1825,8 @@ In file `projects/LIBRARY-NAME/ng-package.json` , add path to assets dir being u
   "assets": ["PATH-TO-ASSETS-DIR-OF-LIBRARY"]
 }
 2.
-In `angular.json` of HOST project, which is using this LIBRARY, add assets object at following path:
-angular.json -> HOST-PROJECT-NAME -> architect -> build -> options -> assets
+In `angular.json` of OTHER project, which is installing this LIBRARY, add LIBRARY assets object at following path:
+angular.json -> OTHER-PROJECT-NAME -> architect -> build -> options -> assets
 "assets": [
    "src/favicon.ico",
    "src/assets",
