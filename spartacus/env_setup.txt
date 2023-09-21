@@ -284,7 +284,7 @@ ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
 --------------                                  // so that COMP-NAME can render when matches [cxComponentWrapper]
 @NgModule({
   providers: [
-    provideDefaultConfig(<CmsConfig>{
+    provideConfig(<CmsConfig>{
       cmsComponents: {
         TYPE-CODE: {                            // TYPE-CODE is same value as given to  [cxComponentWrapper]  typeCode in COMP.HTML
           component: COMP-NAME,                 // COMP-NAME is component to render, when this typecode matches with [cxComponentWrapper]
