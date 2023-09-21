@@ -626,7 +626,20 @@ package.json      : configures the npm package dependencies ie which libraries w
 					 they are not automatically installed, manually modify package.json file to add a Peer Dependency.
 					 "peerDependencies": { "@angular/common": "^15.2.0", "@angular/core": "^15.2.0" }
 package-lock.json : a derivative of package.json which has exact library version(s) you are using for this app.
-                    `npm install` uses 'package-lock.json' (if available) else 'package.json' to install required dependencies.
+                    `npm install` uses 'package-lock.json' (if available) & `yarn install` uses `yarn.lock` (if available)
+		    else 'package.json' to install required dependencies.
+		    A. If lock file is present AND each package is listed in both files(package.json & lock) with SAME VERSION SEMANTICS (^1.1.4 here) i.e.
+		       package.json
+		       ---------------
+		       "olympus-components": "^1.1.4",
+		       yarn.lock
+		       ---------------
+		       olympus-components@^1.1.4:
+			  version "1.1.7"
+		       the exact version (1.1.7 here) recorded in lock file is installed, and lock file will be unchanged.
+		       Yarn/NPM will NOT check for newer versions from internet.
+		    B. If lock file is absent OR there is mismatch between two files(package.json & lock) in dependencies listed or VERSION SEMANTICS
+		       Yarn/NPM looks for newest versions available from internet that satisfy constraints in package.json. The results are written to lock file
                     
 
 commands will look for  "package.json"  file  which contain dependencies  and then load   "index.html"   file
