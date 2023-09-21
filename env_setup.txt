@@ -1791,9 +1791,32 @@ And import module + use selector of component from library
 
 B. Setup Azure and configure .npmrc
 ------------------------------------------
+
 C. Using assets in libraries
 ------------------------------------------
-In order to make assets like images etc. available in HOST angular project, follow steps:
+In order to make assets like images etc. from library, available in HOST angular project, follow steps:
+1.
+In file `projects/LIBRARY-NAME/ng-package.json` , add path to assets dir being used in components
+{
+  "$schema": "../../node_modules/ng-packagr/ng-package.schema.json",
+  "dest": "../../dist/LIBRARY-NAME",
+  "lib": {
+    "entryFile": "src/public-api.ts"
+  },
+  "assets": ["PATH-TO-ASSETS-DIR-OF-LIBRARY"]
+}
+2.
+In `angular.json` of HOST project, which is using this LIBRARY, add assets object at following path:
+angular.json -> HOST-PROJECT-NAME -> architect -> build -> options -> assets
+"assets": [
+   "src/favicon.ico",
+   "src/assets",
+   {
+      "glob": "**/*",
+      "input": "./node_modules/LIBRARY-NAME/assets",
+      "output": "assets/"
+   }
+]
 
 
 LIFECYCLE methods
