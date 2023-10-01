@@ -1753,8 +1753,9 @@ export * from './public-api';
 Now in `projects/LIBRARY-NAME/src/public-api.ts`, export all module into our library, using
 export * from './lib/MODULE-NAME';
 7.
-NOTE: Above steps are one time, when creating new module/component, along with below steps.
-However, whenever there is a code change in existing module/component, follow only below steps.
+IMPORTANT NOTE: ABOVE STEPS ARE ONE TIME, WHEN CREATING NEW MODULE/COMPONENT, ALONG WITH BELOW STEPS.
+HOWEVER, WHENEVER THERE IS A CODE CHANGE IN EXISTING MODULE/COMPONENT, FOLLOW ONLY BELOW STEPS i.e.
+CHANGE IN EXISTING MODULE/COMPONENT -> BUILD -> TEST -> LIB VERSION CHANGE -> BUILD -> PUBLISH
 7.a.
 By running command from ROOT of project, build this library
 > ng build <LIBRARY-NAME>
