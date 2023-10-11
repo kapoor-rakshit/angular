@@ -54,6 +54,17 @@ addJS(
           }
       });
 }
+alreadyExists(elemID: string): boolean {
+    return this.windowRef?.document?.querySelector(`#${elemID}`) ? true : false;
+}
+removeElem(elemID: string): void {
+    this.windowRef?.document?.querySelector(`#${elemID}`)?.remove();
+}
+removeElemList(selector: string): void {
+    this.windowRef?.document?.querySelectorAll(selector)?.forEach((elem) => {
+      elem.remove();
+    });
+}
 
 
 .MODULE.TS
@@ -109,6 +120,17 @@ this.markerClusterStyle = [{
 showMarkerInfo(evt: google.maps.MapMouseEvent, marker: MapMarker, data: any) {
     this.srcStore = { lat: evt.latLng?.lat() ?? 0, lng: evt.latLng?.lng() ?? 0 };
     this.gMapInfoWindow.open(marker);
+}
+
+ngOnDestroy(): void {
+    this.destroyed$.next();
+    this.destroyed$.complete();
+    this.windowUtils.removeElem(this.MARKER_CLUSTER_SCRIPT_ID);
+    this.windowUtils.removeElem(this.GOOGLE_MAPS_CALLBACK_ID);
+    this.windowUtils.removeElemList("[src*='maps.googleapis.com']");
+    if (this.windowRef?.nativeWindow?.window?.google?.maps) {
+      delete this.windowRef.nativeWindow?.window?.google?.maps;
+    }
 }
 
 
