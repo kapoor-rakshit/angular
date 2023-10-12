@@ -1,14 +1,14 @@
 Refer: https://github.com/angular/components/tree/main/src/google-maps
 
-INSTALL
-===========
+1. INSTALL
+================
 > npm install @angular/google-maps
   OR
 > ng add @angular/google-maps
 
 
-LOAD API with YOUR_API_KEY
-============================
+2. LOAD API with YOUR_API_KEY
+===================================
 NOTE: YOUR_API_KEY is a key secret generated from   https://developers.google.com/maps/gmp-get-started
       Ensure to whitelist the host on google console from where request will be made
 <!doctype html>
@@ -67,13 +67,21 @@ removeElemList(selector: string): void {
 }
 
 
-.MODULE.TS
+3. MODULE.TS
 ================
 import { GoogleMapsModule } from '@angular/google-maps';
 
 
-.COMP.TS
-=============
+4. COMP.TS
+===================
+declare global {
+  interface Window {
+    initMap?: () => void;
+    google?: {
+      maps?: any;
+    };
+  }
+}
 public mapOptions: google.maps.MapOptions = {};
 public srcStore!: google.maps.LatLngLiteral;
 public markerClusterStyle!: any[];
@@ -86,6 +94,7 @@ ngOnInit() {
     ).pipe(takeUntil(this.destroyed$)).subscribe((data) => {
         if(data) {
             this.showGoogleMaps = true;
+            this.cdRef.markForCheck();
         }
     });
 }
@@ -134,8 +143,9 @@ ngOnDestroy(): void {
 }
 
 
-.COMP.HTML
-==============
+5. COMP.HTML
+==================
+<div class="map-container">
 <ng-container *ngIf="showGoogleMaps">
     <google-map
        height="100%"
@@ -162,3 +172,26 @@ ngOnDestroy(): void {
        </map-info-window>        
     </google-map>
 </ng-container>
+</div>
+
+
+6. COMP.SCSS
+====================================
+$googleMapHeightMobile: 400px;
+$googleMapHeightDesktop: 600px;
+.map-container {
+  height: $googleMapHeightMobile;
+  @include media-breakpoint-up(md) {
+    height: $googleMapHeightDesktop;
+  }
+}
+::ng-deep {
+  .markerCluster {
+    background-color: var(--red);
+    border-radius: 50%;
+    border: 1px solid var(--white);
+    div {
+      top: 25%;
+    }
+  }
+}
