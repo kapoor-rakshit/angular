@@ -536,7 +536,8 @@ BASESITE SERVICE
 =========================
 A.1.
 On website initial load, a GET API call is made to `/basesites` i.e. `https://BASE-URL/PREFIX/basesites?fields=FULL&lang=en&curr=USD`
-This is handled by spartacus default url mapping, however, we can specify key `baseSites` inside ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
+This is handled by spartacus default url mapping. NOTE: This API call response may not have all fields.
+So, we can specify key `baseSites` inside ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
 backend: { occ: { endpoints: { baseSites: 'basesites?fields=FULL' } } }
 It returns all basesite related config and our application can use values depending on UID of basesite data.
 A.2.
@@ -732,14 +733,86 @@ D.
 
 PRODUCT SERVICES
 ============================
-A.
-import { ProductService } from '@spartacus/core';
-constructor(private productService: ProductService) { }
-this.selectedProduct$: Observable<ProductDetails> = this.productService.get(PRODUCT-CODE) as Observable<ProductDetails>;
-B.
-import { CurrentProductService } from '@spartacus/storefront';
-constructor(private currentProductSerice: CurrentProductService) { }
-this.productData$: Observable<ProductDetails> = this.currentProductSerice.getProduct() as Observable<ProductDetails>;
+A.1.
+On landing to PLP (Product Listing Page), composable storefront makes an API call for getting search data. This is handled by spartacus default url mapping.
+NOTE: This API call response may not have all fields. So, we can specify productSearch URL in ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
+backend: { occ: { endpoints: { productSearch: 'products/search?fields=FULL' } } }
+A.2.
+To use this response data , follow steps:
+- APP.MODULE.TS
+  import { ProductListComponentService } from '@spartacus/storefront';
+  providers: [{ provide: ProductListComponentService, useClass: CUSTOM-ProductListCompService }]
+- CUSTOM-ProductListCompService.SERVICE.TS
+  import { ActivatedRoute, Router } from '@angular/router';
+  import { CurrencyService, LanguageService, ProductSearchService, RoutingService } from '@spartacus/core';
+  import { ProductListComponentService, ProductListRouteParams, ViewConfig } from '@spartacus/storefront';
+  import { CUSTOM-SearchCriteria } from 'src/app/core/interfaces/CUSTOM-interface';
+  @Injectable({
+    providedIn: 'root',
+  })
+  export class CUSTOM-ProductListCompService extends ProductListComponentService {
+    protected readonly RELEVANCE_ALLCATEGORIES = ':relevance:category:';
+    constructor(
+      protected override productSearchService: ProductSearchService, protected override routing: RoutingService,
+      protected override activatedRoute: ActivatedRoute, protected override currencyService: CurrencyService,
+      protected override languageService: LanguageService, protected override router: Router, protected override config: ViewConfig) {
+        super(productSearchService, routing, activatedRoute, currencyService, languageService, router, config);
+    }
+    override search(criteria: CUSTOM-SearchCriteria): void {
+      const currentPage = criteria.currentPage;
+      const pageSize = criteria.pageSize;
+      const sort = criteria.sortCode;
+      this.productSearchService.search(criteria.query, Object.assign({}, { currentPage }, { pageSize }, { sort }));
+    }
+    override getCriteriaFromRoute(routeParams: ProductListRouteParams, queryParams: CUSTOM-SearchCriteria): CUSTOM-SearchCriteria {
+      return {
+        query: queryParams.query ?? this.getQueryFromRouteParams(routeParams),
+        currentPage: queryParams.currentPage ?? 0,
+        pageSize: queryParams.pageSize ?? this.config.view?.defaultPageSize,
+        sortCode: queryParams.sortCode ?? 'relevance',
+      };
+    }
+    protected override getQueryFromRouteParams({ query, categoryCode, brandCode }: ProductListRouteParams): string {
+      if (query) {
+        return query;
+      }
+      if (categoryCode) {
+        return this.RELEVANCE_ALLCATEGORIES + categoryCode;
+      }
+      if (brandCode) {
+        return this.RELEVANCE_ALLCATEGORIES + brandCode;
+      }
+      return '';
+    }
+  }
+- CUSTOM-PRODUCT-LIST-PAGE.COMP.TS
+  constructor(private productListCompService: CUSTOM-ProductListCompService) { }
+  // TO GET PRODUCTS DATA
+  this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+      (res) => {
+        this.products = res.products ?? [];
+        this.sortOptions = res.sorts ?? [];
+        this.defaultSort = res.sorts?.find((option) => option.selected)?.code ?? '';
+        this.cdRef.markForCheck();
+      },
+      (_) => {}
+  );
+  // TO APPLY SORT CODE
+  this.productListCompService.sort(selectedSort.value);
+B.1.
+On landing to PDP (Product Details Page), composable storefront makes an API call for getting product data. This is handled by spartacus default url mapping.
+NOTE: This API call response may not have all fields. So, we can specify product URL in ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
+backend: { occ: { endpoints: { product: 'products/${productCode}?fields=FULL' } } }
+B.2.
+To use this response data , follow:
+- CUSTOM-PRODUCT-DETAILS-PAGE.COMP.TS
+  import { ProductService } from '@spartacus/core';
+  constructor(private productService: ProductService) { }
+  this.selectedProduct$: Observable<ProductDetails> = this.productService.get(PRODUCT-CODE) as Observable<ProductDetails>;
+  OR
+  import { CurrentProductService } from '@spartacus/storefront';
+  constructor(private currentProductSerice: CurrentProductService) { }
+  this.productData$: Observable<ProductDetails> = this.currentProductSerice.getProduct() as Observable<ProductDetails>;
 
 
 HAMBURGER-MENU SERVICE (navigation drawer)
