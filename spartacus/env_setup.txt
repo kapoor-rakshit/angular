@@ -324,8 +324,8 @@ constructor(public component: CmsComponentData<CmsTabComponent>)
 
 LAUNCH-DIALOG SERVICE (POPUP/MODAL/DIALOG)
 =============================================
-1. MODEL.TS
---------------
+1. MODEL.TS/ENUM.TS
+----------------------
 import '@spartacus/storefront';
 declare module '@spartacus/storefront' {
   const enum LAUNCH_CALLER {
@@ -378,6 +378,35 @@ this.launchDialogService.closeDialog({
   data_key_1: data_value_1,
   data_key_2: data_value_2
 });
+5. POPUP.COMP.HTML
+---------------------
+<div class="modal-container">                      // styles applied to `.modal-container` from global STYLES.SCSS
+  <div class="header-container">
+    <span class="headline">TITLE</span>
+    <button type="button" class="closeBtn" aria-label="Close" (click)="close()">
+      <i class="fa fa-times"></i>
+    </button>
+  </div>
+  <div class="body-container"></div>
+</div>
+6. STYLES.SCSS
+---------------------
+.modal {
+  z-index: 1500 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+
+  .modal-container {
+    width: 90%;
+    background-color: var(--white);
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    @include media-breakpoint-up(md) {
+      width: 50%;
+    }
+  }
+}
 
 
 GLOBAL MESSAGE SERVICE (BANNER MESSAGE SHOWN AT TOP)
@@ -681,6 +710,8 @@ constructor(private activeCartService: ActiveCartService,
             private userIdService: UserIdService,
             private multiCartService: MultiCartService) {}
 A.
+// API calls to /cart might not return complete data. To fix this add endpoint to config-file for fields=FULL i.e.
+backend: { occ: { endpoints: { cart: 'users/${userId}/carts/${cartId}?fields=FULL' } } }
 // Create new cart if not exists by calling API, else return existing cart (REFER: localstorage of browser for cartID)
 this.activeCartService.requireLoadedCart().pipe(
     concatMap((cartState) => {
@@ -741,6 +772,7 @@ A.2.
 To use this response data , follow steps:
 - APP.MODULE.TS
   import { ProductListComponentService } from '@spartacus/storefront';
+  imports: [ConfigModule.withConfig({ view: { defaultPageSize: 24 } })],
   providers: [{ provide: ProductListComponentService, useClass: CUSTOM-ProductListCompService }]
 - CUSTOM-ProductListCompService.SERVICE.TS
   import { ActivatedRoute, Router } from '@angular/router';
@@ -766,10 +798,10 @@ To use this response data , follow steps:
     }
     override getCriteriaFromRoute(routeParams: ProductListRouteParams, queryParams: CUSTOM-SearchCriteria): CUSTOM-SearchCriteria {
       return {
-        query: queryParams.query ?? this.getQueryFromRouteParams(routeParams),
+        query: queryParams.query ? queryParams.query : this.getQueryFromRouteParams(routeParams),
         currentPage: queryParams.currentPage ?? 0,
         pageSize: queryParams.pageSize ?? this.config.view?.defaultPageSize,
-        sortCode: queryParams.sortCode ?? 'relevance',
+        sortCode: queryParams.sortCode ?? (queryParams.query ? queryParams.query.split(':')[1] : 'relevance'),
       };
     }
     protected override getQueryFromRouteParams({ query, categoryCode, brandCode }: ProductListRouteParams): string {
@@ -787,7 +819,7 @@ To use this response data , follow steps:
   }
 - CUSTOM-PRODUCT-LIST-PAGE.COMP.TS
   constructor(private productListCompService: CUSTOM-ProductListCompService) { }
-  // TO GET PRODUCTS DATA
+  a. TO GET PRODUCTS DATA
   this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (res) => {
         this.products = res.products ?? [];
@@ -797,8 +829,10 @@ To use this response data , follow steps:
       },
       (_) => {}
   );
-  // TO APPLY SORT CODE
-  this.productListCompService.sort(selectedSort.value);
+  b. TO APPLY SORT CODE
+  this.productListCompService.sort(SORTCODE-VALUE);
+  c. TO APPLY FACETS
+  
 B.1.
 On landing to PDP (Product Details Page), composable storefront makes an API call for getting product data. This is handled by spartacus default url mapping.
 NOTE: This API call response may not have all fields. So, we can specify product URL in ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
