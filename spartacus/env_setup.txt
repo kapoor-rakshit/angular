@@ -820,7 +820,7 @@ To use this response data , follow steps:
 - CUSTOM-PRODUCT-LIST-PAGE.COMP.TS
   constructor(private productListCompService: CUSTOM-ProductListCompService) { }
   a. TO GET PRODUCTS DATA
-  this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+     this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
       (res) => {
         this.products = res.products ?? [];
         this.sortOptions = res.sorts ?? [];
@@ -828,11 +828,32 @@ To use this response data , follow steps:
         this.cdRef.markForCheck();
       },
       (_) => {}
-  );
+     );
   b. TO APPLY SORT CODE
-  this.productListCompService.sort(SORTCODE-VALUE);
-  c. TO APPLY FACETS
-  
+     this.productListCompService.sort(SORTCODE-VALUE);
+- CUSTOM-PRODUCT-LEFT-REFINEMENT.COMP.TS
+  a. TO APPLY FACETS (NOTE: REFER spartacus repo code)
+     - import { FacetList, ProductFacetNavigationComponent } from '@spartacus/storefront';
+       export class CUSTOM-LeftRefinementComponent extends ProductFacetNavigationComponent {
+        constructor(private productListCompService: CUSTOM-ProductListCompService) { }
+        this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
+         (res) => {
+           this.facetList = { facets: resp.facets, activeFacets: resp.breadcrumbs };         // passed as @Input prop to CUSTOM-FacetListComponent
+           this.cd.markForCheck();
+         })}
+     - import { FacetListComponent, FacetService } from '@spartacus/storefront';
+       export class CUSTOM-FacetListComponent extends FacetListComponent {
+        constructor(protected _facetService: FacetService, protected _elementRef: ElementRef, protected _renderer: Renderer2) {
+         super(_facetService, _elementRef, _renderer);
+        }
+        this.facetList$ = of(this.facetList);
+       }
+     - import { FacetComponent, FacetService } from '@spartacus/storefront';                // This component is a child element in CUSTOM-FacetListComponent
+       export class CUSTOM-FacetComponent extends FacetComponent {                          // i.e. added to *ngFor loop of facetList.facets
+        constructor( protected _facetService: FacetService, protected _elementRef: ElementRef, protected _cd: ChangeDetectorRef) {
+         super(_facetService, _elementRef, _cd);
+        }
+       }
 B.1.
 On landing to PDP (Product Details Page), composable storefront makes an API call for getting product data. This is handled by spartacus default url mapping.
 NOTE: This API call response may not have all fields. So, we can specify product URL in ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
@@ -884,7 +905,7 @@ constructor(protected auth: AuthService) { }
 A.
 API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/token
           REQUEST BODY: {username, password} | RESPONSE: {access_token:'', refresh_token:'', expires_in:'', token_type:'', scope:''}
-Redirect to: `` on successful login
+Redirect to: `LAST VISITED PAGE` on successful login
 from(this.auth.loginWithCredentials(email.toLowerCase(), password)).pipe(        // backend accepts lowercase emails only
     withLatestFrom(this.auth.isUserLoggedIn()),
     tap(([_, isLoggedIn]) => {
@@ -899,6 +920,26 @@ API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/a
           REQUEST BODY: {baseSite:'', token_type_hint:'', token:''} | RESPONSE: NA
 Redirect to: `/login` on successful logout
 this.auth.logout();
+
+
+USER SERVICES
+=========================
+For complete data to be available in /users API response , add fields=FULL i.e.
+backend: { occ: { endpoints: { user: 'users/${userId}?fields=FULL' } } }
+A. 
+import { User, UserAccountFacade } from '@spartacus/user/account/root';
+constructor(private userAccountService: UserAccountFacade) { }
+this.userAccountService.get().pipe(takeUntil(this.unsubscribe$)).subscribe((resp) => {
+  this.userInfo = resp;
+  this.cdRef.markForCheck();
+}, (_) => {});
+B.
+import { UserAddressService, Address } from '@spartacus/core';
+constructor(private userAddressService: UserAddressService) { }
+this.userAddressService.getAddresses().pipe(takeUntil(this.unsubscribe$)).subscribe((resp) => {
+  this.userAddresses = resp;
+  this.cdRef.markForCheck();
+}, (_) => {});
 
 
 NORMALIZERS
