@@ -451,6 +451,21 @@ import {ListNavigationModule} from '@spartacus/storefront';
 ------------------
 this.searchResult = data;                // data from API response of /search , it will have
                                          // object "pagination": {"currentPage": 1,"pageSize": 24,"sort": "clear","totalPages": 3,"totalResults": 60}
+4. APP.MODULE.TS
+------------------
+For global configuration of pagination widget, add here in app.module.ts
+imports: [
+ ConfigModule.withConfig({
+  pagination: {
+    addStart: true,
+    addPrevious: true,
+    addDots: true,
+    rangeCount: 5,
+    addNext: true,
+    addEnd: true,
+  },
+ })
+]
 
 INFINITE SCROLL
 =========================
