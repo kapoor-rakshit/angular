@@ -459,8 +459,10 @@ imports: [
   pagination: {
     addStart: true,
     addPrevious: true,
+    addFirst: true,
     addDots: true,
-    rangeCount: 5,
+    rangeCount: 3,
+    addLast: true,
     addNext: true,
     addEnd: true,
   },
