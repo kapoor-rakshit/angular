@@ -928,11 +928,21 @@ constructor(private hamburgerMenuService: HamburgerMenuService) { }
 this.hamburgerMenuService.isExpanded.pipe(takeUntil(this.unsubscribe$)).subscribe((isExpanded: boolean) => { });
 
 
-LOGIN / LOGOUT SERVICES
-=============================
+SIGNUP / LOGIN / LOGOUT SERVICES
+======================================
+A.
+import { UserRegisterFacade } from '@spartacus/user/profile/root';
+constructor(private userService: UserRegisterFacade) {}
+this.userService.register(<any>{
+  firstName: formData.firstName,
+  lastName: formData.lastName,
+  uid: formData.email.toLowerCase(),
+  password: formData.passw,
+  phoneNumber: formData.phone
+}).pipe(takeUntil(this.unsubscribe$)).subscribe((_) => {}, (err: any) => {});
+B.
 import {AuthService} from '@spartacus/core';
 constructor(protected auth: AuthService) { }
-A.
 API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/token
           REQUEST BODY: {username, password} | RESPONSE: {access_token:'', refresh_token:'', expires_in:'', token_type:'', scope:''}
 Redirect to: `LAST VISITED PAGE` on successful login
@@ -945,7 +955,7 @@ from(this.auth.loginWithCredentials(email.toLowerCase(), password)).pipe(       
         this.cd.markForCheck();
     })
 ).subscribe((res) => {}, (err) => {});
-B.
+C.
 API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/revoke
           REQUEST BODY: {baseSite:'', token_type_hint:'', token:''} | RESPONSE: NA
 Redirect to: `/login` on successful logout
