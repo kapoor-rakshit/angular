@@ -624,6 +624,7 @@ ROUTING
 ==============
 Many routes are built-in with SPARTACUS, and render templates accordingly.
 However, we can create CUSTOM routes too.
+A
 1. APP.MODULE.TS
 -------------------
 imports: [
@@ -651,6 +652,18 @@ navigateFabricSamples() {
       cxRoute: 'FE_PATH_2',
     });
 }
+
+B
+1. MODULE.TS
+--------------------
+import { RouterModule, Routes } from '@angular/router';
+import { CmsPageGuard } from '@spartacus/storefront';
+const STATIC_ROUTE: Routes = [{ path: 'PATH-TO-COMP', component: CUSTOM-Component, canActivate: [CmsPageGuard] }];
+@NgModule({
+  declarations: [CUSTOM-Component],
+  imports: [CommonModule, RouterModule.forChild(STATIC_ROUTE)]
+})
+export class CUSTOM-Module { }
 
 
 ROUTE GUARDS
@@ -681,7 +694,7 @@ serviceMethod() {
       PARAM_1: this.defaultUserId,                                                        // variables in URL i.e. ${PARAM_1}
       PARAM_2: VAL_2,
     }
-  });
+  }, { baseUrl: true, prefix: false, baseSite: false });
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
 B.
@@ -692,7 +705,7 @@ serviceMethod() {
       PARAM_1: this.defaultUserId,
       PARAM_2: VAL_2,
     }
-  });
+  }, { baseUrl: true, prefix: false, baseSite: false });
   return this.httpClient.post(url, body, httpOptions).pipe(catchError((err: Error) => throwError(err)));
 }
 C.
