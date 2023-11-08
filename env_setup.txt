@@ -98,6 +98,7 @@ node.js terminal is a CMD terminal with NODEJs and NPM path variables set for us
 (MULTI-REPO)  :  every new angular project created will have its own node_modules, files (angular.json, package.json), folders.
 > ng new <APP_NAME> 
 > ng serve
+> set NODE_OPTIONS=--openssl-legacy-provider && ng serve      // if `ng serve` throws error of SSL/SOCKET etc. , use this command
 > ng build --prod
   ng build --prod --output-hashing=none           // prevents hash-number to be attached to build artifacts
 
