@@ -741,17 +741,56 @@ constructor(private activeCartService: ActiveCartService,
             private multiCartService: MultiCartService) {}
 A.
 // API calls to /cart might not return complete data. To fix this add endpoint to config-file for fields=FULL i.e.
-backend: { occ: { endpoints: { cart: 'users/${userId}/carts/${cartId}?fields=FULL' } } }
+backend: { occ: { endpoints: {
+           cart: 'users/${userId}/carts/${cartId}?fields=FULL',
+           carts: 'users/${userId}/carts?fields=FULL',
+           createCart: 'users/${userId}/carts?fields=FULL',
+     } } }
 // Create new cart if not exists by calling API, else return existing cart (REFER: localstorage of browser for cartID)
-this.activeCartService.requireLoadedCart().pipe(
-    concatMap((cartState) => {
-        return this.SERVICE.HTTP-SERVICE-METHOD(cartState?.value?.code ?? '');
-    })
-).pipe(takeUntil(this.unsubscribe$)).subscribe((data: any) => {
-    // TODO: SUCCESS OF HTTP-SERVICE-METHOD
-}, (err: Error) => {
-    // TODO: ERROR OF HTTP-SERVICE-METHOD
-});
+- APP.MODULE.TS
+  import { ActiveCartService, CartAdapter, MultiCartService } from '@spartacus/cart/base/core';
+  providers: [{ provide: CartAdapter, useClass: CUSTOM-CartAdapter}, { provide: ActiveCartService, useExisting: CUSTOM-CartService }, MultiCartService]
+- CUSTOM-CartAdapter.SERVICE.TS
+  import { OccCartAdapter } from '@spartacus/cart/base/occ';
+  import { Cart, CART_NORMALIZER } from '@spartacus/cart/base/root';
+  import { ConverterService, Occ, OccEndpointsService } from '@spartacus/core';
+  @Injectable({providedIn: 'root'})
+  export class CUSTOM-CartAdapter extends OccCartAdapter {
+    constructor(protected _http: HttpClient, protected _occEndpointsService: OccEndpointsService, protected _converterService: ConverterService) {
+      super(_http, _occEndpointsService, _converterService);
+    }
+    override create(userId: string, oldCartId?: string, toMergeCartGuid?: string): Observable<Cart> {
+      const toAdd = JSON.stringify({});
+      const params = <any>{};
+      if (oldCartId) {
+        params['oldCartId'] = oldCartId;
+      }
+      if (toMergeCartGuid) {
+        params['toMergeCartGuid'] = toMergeCartGuid;
+      }
+      params['fields'] = 'FULL';
+      return this.http.post<Occ.Cart>(this._occEndpointsService.buildUrl('createCart', {urlParams: { userId }, queryParams: params }), toAdd)
+                                     .pipe(this._converterService.pipeable(CART_NORMALIZER));
+    }
+  }
+- CUSTOM-CartService.SERVICE.TS
+  import { ActiveCartService, getCartIdByUserId, MultiCartService } from '@spartacus/cart/base/core';
+  import { MultiCartFacade } from '@spartacus/cart/base/root';
+  import { UserIdService, WindowRef } from '@spartacus/core';
+  @Injectable({providedIn: 'root'})
+  export class CUSTOM-CartService extends ActiveCartService {
+    constructor(multiCartFacade: MultiCartFacade, userIdService: UserIdService, winRef: WindowRef, protected multiCartService: MultiCartService) {
+      super(multiCartFacade, userIdService, winRef);
+    }
+    override addEntry(productCode: string, quantity: number, pickupStore?: string): void {
+      this.requireLoadedCart().pipe(withLatestFrom(this.userIdService.getUserId())).subscribe(([cart, userId]) => {
+        this.multiCartService.addEntry(userId, getCartIdByUserId(cart, userId), productCode, quantity, pickupStore);
+      });
+    }
+  }
+- COMP.TS
+  constructor(private cartService: CUSTOM-CartService) {}
+  this.cartService.addEntry(product.code, product.quantity);
 B.1.
 // Subscribe to any cart related changes and get cart data
 this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe((cart: CART-TYPE) => {
