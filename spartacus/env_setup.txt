@@ -820,6 +820,48 @@ C.
 // Cart can be updated using builtin endpoint KEYS like 'addEntries', 'updateEntries', 'removeEntries' from defaultOccCartConfig of spartacus
 // i.e. we need NOT to specify URL endpoints in the endpoints file provided in `spartacus-configuration.MODULE.TS`
 // Other KEYS and URLs value and what all path params (urlParams) it expects, can be checked from spartacus code repo.
+C.1.
+- APP.MODULE.TS
+  import { CartEntryAdapter } from '@spartacus/cart/base/core';
+  providers: [{ provide: CartEntryAdapter, useClass: CUSTOM-CartEntryAdapterService }]
+- CUSTOM-CartEntryAdapterService.SERVICE.TS
+  import { OccCartEntryAdapter } from '@spartacus/cart/base/occ';
+  import { CartModification, CART_MODIFICATION_NORMALIZER } from '@spartacus/cart/base/root';
+  import { ConverterService, OccEndpointsService } from '@spartacus/core';
+  @Injectable({ providedIn: 'root' })
+  export class CUSTOM-CartEntryAdapterService extends OccCartEntryAdapter {
+    constructor(protected _http: HttpClient, protected _occEndpointsService: OccEndpointsService, protected _converterService: ConverterService) {
+      super(_http, _occEndpointsService, _converterService);
+    }
+    public override add(userId: string, cartId: string, productCode: string, quantity: number = 1, pickupStore?: string): Observable<CartModification> {
+      const url = this.occEndpointsService.buildUrl('addEntries', {
+        urlParams: { userId, cartId, quantity },
+      });
+
+      // Handle b2b case where the x-www-form-urlencoded is still used
+      if (url.includes(`quantity=${quantity}`)) {
+        const httpHeaders = new HttpHeaders({
+          'Content-Type': 'application/x-www-form-urlencoded',
+        });
+        return this.http.post<CartModification>(url, {}, { headers: httpHeaders, params: { code: productCode } })
+                        .pipe(this.converterService.pipeable(CART_MODIFICATION_NORMALIZER));
+      }
+
+      const toAdd = {
+        orderEntries: [{
+          quantity,
+          product: { code: productCode },
+          ...(pickupStore && { deliveryPointOfService: { name: pickupStore } }),
+        }]
+      };
+      const headers = new HttpHeaders({
+        'Content-Type': 'application/json',
+      });
+      return this.http.post<CartModification>(url, toAdd, { headers })
+                      .pipe(this.converterService.pipeable(CART_MODIFICATION_NORMALIZER));
+    }
+  }
+C.2.
 const url = this.occEndpointsService.buildUrl('updateEntries', {
     urlParams: {
         userId: this.defaultUserId,
