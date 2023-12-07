@@ -72,7 +72,9 @@ SETUP
   ng update @spartacus/schematics@VERSION         // After update is done, inspect your code for comments that begin with TODO:Spartacus
 > check `package.json` for correct version of @spartacus libs and
   delete node_modules(if already exists) and then run:
-  npm install
+  npm install or yarn install
+> update `manifest.json` file , present in 'js-storefront' directory
+  (REFER: deployment -> manifest.json   in angular repo)
 
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
