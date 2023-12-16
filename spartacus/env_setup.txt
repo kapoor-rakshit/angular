@@ -548,6 +548,21 @@ this.routingService.isNavigating().pipe(takeUntil(this.destroyed$)).subscribe((n
 });
 
 
+ACTIONS
+========================
+Some API calls are handled by spartacus and we do not have control over their success response or failure response.
+So, we can make use of actions from ngrx/effects.
+Eg:
+import { Actions, ofType } from '@ngrx/effects';
+import { ProductActions } from '@spartacus/core';
+constructor(private actions$: Actions) { }
+ngOnInit() {
+  this.actions$.pipe(ofType(ProductActions.SEARCH_PRODUCTS_FAIL)).subscribe(() => {
+     this.loaderService.hide();
+  });
+}
+
+
 TRANSLATION SERVICE
 =========================
 1. MODULE.TS
