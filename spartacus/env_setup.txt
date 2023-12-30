@@ -1221,6 +1221,9 @@ B.1 .module.TS
 PAGE NOT FOUND REDIRECTION
 ==============================
 REFER: code sample in `server.prod.ts`, `server/server-api`, `server/node.helper`, `server/baseurl-mappings` in `deployment` folder.
+OR
+Map `/not-found` page's `ErrorPageTemplate`s ErrorComponent from backend with custom angular component.
+Spartacus automatically redirects to `/not-found` in case route does not exist.
 
 
 STYLES
