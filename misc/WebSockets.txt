@@ -1,0 +1,72 @@
+a. In traditional web applications, the client sends a request to the server, which then responds with the requested data.
+   This request-response model can be inefficient for real-time applications,
+   such as chat applications, online gaming, and financial trading platforms, where data needs to be updated in real-time.
+
+b. WebSockets are a technology that allow for real-time communication between a client and server.
+   They provide a bi-directional communication, without the need for the client to constantly request data from the server.
+
+c. To open a websocket connection, we need to create new WebSocket using the special protocol ws:// OR wss:// in the url
+   wss:// is same as HTTPS is with HTTP
+
+1. COMP.HTML
+=================
+<button (click)="sendMsg()">Send Message</button>
+
+2. COMP.TS
+=================
+constructor(private msgService: MsgService) {
+  msgService.messages.pipe(takeUntil(this.unsubscribe$)).subscribe((msg) => {
+    console.log("Response from websocket: " + msg);
+  });
+}
+sendMsg() {
+  this.msgService.messages.next("new message from client to websocket");
+}
+
+3. MESSAGE-SERVICE.SERVICE.TS
+==================================
+@Injectable({providedIn: 'root'})
+export class MsgService {
+  readonly WEBSOCKET_URL = "wss://WEBSOCKET_URL_DOMAIN";
+  public messages: Subject<any> = new Subject<any>();
+  constructor(wsService: WebsocketService) {
+    this.messages = <Subject<any>>wsService.connect(WEBSOCKET_URL).map(
+      (response: MessageEvent): any => {
+        let data = JSON.parse(response.data);
+        return data;
+      });
+  }
+}
+
+4. WEBSOCKET-SERVICE.SERVICE.TS
+====================================
+import * as Rx from "rxjs/Rx";
+@Injectable({providedIn: 'root'})
+export class WebsocketService {
+  private subject: Rx.Subject<MessageEvent>;
+
+  public connect(url): Rx.Subject<MessageEvent> {
+    if (!this.subject) {
+      this.subject = this.create(url);
+    }
+    return this.subject;
+  }
+
+  private create(url): Rx.Subject<MessageEvent> {
+    let ws = new WebSocket(url);
+    let observable = Rx.Observable.create((obs: Rx.Observer<MessageEvent>) => {
+      ws.onmessage = obs.next.bind(obs);
+      ws.onerror = obs.error.bind(obs);
+      ws.onclose = obs.complete.bind(obs);
+      return ws.close.bind(ws);
+    });
+    let observer = {
+      next: (data: Object) => {
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(data));
+        }
+      }
+    };
+    return Rx.Subject.create(observer, observable);
+  }
+}
