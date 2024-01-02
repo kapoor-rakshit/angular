@@ -324,6 +324,58 @@ import {PageComponentModule} from '@spartacus/storefront';
 constructor(public component: CmsComponentData<CmsTabComponent>)
 
 
+CMS COMPONENTS
+========================
+1. MODULE.TS
+---------------
+@NgModule({
+  declarations: [CUSTOM-ParagraphComponent, CUSTOM-BannerComponent],
+  imports: [
+    SupplementHashAnchorsModule,
+    ConfigModule.withConfig({
+      cmsComponents: {
+        CMSParagraphComponent: {
+          component: CUSTOM-ParagraphComponent,
+        },
+        SimpleResponsiveBannerComponent: {
+          component: CUSTOM-BannerComponent,
+        },
+        BannerComponent: {
+          component: CUSTOM-BannerComponent,
+        },
+      },
+    }),
+  ],
+})
+export class CmsContentModule {}               // import in `spartacus-features.MODULE.TS`
+
+A. PARAGRAPH COMPONENT
+------------------------
+  2. CUSTOM-COMP.TS
+  --------------------
+  import { ParagraphComponent } from '@spartacus/storefront';
+  export class CUSTOM-ParagraphComponent extends ParagraphComponent {}
+  3. CUSTOM-COMP.HTML
+  ---------------------
+  <div *ngIf="component.data$ | async as data" [innerHTML]="data.content ?? '' | cxSupplementHashAnchors | safeHtml"></div>
+
+B. BANNER COMPONENT
+------------------------
+  2. CUSTOM-COMP.TS
+  --------------------
+  import { BannerComponent } from '@spartacus/storefront';
+  export class CUSTOM-BannerComponent extends BannerComponent {}
+  3. CUSTOM-COMP.HTML
+  ---------------------
+  <div *ngIf="component.data$ | async as data">
+    <img *ngIf="data.media && data.media.src"
+      [attr.src]="data.media.src"
+      [attr.alt]="data.media.alt"
+      [attr.role]="data.media.role"
+    />
+  </div>
+
+
 LAUNCH-DIALOG SERVICE (POPUP/MODAL/DIALOG)
 =============================================
 1. MODEL.TS/ENUM.TS
