@@ -280,8 +280,8 @@ uid: "search"
 uuid: "eyJp==="
 
 
-ADD COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
-=========================================================
+ADD CMS COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
+=============================================================
 1. MODULE.TS                                    // NOTE: import this module, in SPARTACUS-FEATURES MODULE,
 --------------                                  // so that COMP-NAME can render when matches [cxComponentWrapper]
 @NgModule({
@@ -682,11 +682,285 @@ CMS SERVICE
 ==========================
 import { CmsService, Page } from '@spartacus/core';
 constructor(private cmsService: CmsService) { }
+A.
 public pageData!: Page;
 this.cmsService.getCurrentPage().pipe(takeUntil(this.destroyed$)).subscribe((data) => {
     this.pageData = data;
-});
+}, () => {});
 this.pageData?.template === PageTemplateENUM.VALUE-FROM-PAGES-API-TEMPLATE;
+B.
+this.cmsService.getComponentData('COMP-UID').pipe(takeUntil(this.destroyed$)).subscribe((compData: CmsComponent) => {
+    this.navNode = compData?.navigationNode;
+}, () => {});
+
+
+NAVIGATION SERVICE (navigation menus)
+=======================================
+1. COMP.TS (mapped in module with navigation slot's comp)
+--------------------------------------------------------------
+import { NavigationService } from '@spartacus/storefront';
+A.
+constructor(public navService: NavigationService, public component: CmsComponentData<CmsNavigationComponent>) { }
+this.component.data$.pipe(switchMap((compData) => {
+  if (compData && compData?.navigationNode) {
+    return this.navService.createNavigation(of(compData));
+  } else {
+    return of(null);
+  }
+}),
+takeUntil(this.destroy$)
+).subscribe((navigationNode) => {
+  if (navigationNode) {
+    this.navNode = navigationNode;
+    this.cd.markForCheck();
+  }
+});
+   OR
+B.
+constructor(public navService: NavigationService, private cmsService: CmsService) { }
+this.cmsService.getComponentData('COMP-UID').pipe(switchMap((compData) => {
+  if (compData && compData?.navigationNode) {
+    return this.navService.createNavigation(of(compData));
+  } else {
+    return of(null);
+  }
+}),
+takeUntil(this.destroy$)
+).subscribe((navigationNode) => {
+  if (navigationNode) {
+    this.navNode = navigationNode;
+    this.cd.markForCheck();
+  }
+});
+2. COMP.HTML
+----------------
+<CUSTOM-MOBILE-NAVIGATION
+  [node]="navNode"
+  [resetMenuOnClose]="true">
+</CUSTOM-MOBILE-NAVIGATION>
+3. CUSTOM-MOBILE-NAVIGATION.COMP.TS
+----------------------------------------
+import { ElementRef, Renderer2 } from '@angular/core';
+import { Router } from '@angular/router';
+import { WindowRef } from '@spartacus/core';
+import { HamburgerMenuService, NavigationUIComponent } from '@spartacus/storefront';
+export class CUSTOM-MobileNavigationComponent extends NavigationUIComponent implements OnDestroy {
+  private _subscriptions = new Subscription();
+  constructor(protected _router: Router, protected _renderer: Renderer2, protected _elemRef: ElementRef,
+              protected _hamburgerMenuService: HamburgerMenuService, protected _winRef: WindowRef) {
+    super(_router, _renderer, _elemRef, _hamburgerMenuService, _winRef);
+  }
+  override closeIfClickedTheSameLink(navNode: NavigationNode): void {
+    if (typeof navNode.url === 'string' && this.winRef.nativeWindow?.location.href.includes(navNode.url)) {
+      this._elemRef.nativeElement
+        .querySelectorAll('li.is-open:not(.back), li.is-opened, .top-menu.is-open')
+        .forEach((el: any) => {
+          this._renderer.removeClass(el, 'is-open');
+          this._renderer.removeClass(el, 'is-opened');
+        });
+      this.reinitializeMenu();
+      this.hamburgerMenuService.toggle(true);
+    }
+  }
+  /**
+   * This method performs the action of resetting the menu (close all sub menus and return to main options)
+   * when the menu is closed.
+   */
+  override resetOnMenuCollapse(): void {
+    this._subscriptions.add(
+      this.hamburgerMenuService?.isExpanded.pipe(distinctUntilChanged(), filter(Boolean)).subscribe(() => {
+        this.reinitializeMenu();
+        this.resetMenuChilds();
+      })
+    );
+  }
+  resetMenuChilds() {
+    const openNav = this.winRef.nativeWindow?.document.querySelectorAll('.is-open');
+    if (openNav?.length) {
+      openNav.forEach((node) => {
+        this._renderer.removeClass(node, 'is-open');
+      });
+    }
+  }
+  toggleChildMenu(event: any): void {
+    const node = <HTMLElement>event.currentTarget;
+    const parentNode = <HTMLElement>node.parentNode;
+    if (parentNode) {
+      if (parentNode.classList.contains('is-open')) {
+        const up_arrow = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open cx-icon.up-arrow');
+        const down_arrow = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open cx-icon.down-arrow');
+        if (up_arrow?.length && down_arrow?.length) {
+          this._renderer.removeClass(down_arrow[0], 'd-none');
+          this._renderer.addClass(up_arrow[0], 'd-none');
+        }
+        this._renderer.removeClass(parentNode, 'is-open');
+      } else {
+        const openNodes = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open');
+        if (openNodes?.length) {
+          openNodes.forEach((node) => {
+            const up_arrow = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open cx-icon.up-arrow');
+            const down_arrow = this.winRef.nativeWindow?.document.querySelectorAll(
+              '.top-menu.is-open cx-icon.down-arrow'
+            );
+            if (up_arrow?.length && down_arrow?.length) {
+              this._renderer.removeClass(down_arrow[0], 'd-none');
+              this._renderer.addClass(up_arrow[0], 'd-none');
+            }
+            this._renderer.removeClass(node, 'is-open');
+          });
+        }
+        this._renderer.addClass(parentNode, 'is-open');
+        const up_arrow = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open cx-icon.up-arrow');
+        const down_arrow = this.winRef.nativeWindow?.document.querySelectorAll('.top-menu.is-open cx-icon.down-arrow');
+        if (up_arrow?.length && down_arrow?.length) {
+          this._renderer.removeClass(up_arrow[0], 'd-none');
+          this._renderer.addClass(down_arrow[0], 'd-none');
+        }
+      }
+    }
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+  }
+  backToMainMenu(): void {
+    this.back();
+    this.resetMenuChilds();
+  }
+  override ngOnDestroy() {
+    if (this._subscriptions) {
+      this._subscriptions.unsubscribe();
+    }
+  }
+}
+4. CUSTOM-MOBILE-NAVIGATION.COMP.HTML
+----------------------------------------
+<nav [attr.aria-label]="navAriaLabel">
+  <ul>
+    <li *ngIf="flyout && (node?.children?.length ?? 0) >= 1" class="back is-open">
+      <button (click)="backToMainMenu()">
+        <cx-icon [type]="iconType.ARROW_LEFT"></cx-icon>
+        {{ 'common.back' | cxTranslate }}
+      </button>
+    </li>
+    <ng-container *ngFor="let child of node?.children">
+      <ng-container *ngTemplateOutlet="nav; context: { node: child, depth: 0 }"></ng-container>
+    </ng-container>
+  </ul>
+</nav>
+<!-- we generate links in a recursive manner -->
+<ng-template #nav let-node="node" let-depth="depth">
+  <li class="main-heading">
+    <cx-generic-link
+      *ngIf="node.url && (!node.children || node.children?.length === 0); else heading"
+      [url]="node.url"
+      [target]="node.target"
+      [style]="node.styleAttributes"
+      [class]="node.styleClasses"
+      (click)="closeIfClickedTheSameLink(node)">
+        {{ node.title }}
+    </cx-generic-link>
+    <ng-template #heading>
+      <ng-container *ngIf="flyout && node.children?.length > 0; else title">
+        <cx-generic-link
+          *ngIf="node.url"
+          [url]="node.url"
+          [target]="node.target"
+          (click)="closeIfClickedTheSameLink(node)">
+            {{ node.title }}
+        </cx-generic-link>
+        <button
+          [attr.tabindex]="depth < 1 ? 0 : -1"
+          [attr.aria-haspopup]="true"
+          [attr.aria-expanded]="false"
+          [attr.aria-label]="node.title"
+          (click)="toggleOpen($any($event))"
+          (mouseenter)="onMouseEnter($event)"
+          (keydown.space)="toggleOpen($any($event))"
+          (keydown.esc)="back()">
+            <ng-container *ngIf="!node.url">
+              {{ node.title }}
+            </ng-container>
+            <cx-icon [type]="iconType.CARET_RIGHT"></cx-icon>
+        </button>
+      </ng-container>
+      <ng-template #title>
+        <span [attr.tabindex]="-1">
+          {{ node.title }}
+        </span>
+      </ng-template>
+    </ng-template>
+    <!-- we add a wrapper to allow for better layout handling in CSS -->
+    <div class="wrapper" *ngIf="node.children && node.children.length > 0">
+      <ul
+        class="childs"
+        [attr.depth]="getTotalDepth(node)"
+        [attr.wrap-after]="node.children.length > wrapAfter ? wrapAfter : null"
+        [attr.columns]="getColumnCount(node.children.length)">
+          <ng-container *ngFor="let child of node.children">
+            <ng-container *ngTemplateOutlet="firstLevelNav; context: { node: child, depth: depth + 1 }"> </ng-container>
+          </ng-container>
+      </ul>
+    </div>
+  </li>
+</ng-template>
+<!-- First-level Nav -->
+<ng-template #firstLevelNav let-node="node" let-depth="depth">
+  <nav
+    (keydown.space)="toggleChildMenu($any($event))"
+    (keydown.esc)="back()"
+    (click)="toggleChildMenu($any($event))"
+    aria-label="Top level menu"
+    class="top-menu"
+    tabindex="0"
+    #top_level_nav>
+      <div class="top-menu-link" (click)="toggleChildMenu($any($event))"
+        *ngIf="node.url && (!node.children || node.children?.length === 0); else heading">
+          <cx-generic-link
+            [url]="node.url"
+            [target]="node.target"
+            [style]="node.styleAttributes"
+            [class]="node.styleClasses"
+            (click)="(node); resetOnMenuCollapse()">
+              {{ node.title }}
+          </cx-generic-link>
+          <cx-icon class="down-arrow" *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_DOWN"></cx-icon>
+          <cx-icon class="up-arrow d-none" *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_UP"></cx-icon>
+      </div>
+      <ng-template #heading>
+        <div *ngIf="node.url" class="top-menu-link" (click)="toggleChildMenu($any($event))">
+          <cx-generic-link
+            [url]="node.url"
+            [target]="node.target"
+            (click)="closeIfClickedTheSameLink(node); (resetOnMenuCollapse)">
+              {{ node.title }}
+          </cx-generic-link>
+          <cx-icon class="down-arrow" *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_DOWN"></cx-icon>
+          <cx-icon
+            class="up-arrow d-none"
+            *ngIf="flyout && node.children?.length > 0"
+            [type]="iconType.CARET_UP">
+          </cx-icon>
+        </div>
+        <span *ngIf="!node.url"
+          [attr.tabindex]="flyout && (depth === 0 || node.url) ? 0 : -1"
+          (click)="toggleChildMenu($any($event))">
+            {{ node.title }}
+            <cx-icon class="down-arrow" *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_DOWN"></cx-icon>
+            <cx-icon class="up-arrow d-none" *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_UP"></cx-icon>
+        </span>
+      </ng-template>
+      <!-- we add a wrapper to allow for better layout handling in CSS -->
+      <div class="wrapper second-level-nav" *ngIf="node.children?.length > 0">
+        <div class="inner-wrapper">
+          <div class="childs" [attr.depth]="getTotalDepth(node)" [attr.wrap-after]="node.children?.length > wrapAfter ? wrapAfter : null"
+            [attr.columns]="getColumnCount(node.children?.length)">
+            <ng-container *ngFor="let child of node.children">
+              <ng-container *ngTemplateOutlet="nav; context: { node: child, depth: depth + 2 }"></ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+  </nav>
+</ng-template>
 
 
 ROUTING
