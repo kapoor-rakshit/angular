@@ -1130,20 +1130,27 @@ It provides a layer of abstraction between the DOM element and the component cod
     You will not able to use App in other platforms like in web worker, Server(SSR), Desktop, mobile app, where there is no browser.
   - The DOM APIs do not sanitize the data. Hence it is possible to inject a script, thereby, opening our app an easy target for XSS injection attack.
 import { Renderer2, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+@ViewChild('ELEM', { static: false }) elemRef: ElementRef;
 constructor(private renderer: Renderer2, private el: ElementRef) { }
 A.
-this.renderer.addClass(this.el.nativeElement, 'CLASS-NAME');
-this.renderer.removeClass(this.el.nativeElement, 'CLASS-NAME');
+this.renderer.addClass(this.elemRef.nativeElement, 'CLASS-NAME');
+this.renderer.removeClass(this.elemRef.nativeElement, 'CLASS-NAME');
 B.  
-const div = this.renderer.createElement('div');
+const divElem = this.renderer.createElement('div');
 const text = this.renderer.createText('Hello world!');
-this.renderer.appendChild(div, text);			// text node inside our new div and finally our div is added to the element 
-this.renderer.appendChild(this.el.nativeElement, div);
+this.renderer.appendChild(divElem, text);			// text node inside our new div and finally our div is added to the element 
+this.renderer.appendChild(this.el.nativeElement, divElem);
+this.renderer.insertBefore(this.el.nativeElement, divElem, this.elemRef.nativeElement);      // (parent, child, refElem)
 C.
 this.renderer.setAttribute(this.el.nativeElement, 'aria-hidden', 'true');
 D.
 this.renderer.setStyle(this.el.nativeElement, 'border-left', '2px dashed olive');
 this.renderer.removeStyle(this.el.nativeElement, 'border-left');
+E.
+this.clicklistener = this.renderer.listen(this.elemRef.nativeElement, 'click', (evt) => { });
+ngOnDestroy() {
+  this.clicklistener.unsubscribe();
+}
 
 
 Angular Animations
