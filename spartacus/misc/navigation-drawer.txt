@@ -1,0 +1,200 @@
+5. CUSTOM-MOBILE-NAVIGATION.COMP.SCSS
+-----------------------------------------
+@import 'bootstrap/scss/mixins';
+@import '@spartacus/styles/scss/cxbase/mixins';
+@import '@spartacus/styles/scss/components/content/navigation/_navigation-ui';
+
+:host {
+  @extend %cx-navigation-ui;
+
+  background-color: var(--transparent);
+  display: flex;
+
+  @extend %nav-icon;
+  @extend %nav-wrapper;
+  @extend %nav-childs;
+  @extend %nav-links;
+  @extend %nav-wrap;
+
+  &.flyout {
+    .back {
+      display: none;
+    }
+    @include media-breakpoint-down(md) {
+      &.is-open {
+        .back {
+          display: initial;
+          button {
+            border: none;
+            background-color: var(--primary-color);
+            color: var(--white);
+            text-transform: capitalize;
+            justify-content: flex-start;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            cx-icon {
+              padding-inline-end: 10px;
+            }
+          }
+        }
+
+        li.main-heading.is-open {
+          position: absolute;
+          top: 57px;
+          height: 90%;
+          width: 100%;
+          left: 0px;
+          background: var(--white);
+
+          button {
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            justify-content: space-between;
+            display: flex;
+
+            cx-icon {
+              display: none;
+            }
+          }
+        }
+
+        .wrapper.second-level-nav {
+          display: none;
+        }
+
+        .top-menu {
+          &.is-open {
+            .wrapper.second-level-nav {
+              display: block;
+              background: var(--off-white);
+              padding: 8px 0;
+
+              .inner-wrapper {
+                li.main-heading {
+                  button,
+                  div.wrapper {
+                    display: none;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        .top-menu-link {
+          border-bottom: 1px solid var(--cx-color-medium);
+          display: flex;
+          justify-content: space-between;
+          padding-right: 16px;
+        }
+      }
+
+      &:not(.is-open) {
+        .back {
+          display: none;
+        }
+      }
+    }
+  }
+
+  nav {
+    width: 100%;
+    &:focus {
+      color: var(--cx-g-color-primary);
+    }
+  }
+
+  span,
+  button {
+    margin: 0;
+  }
+
+  &.flyout {
+    span,
+    button,
+    cx-generic-link {
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      color: var(--dark-black);
+
+      &:hover {
+        color: var(--cx-color-primary);
+      }
+
+      &:focus {
+        z-index: 1;
+        position: relative;
+      }
+
+      a {
+        display: block;
+        width: 100%;
+        &:focus {
+          z-index: 1;
+          position: relative;
+        }
+      }
+    }
+
+    @include media-breakpoint-down(md) {
+      ::ng-deep {
+        > nav > ul > li {
+          > span,
+          > button:not(cx-generic-link + button),
+          > cx-generic-link {
+            font-weight: 600;
+            width: 100%;
+          }
+          &:not(.is-open):not(.is-opened) {
+            > .wrapper {
+              display: none;
+            }
+          }
+        }
+        span,
+        button,
+        cx-generic-link {
+          display: flex;
+          justify-content: space-between;
+          cursor: pointer;
+
+          a {
+            display: flex;
+            width: 100%;
+            color: var(--dark-black);
+            justify-content: space-between;
+          }
+        }
+
+        span,
+        button {
+          border-bottom: 1px solid var(--cx-color-medium);
+        }
+
+        span,
+        button,
+        cx-generic-link a {
+          padding: 16px;
+        }
+      }
+    }
+  }
+}
+
+:host {
+  @include media-breakpoint-down(md) {
+    ::ng-deep {
+      .top-menu.is-open {
+        .top-menu-link {
+          cx-generic-link a {
+            font-weight: 600;
+            color: var(--navy-blue-01) !important;
+          }
+        }
+      }
+    }
+  }
+}
