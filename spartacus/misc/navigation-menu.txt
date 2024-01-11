@@ -1,0 +1,752 @@
+// MEGA MENU
+1. COMP.TS (mapped in module with navigation slot's comp)
+--------------------------------------------------------------
+import { NavigationService } from '@spartacus/storefront';
+A.
+constructor(public navService: NavigationService, public component: CmsComponentData<CmsNavigationComponent>) { }
+this.component.data$.pipe(switchMap((compData) => {
+  this.compData = compData;
+  if (compData && compData?.navigationNode) {
+    return this.navService.createNavigation(of(compData));
+  } else {
+    return of(null);
+  }
+}),
+takeUntil(this.destroy$)
+).subscribe((navigationNode) => {
+  if (navigationNode) {
+    this.navNode = navigationNode;
+    this.cd.markForCheck();
+  }
+});
+   OR
+B.
+constructor(public navService: NavigationService, private cmsService: CmsService) { }
+this.cmsService.getComponentData('COMP-UID').pipe(switchMap((compData) => {
+  this.compData = compData;
+  if (compData && compData?.navigationNode) {
+    return this.navService.createNavigation(of(compData));
+  } else {
+    return of(null);
+  }
+}),
+takeUntil(this.destroy$)
+).subscribe((navigationNode) => {
+  if (navigationNode) {
+    this.navNode = navigationNode;
+    this.cd.markForCheck();
+  }
+});
+
+2. COMP.HTML
+----------------
+<CUSTOM-DESKTOP-NAVIGATION
+  [node]="navNode"
+  [resetMenuOnClose]="true"
+  [ngClass]="compData.styleClass ?? ''"
+  [wrapAfter]="+(compData.wrapAfter ?? '')">
+</CUSTOM-DESKTOP-NAVIGATION>
+
+3. CUSTOM-DESKTOP-NAVIGATION.COMP.TS
+-----------------------------------------
+import { Component, ElementRef, HostBinding, Input, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { WindowRef } from '@spartacus/core';
+import { ICON_TYPE, NavigationNode } from '@spartacus/storefront';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
+@Component({
+  selector: 'CUSTOM-DESKTOP-NAVIGATION',
+  templateUrl: './navigation-ui.component.html',
+  styleUrls: ['./navigation-ui.component.scss'],
+})
+export class CUSTOM-DESKTOP-NavigationComponent implements OnInit {
+  /**
+   * The navigation node to render.
+   */
+  @Input() node!: NavigationNode | null;
+  /**
+   * The number of child nodes that must be wrapped.
+   */
+  @Input() wrapAfter!: number;
+  /**
+   * Flag indicates whether to reset the state of menu navigation (ie. Collapse all submenus) when the menu is closed.
+   */
+  @Input() resetMenuOnClose: boolean | undefined;
+  @Input() navAriaLabel: string | null | undefined;
+  iconType = ICON_TYPE;
+  /**
+   * Indicates whether the navigation should support flyout.
+   * If flyout is set to true, the
+   * nested child navigation nodes will only appear on hover or focus.
+   */
+  @Input() @HostBinding('class.flyout') flyout = true;
+  @Input() @HostBinding('class.is-open') isOpen = false;
+  @Input() userName: string = '';
+  @ViewChild('menu') menu!: ElementRef;
+  private openNodes: HTMLElement[] = [];
+  private subscriptions = new Subscription();
+  isMenuOpen = false;
+  constructor(
+    private router: Router,
+    private renderer: Renderer2,
+    private elemRef: ElementRef,
+    protected winRef: WindowRef
+  ) {
+    this.subscriptions.add(this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => this.clear()));
+  }
+  ngOnInit() {
+    if (this.resetMenuOnClose) {
+      this.reinitializeMenu();
+    }
+    this.renderer.listen('window', 'click', (e: Event) => {
+      if (e.target !== this.menu.nativeElement && !this.menu.nativeElement.contains(e.target)) {
+        this.isMenuOpen = false;
+        this.closeMegaMenu(e);
+      }
+    });
+  }
+  closeIfClickedTheSameLink(navNode: NavigationNode): void {
+    if (typeof navNode.url === 'string' && this.winRef.nativeWindow?.location.href.includes(navNode.url)) {
+      this.elemRef.nativeElement.querySelectorAll('li.is-open:not(.back), li.is-opened').forEach((el: any) => {
+        this.renderer.removeClass(el, 'is-open');
+        this.renderer.removeClass(el, 'is-opened');
+      });
+      this.reinitializeMenu();
+    }
+  }
+  /**
+   * This method performs the actions required to reset the state of the menu and reset any visual components.
+   */
+  reinitializeMenu(): void {
+    if (this.openNodes?.length > 0) {
+      this.clear();
+      this.renderer.removeClass(this.elemRef.nativeElement, 'is-open');
+    }
+  }
+  protected ariaCollapseNodes(): void {
+    this.openNodes.forEach((parentNode) => {
+      Array.from(parentNode.children)
+        .filter((childNode) => childNode?.tagName === 'BUTTON')
+        .forEach((childNode) => {
+          this.renderer.setAttribute(childNode, 'aria-expanded', 'false');
+        });
+    });
+  }
+  toggleOpen(event: any): void {
+    this.isMenuOpen = true;
+    let parentElement: any = false;
+    let secondParent: any = false;
+    if (event.currentTarget.classList.contains('top-menu')) {
+      parentElement = this.winRef.nativeWindow?.document.querySelector('.first-level-wrapper')?.parentNode;
+    } else if (event.currentTarget.classList.contains('second-menu')) {
+      secondParent = this.winRef.nativeWindow?.document.querySelector('.second-level-nav')?.parentNode;
+    }
+    if (event.type === 'keydown') {
+      event.preventDefault();
+    }
+    const node = event.currentTarget as HTMLElement;
+    if (this.openNodes.includes(node)) {
+      if (event.type === 'keydown') {
+        this.back();
+      } else {
+        this.openNodes = this.openNodes.filter((n) => !(n === (parentElement || secondParent)));
+        this.renderer.removeClass(node, 'is-open');
+      }
+      this.updateClasses();
+    } else if (node.classList.contains('top-menu') && this.openNodes.length > 1) {
+      this.openNodes = this.openNodes.filter((n: any) => {
+        if ((n.classList.contains('top-menu') || n.classList.contains('second-menu')) !== true) {
+          return n;
+        } else {
+          this.renderer.removeClass(n, 'is-open');
+        }
+      });
+      this.openNodes.push(node);
+      this.updateClasses(2);
+    } else if (node.classList.contains('second-menu') && this.openNodes.length > 2) {
+      this.openNodes = this.openNodes.filter((n: any) => {
+        if (n.classList.contains('second-menu') !== true) {
+          return n;
+        } else {
+          this.renderer.removeClass(n, 'is-open');
+        }
+      });
+      this.openNodes.push(node);
+      this.updateClasses(3);
+    } else {
+      if (node.classList.contains('main')) {
+        this.openNodes
+          .filter((n) => {
+            return n != node;
+          })
+          .forEach((n) => {
+            this.renderer.removeClass(n, 'is-open');
+          });
+        this.openNodes = [];
+      }
+      this.openNodes.push(node);
+      this.updateClasses();
+    }
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+  }
+  back(): void {
+    if (this.openNodes[this.openNodes.length - 1]) {
+      this.renderer.removeClass(this.openNodes[this.openNodes.length - 1], 'is-open');
+      this.openNodes.pop();
+      this.updateClasses();
+    }
+  }
+  resetChild(event: any): void {
+    if (event.currentTarget.classList.value === 'main is-open') {
+      for (let openMainNav of event.currentTarget?.parentNode.children) {
+        if (openMainNav.classList?.contains('main') && openMainNav !== event.currentTarget) {
+          if (openMainNav.classList.contains('is-open')) {
+            this.renderer.removeClass(openMainNav, openMainNav.classList[1]);
+          }
+        }
+      }
+      // To identify child of Main menu
+      for (let openNav of event.currentTarget?.childNodes) {
+        if (openNav.classList?.contains('wrapper')) {
+          const el = openNav?.childNodes[0].children;
+          if (el) {
+            for (let currentTarget of el) {
+              if (currentTarget.classList.contains('is-open')) {
+                this.renderer.removeClass(currentTarget, 'is-open');
+              }
+            }
+          }
+        }
+      }
+    } else if (event.currentTarget.classList.value === 'top-menu is-open') {
+      for (let openTopNav of event.currentTarget?.parentNode.children) {
+        if (openTopNav.classList?.contains('top-menu') && openTopNav !== event.currentTarget) {
+          if (openTopNav.classList.contains('is-open')) {
+            this.renderer.removeClass(openTopNav, 'is-open');
+          }
+        }
+      }
+      for (let openNav of event.currentTarget?.childNodes) {
+        if (openNav.classList?.contains('second-level-nav')) {
+          const el = openNav?.childNodes[0]?.children[0].children;
+          if (el) {
+            for (let currentTarget of el) {
+              if (currentTarget.classList.contains('is-open')) {
+                this.renderer.removeClass(currentTarget, 'is-open');
+              }
+            }
+          }
+        }
+      }
+    } else if (event.currentTarget.classList.value === 'second-menu is-open') {
+      for (let openSecondNav of event.currentTarget?.parentNode.children) {
+        if (openSecondNav.classList?.contains('second-menu') && openSecondNav !== event.currentTarget) {
+          if (openSecondNav.classList.contains('is-open')) {
+            this.renderer.removeClass(openSecondNav, 'is-open');
+          }
+        }
+      }
+    }
+  }
+  closeMegaMenu(event: any) {
+    this.openNodes.forEach((node) => {
+      this.renderer.removeClass(node, 'is-open');
+    });
+    let mainNav = this.winRef.nativeWindow?.document.querySelector('.main.is-open');
+    mainNav ? this.renderer.removeClass(mainNav, 'is-open') : '';
+    this.clear();
+    event.stopImmediatePropagation();
+    event.stopPropagation();
+  }
+  clear(): void {
+    this.openNodes = [];
+    this.updateClasses();
+  }
+  onMouseEnter(event: MouseEvent) {
+    this.focusAfterPreviousClicked(event);
+  }
+  getTotalDepth(node: NavigationNode, depth = 0): number {
+    if (node.children && node.children.length > 0) {
+      return Math.max(...node.children.map((n) => this.getTotalDepth(n, depth + 1)));
+    } else {
+      return depth;
+    }
+  }
+  getColumnCount(length: number): number {
+    return Math.round(length / (this.wrapAfter || length));
+  }
+  focusAfterPreviousClicked(event: MouseEvent) {
+    const target: HTMLElement = <HTMLElement>(event.target || event.relatedTarget);
+    if (target.ownerDocument.activeElement?.matches('nav[tabindex]') && target.parentElement?.matches('.flyout')) {
+      target.focus();
+    }
+    return target.ownerDocument;
+  }
+  private updateClasses(num?: number): void {
+    this.openNodes.forEach((node, i) => {
+      if (i + (num || 3) < this.openNodes.length) {
+        this.renderer.addClass(node, 'is-opened');
+        this.renderer.removeClass(node, 'is-open');
+      } else {
+        this.renderer.removeClass(node, 'is-opened');
+        this.renderer.addClass(node, 'is-open');
+      }
+    });
+    this.isOpen = this.openNodes.length > 0;
+  }
+  ngOnDestroy() {
+    if (this.subscriptions) {
+      this.subscriptions.unsubscribe();
+    }
+  }
+}
+
+4. CUSTOM-DESKTOP-NAVIGATION.COMP.HTML
+-----------------------------------------
+<nav [attr.aria-label]="navAriaLabel" #menu>
+  <ul>
+    <ng-container *ngFor="let child of node?.children">
+      <ng-container *ngTemplateOutlet="nav; context: { node: child, depth: 0 }"> </ng-container>
+    </ng-container>
+  </ul>
+</nav>
+<!-- we generate links in a recursive manner -->
+<ng-template #nav let-node="node" let-depth="depth">
+  <li class="main" (mouseenter)="toggleOpen($any($event)); resetChild($event)">
+    <cx-generic-link
+      *ngIf="node.url && (!node.children || node.children?.length === 0); else heading"
+      [url]="node.url"
+      [target]="node.target"
+      [style]="node.styleAttributes"
+      [class]="node.styleClasses"
+      (click)="closeIfClickedTheSameLink(node)"
+    >
+      {{ node.title }}
+    </cx-generic-link>
+    <ng-template #heading>
+      <ng-container *ngIf="flyout && node.children?.length > 0; else title">
+        <cx-generic-link
+          *ngIf="node.url"
+          [url]="node.url"
+          [target]="node.target"
+          (click)="closeIfClickedTheSameLink(node)"
+        >
+          {{ node.title }}
+        </cx-generic-link>
+        <button
+          [attr.tabindex]="depth < 1 ? 0 : -1"
+          [attr.aria-haspopup]="true"
+          [attr.aria-expanded]="false"
+          [attr.aria-label]="node.title"
+          (mouseenter)="onMouseEnter($event)"
+          (keydown.space)="toggleOpen($any($event))"
+          (keydown.esc)="back()"
+        >
+          <ng-container *ngIf="!node.url">
+            <ng-container *ngIf="userName !== ''; else default">
+              {{ 'siteLogin.title' | cxTranslate : { username: userName } }}
+            </ng-container>
+            <ng-template #default>
+              {{ node.title }}
+            </ng-template>
+          </ng-container>
+          <cx-icon [type]="iconType.CARET_DOWN"></cx-icon>
+        </button>
+      </ng-container>
+      <ng-template #title>
+        <span [attr.tabindex]="-1">
+          {{ node.title }}
+        </span>
+      </ng-template>
+    </ng-template>
+    <!-- we add a wrapper to allow for better layout handling in CSS -->
+    <div class="wrapper first-level-wrapper" *ngIf="node.children && node.children.length > 0">
+      <ul
+        class="childs"
+        [attr.depth]="getTotalDepth(node)"
+        [attr.wrap-after]="node.children.length > wrapAfter ? wrapAfter : null"
+        [attr.columns]="getColumnCount(node.children.length)"
+      >
+        <ng-container *ngFor="let child of node.children">
+          <ng-container *ngTemplateOutlet="firstLevelNav; context: { node: child, depth: depth + 1 }"> </ng-container>
+        </ng-container>
+      </ul>
+    </div>
+  </li>
+</ng-template>
+<!-- First-level Nav -->
+<ng-template #firstLevelNav let-node="node" let-depth="depth">
+  <nav
+    (keydown.space)="toggleOpen($any($event))"
+    (keydown.esc)="back()"
+    (mouseenter)="toggleOpen($any($event)); resetChild($event)"
+    aria-label="Top level menu"
+    class="top-menu"
+    tabindex="0"
+    #top_level_nav
+  >
+    <cx-generic-link
+      *ngIf="node.url && (!node.children || node.children?.length === 0); else heading"
+      [url]="node.url"
+      [target]="node.target"
+      [style]="node.styleAttributes"
+      [class]="node.styleClasses"
+      (click)="closeIfClickedTheSameLink(node)"
+    >
+      {{ node.title }}
+      <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+    </cx-generic-link>
+    <ng-template #heading>
+      <cx-generic-link
+        *ngIf="node.url"
+        [url]="node.url"
+        [target]="node.target"
+        (click)="closeIfClickedTheSameLink(node)"
+      >
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </cx-generic-link>
+      <span *ngIf="!node.url" [attr.tabindex]="flyout && (depth === 0 || node.url) ? 0 : -1">
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </span>
+    </ng-template>
+    <!-- we add a wrapper to allow for better layout handling in CSS -->
+    <div class="wrapper second-level-nav" *ngIf="node.children?.length > 0">
+      <div class="inner-wrapper">
+        <div
+          class="childs"
+          [attr.depth]="getTotalDepth(node)"
+          [attr.wrap-after]="node.children?.length > wrapAfter ? wrapAfter : null"
+          [attr.columns]="getColumnCount(node.children?.length)"
+        >
+          <ng-container *ngFor="let child of node.children">
+            <ng-container *ngTemplateOutlet="secondLevelNav; context: { node: child, depth: depth + 2 }">
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </nav>
+</ng-template>
+<!-- Second-level Nav -->
+<ng-template #secondLevelNav let-node="node" let-depth="depth">
+  <nav
+    (mouseenter)="toggleOpen($any($event)); resetChild($event)"
+    (keydown.space)="toggleOpen($any($event))"
+    (keydown.esc)="back()"
+    aria-label="Second level menu"
+    class="second-menu"
+    tabindex="0"
+    #second_level_nav
+  >
+    <cx-generic-link
+      *ngIf="node.url && (!node.children || node.children?.length === 0); else heading"
+      [url]="node.url"
+      [target]="node.target"
+      [style]="node.styleAttributes"
+      [class]="node.styleClasses"
+    >
+      {{ node.title }}
+      <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_DOWN"></cx-icon>
+    </cx-generic-link>
+    <ng-template #heading>
+      <cx-generic-link
+        *ngIf="node.url"
+        [url]="node.url"
+        [target]="node.target"
+        (click)="closeIfClickedTheSameLink(node)"
+      >
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </cx-generic-link>
+      <span *ngIf="!node.url" [attr.tabindex]="flyout && (depth === 0 || node.url) ? 0 : -1">
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </span>
+    </ng-template>
+    <!-- we add a wrapper to allow for better layout handling in CSS -->
+    <div class="wrapper third-level-nav" *ngIf="node.children?.length > 0">
+      <div class="inner-wrapper">
+        <div
+          class="childs"
+          [attr.depth]="getTotalDepth(node)"
+          [attr.wrap-after]="node.children?.length > wrapAfter ? wrapAfter : null"
+          [attr.columns]="getColumnCount(node.children?.length)"
+        >
+          <ng-container *ngFor="let child of node.children">
+            <ng-container *ngTemplateOutlet="thirdLevelNav; context: { node: child, depth: depth + 3 }"> </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </nav>
+</ng-template>
+<!-- Third-level Nav -->
+<ng-template #thirdLevelNav let-node="node" let-depth="depth">
+  <nav
+    (click)="toggleOpen($any($event))"
+    (keydown.space)="toggleOpen($any($event))"
+    (keydown.esc)="back()"
+    aria-label="Third level menu"
+    class="third-menu"
+    tabindex="0"
+    #third_level_nav
+  >
+    <cx-generic-link
+      *ngIf="node.url && (!node.children || node.children?.length === 0); else heading"
+      [url]="node.url"
+      [target]="node.target"
+      [style]="node.styleAttributes"
+      [class]="node.styleClasses"
+    >
+      {{ node.title }}
+      <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_DOWN"></cx-icon>
+    </cx-generic-link>
+    <ng-template #heading>
+      <cx-generic-link
+        *ngIf="node.url"
+        [url]="node.url"
+        [target]="node.target"
+        (click)="closeIfClickedTheSameLink(node)"
+      >
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </cx-generic-link>
+      <span *ngIf="!node.url" [attr.tabindex]="flyout && (depth === 0 || node.url) ? 0 : -1">
+        {{ node.title }}
+        <cx-icon *ngIf="flyout && node.children?.length > 0" [type]="iconType.CARET_RIGHT"></cx-icon>
+      </span>
+    </ng-template>
+  </nav>
+</ng-template>
+
+5. CUSTOM-DESKTOP-NAVIGATION.COMP.SCSS
+----------------------------------------
+@import 'bootstrap/scss/mixins';
+@import '@spartacus/styles/scss/cxbase/mixins';
+@import '@spartacus/styles/scss/components/content/navigation/_navigation-ui';
+:host {
+  @extend %cx-navigation-ui;
+  background-color: var(--transparent);
+  display: flex;
+  @extend %nav-heading;
+  @extend %nav-icon;
+  @extend %nav-wrapper;
+  @extend %nav-childs;
+  @extend %nav-links;
+  @extend %nav-back-button;
+  @extend %nav-wrap;
+  nav {
+    outline: none;
+    ul {
+      list-style: none;
+      padding-inline-start: 0;
+      margin-bottom: 0;
+    }
+    button {
+      border: none;
+      background-color: var(--transparent);
+    }
+    ul > li {
+      padding-bottom: 16px;
+      padding-top: 16px;
+      position: relative;
+      > button {
+        color: var(--white);
+        padding: 0;
+      }
+      > ::ng-deep {
+        cx-generic-link > a {
+          color: var(--white);
+          font-size: 16px;
+          font-weight: 600;
+          text-transform: none;
+          &:hover {
+            text-decoration: none;
+          }
+        }
+      }
+    }
+    .wrapper {
+      background-color: var(--white);
+      > ul.childs > li > button {
+        color: var(--black);
+      }
+      &.second-level-nav,
+      &.third-level-nav {
+        position: absolute;
+        border: 1px solid var(--beige);
+        padding: 10px 10px;
+        background: var(--white);
+        top: 0px;
+        left: 101%;
+        min-width: 250px;
+        box-shadow: 0px 0px 6px var(--black-color);
+        border-radius: 0px 0px 8px 8px;
+        @include hideWrapperDesktop();
+      }
+      &.second-level-nav {
+        min-height: 399px;
+      }
+    }
+  }
+  &.flyout {
+    @include media-breakpoint-down(md) {
+      // Styles for tablet
+    }
+    // Show dropdowns via hover when no nav is focused
+    > nav > ul > li {
+      > button + .wrapper {
+        position: absolute;
+        margin-top: 0;
+        top: 100%;
+        border: 1px solid var(--beige);
+        z-index: 99;
+        width: auto;
+        min-width: 250px;
+        box-shadow: 0px 0px 6px var(--black-color);
+        border-radius: 0px 0px 8px 8px;
+        @include hideWrapperDesktop();
+      }
+      // We only treat the first wrapper as a collapsible container
+      &:hover,
+      &.is-open {
+        > button + .wrapper,
+        button + .wrapper:hover {
+          @include showWrapperDesktop();
+        }
+      }
+      // Show dropdowns via focus only once a nav is clicked
+      &:focus-within {
+        &:focus,
+        &.is-open {
+          > button + .wrapper {
+            @include showWrapperDesktop();
+          }
+        }
+      }
+      nav.top-menu {
+        &:focus,
+        &.is-open:focus-within,
+        &.is-open,
+        &:hover {
+          > .wrapper.second-level-nav {
+            display: block;
+            @include showWrapperDesktop();
+            nav.second-menu {
+              &:focus,
+              &.is-open:focus-within,
+              &.is-open {
+                > .wrapper.third-level-nav {
+                  display: block;
+                  @include showWrapperDesktop();
+                }
+              }
+              span:hover + .wrapper.third-level-nav {
+                display: block;
+                @include showWrapperDesktop();
+              }
+            }
+          }
+        }
+        &.is-open > .wrapper.second-level-nav {
+          display: block;
+          @include showWrapperDesktop();
+        }
+      }
+    }
+    .childs {
+      color: var(--black);
+      ::ng-deep {
+        > nav > span,
+        > nav > cx-generic-link > a,
+        > li {
+          display: flex;
+          justify-content: space-between;
+          padding: 10px 16px;
+          color: var(--black);
+        }
+        > nav.top-menu > span:hover,
+        > nav.top-menu.is-open > span,
+        > nav.top-menu.is-open > cx-generic-link > a,
+        > nav.top-menu > cx-generic-link > a:hover,
+        > li:hover {
+          background-color: var(--off-white);
+          color: var(--navy-blue);
+          font-weight: 700;
+          text-decoration: none;
+        }
+        > nav.second-menu > span:hover,
+        > nav.second-menu.is-open > span,
+        > nav.third-menu > span:hover,
+        > nav.second-menu.is-open > cx-generic-link > a,
+        > nav.second-menu > cx-generic-link > a:hover,
+        > nav.third-menu.is-open > cx-generic-link > a,
+        > nav.third-menu > cx-generic-link > a:hover {
+          color: var(--navy-blue);
+          font-weight: 700;
+          text-decoration: none;
+        }
+      }
+    }
+    > nav > ul > li {
+      > .wrapper {
+        transition: opacity 0.4s;
+      }
+    }
+    &.accNavComponent {
+      background-color: transparent;
+      nav {
+        li.is-open {
+          @include media-breakpoint-down(md) {
+            background-color: var(--cx-color-medium);
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}
+:host(.flyout) {
+  // we hide the categories in flyout mode on mobile
+  @include media-breakpoint-down(md) {
+    &.is-open {
+      li.is-open:not(.back) {
+        > span {
+          display: none;
+        }
+      }
+    }
+  }
+}
+nav > ul > li > cx-generic-link {
+  text-transform: uppercase;
+  font-weight: 600;
+  width: 100%;
+}
+nav > ul {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  > li {
+    @include media-breakpoint-up(lg) {
+      padding-inline-end: 15px;
+    }
+    list-style: none;
+    display: flex;
+    @include media-breakpoint-up(lg) {
+      > .wrapper {
+        margin-top: $header-height;
+      }
+    }
+  }
+}
+@mixin hideWrapperDesktop {
+  display: none;
+}
+@mixin showWrapperDesktop {
+  display: initial;
+}
