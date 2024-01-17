@@ -423,6 +423,13 @@ this.launchDialogService.dialogClose.pipe(takeUntil(this.destroyed$)).subscribe(
 });
 4. POPUP.COMP.TS
 ------------------
+// Close on click outside the dialog window
+@HostListener('click', ['$event'])
+handleClick(evt: UIEvent): void {
+  if ((evt.target as any).classList.contains('modal')) {
+    this.close();
+  }
+}
 A.
 this.launchDialogService.data$.pipe(takeUntil(this.destroyed$)).subscribe((data: any) => {
   // TODO: data received from .comp.TS on opening dialog
