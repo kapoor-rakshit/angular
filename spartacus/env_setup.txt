@@ -1014,6 +1014,19 @@ OR
   })).subscribe(() => { });
 
 
+ORDER / CHECKOUT SERVICES
+============================
+import { Order, OrderFacade } from '@spartacus/order/root';
+constructor(private orderService: OrderFacade) { }
+A.
+this.orderService.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
+  (orderData: Order) => {
+    this.router.navigate(['order-confirmation']);
+  },
+  (_) => { }
+);
+
+
 PRODUCT SERVICES
 ============================
 A.1.
