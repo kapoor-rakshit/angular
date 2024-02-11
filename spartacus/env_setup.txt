@@ -1199,22 +1199,62 @@ this.auth.logout();
 
 USER SERVICES
 =========================
-For complete data to be available in /users API response , add fields=FULL i.e.
+For complete data to be available in API response , add fields=FULL
+A. USER PROFILE
+--------------------
 backend: { occ: { endpoints: { user: 'users/${userId}?fields=FULL' } } }
-A. 
 import { User, UserAccountFacade } from '@spartacus/user/account/root';
 constructor(private userAccountService: UserAccountFacade) { }
+A.1.
 this.userAccountService.get().pipe(takeUntil(this.unsubscribe$)).subscribe((resp) => {
   this.userInfo = resp;
   this.cdRef.markForCheck();
 }, (_) => {});
-B.
+
+B. USER ADDRESS
+----------------------
+backend: { occ: { endpoints: { addresses: 'users/${userId}/addresses?fields=FULL' } } }
 import { UserAddressService, Address } from '@spartacus/core';
 constructor(private userAddressService: UserAddressService) { }
-this.userAddressService.getAddresses().pipe(takeUntil(this.unsubscribe$)).subscribe((resp) => {
-  this.userAddresses = resp;
-  this.cdRef.markForCheck();
-}, (_) => {});
+B.1.
+this.userAddressService.addUserAddress({
+      firstName: 'NEW FIRST NAME',
+      lastName: 'NEW LAST NAME',
+      line1: 'NEW Street Line 1',
+      line2: 'NEW Street Line 2',
+      town: 'NEW Town',
+      postalCode: '2000',
+      country: {
+        isocode: 'AU',
+        name: 'Australia',
+      },
+});
+B.2.
+a. this.userAddressService.loadAddresses();
+   this.userAddressService.getAddresses().pipe(takeUntil(this.unsubscribe$)).subscribe((resp: Address[]) => {
+     this.userAddresses = resp;
+   }, (_) => {});
+b. this.userAddressService.verifyAddress({
+        firstName: 'NEW FIRST NAME',
+        lastName: 'NEW LAST NAME',
+        line1: 'NEW Street Line 1',
+        town: 'NEW Town',
+        postalCode: '2000',
+        country: {
+          isocode: 'AU',
+          name: 'Australia',
+        },
+   }).pipe(takeUntil(this.destroy$)).subscribe((data) => { }, (_) => { });
+B.3.
+a. this.userAddressService.setAddressAsDefault(ADDRESS_ID);
+b. this.userAddressService.updateUserAddress(ADDRESS_ID ?? '', {
+      firstName: 'Rakshit',
+      lastName: 'Kapoor',
+      line1: 'Shastri Nagar',
+      town: 'Amritsar',
+   });
+B.4.
+this.userAddressService.deleteUserAddress(ADDRESS_ID);
 
 
 NORMALIZERS
