@@ -614,9 +614,13 @@ So, we can make use of actions from ngrx/effects.
 Eg:
 import { Actions, ofType } from '@ngrx/effects';
 import { ProductActions } from '@spartacus/core';
+import { CartActions } from '@spartacus/cart/base/core';
 constructor(private actions$: Actions) { }
 ngOnInit() {
   this.actions$.pipe(ofType(ProductActions.SEARCH_PRODUCTS_FAIL)).subscribe(() => {
+     this.loaderService.hide();
+  });
+  this.actions$.pipe(ofType(CartActions.LOAD_CART_FAIL)).subscribe(() => {
      this.loaderService.hide();
   });
 }
@@ -1017,9 +1021,34 @@ OR
 ORDER / CHECKOUT SERVICES
 ============================
 import { Order, OrderFacade } from '@spartacus/order/root';
-constructor(private orderService: OrderFacade) { }
+constructor(private checkoutDeliveryAddressFacade: CheckoutDeliveryAddressFacade,
+            private checkoutDeliveryModesFacade: CheckoutDeliveryModesFacade,
+            private checkoutPaymentFacade: CheckoutPaymentFacade,
+            private orderFacade: OrderFacade) { }
 A.
-this.orderService.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
+backend: { occ: { endpoints: { setDeliveryAddress: 'orgUsers/${userId}/carts/${cartId}/addresses/delivery?addressId=${addressId}&fields=FULL' } } }
+// Sets the delivery address to cart
+this.checkoutDeliveryAddressFacade.setDeliveryAddress(DELIVERY-ADDRESS-OBJECT ?? {}).pipe(takeUntil(this.destroy$)).subscribe(
+  (_) => { },
+  (_) => { }
+);
+B.
+backend: { occ: { endpoints: { setDeliveryMode: 'users/${userId}/carts/${cartId}/deliverymode?deliveryModeId=${deliveryModeId}' } } }
+// Sets the provided delivery mode to current cart
+this.checkoutDeliveryModesFacade.setDeliveryMode(DELIVERY-MODE-STRING ?? '').pipe(takeUntil(this.destroy$)).subscribe(
+  (_) => { },
+  (_) => { }
+);
+C.
+// Sets the payment details to current cart
+this.checkoutPaymentFacade.setPaymentDetails(PAYMENT-DETAILS-OBJECT ?? {}).pipe(takeUntil(this.destroy$)).subscribe(
+  (_) => { },
+  (_) => { }
+);
+D.
+backend: { occ: { endpoints: { placeOrder: 'orgUsers/${userId}/orders?cartId=${cartId}&termsChecked=true&fields=FULL' } } }
+// Places an order
+this.orderFacade.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
   (orderData: Order) => {
     this.router.navigate(['order-confirmation']);
   },
