@@ -1639,10 +1639,20 @@ This concept is used when we have a common class for data that can be used by mu
    In child-comp.ts
    -----------------------
    @Input('EXTERNAL_VAR_NAME') INTERNAL_VAR_NAME: string = "DefaultValue";
+  OR
+   private VAR: string = '';
+   @Input('EXTERNAL_VAR_NAME')
+   set INTERNAL_VAR_NAME(arg: string) {
+     this.VAR = arg && arg.toUpperCase();
+   }
+   get INTERNAL_VAR_NAME(): string {
+     return this.VAR;
+   }
+  OR
    @Input({ required: true, alias: 'EXTERNAL_VAR_NAME' }) INTERNAL_VAR_NAME: string = "DefaultValue";   // v16, @Input() values can be made required
    In child-comp.html
    ------------------------
-   {{INTERNAL_VAR_NAME}}
+   {{ INTERNAL_VAR_NAME }}
    In parent-comp.html
    -------------------------
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"> default text if child component not available </child-selector-tag>
