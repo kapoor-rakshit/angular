@@ -1056,6 +1056,42 @@ this.orderFacade.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
 );
 
 
+ORDER HISTORY SERVICE
+============================
+backend: { occ: { endpoints: { orderHistory: 'users/${userId}/orders?pageSize=${pageSize}&fields=FULL' } } }
+import { OrderHistoryFacade, OrderHistoryList } from '@spartacus/order/root';
+constructor(private orderHistoryFacade: OrderHistoryFacade) { }
+A.
+this.orderHistoryFacade.loadOrderList(PAGE_SIZE, CURRENT_PAGE, SORT_CODE);
+this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(takeUntil(this.unsubscribe$)).subscribe(
+  (resp?: OrderHistoryList) => {
+    this.OrderHistoryList = resp;
+    this.cdRef.markForCheck();
+  },
+  () => {}
+);
+
+
+ORDER CONFIRMATION PAGE
+============================
+import { Order, OrderFacade } from '@spartacus/order/root';
+constructor(private orderFacade: OrderFacade) { }
+A.
+// Returns the current order
+this.orderFacade.getOrderDetails().pipe(takeUntil(this.unsubscribe$)).subscribe(
+  (order?: Order) => {
+    this.currentOrder = order;
+    this.cdRef.markForCheck();
+  },
+  () => {}
+);
+B.
+// Clears the current order
+ngOnDestroy(): void {
+  this.orderFacade.clearPlacedOrder();
+}
+
+
 PRODUCT SERVICES
 ============================
 A.1.
