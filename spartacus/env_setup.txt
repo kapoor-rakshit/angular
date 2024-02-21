@@ -55,6 +55,11 @@ RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
 - Click on Add User and create a technical user.
 - In User Management tab of RBSC website, select the technical user and copy the generated NPM Base64 Credentials, required for .npmrc file in project
 
+CCv2 (Commerce Cloud Version 2)
+https://portal.commerce.ondemand.com
+- Here we need to login with S-user ID.
+- It allows to make a BUILD from configured repository's branch and then deploy to specific ENVIRONMENT.
+
 SETUP
 =============
 > ng new <APP_NAME> --style=scss --routing=false
