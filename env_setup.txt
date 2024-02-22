@@ -708,6 +708,12 @@ app.component.ts          --   defines @Component
 app.component.html        --   displayed to BROWSER
 
 
+$any() TypeCast Function
+===============================
+It converts object to an “any” type,
+and allows it to act as such in HTML. It’s basically identical to cast we do in component's TS file i.e. VAR: any = {};
+Eg: (change)="changeSortCode($any($event)?.target?.value ?? '')"  OR  {{ $any(myPerson).firstName }}
+
 
 Misc. Event/Element binding/reference example (similar to `this` in JS)
 ========================================================================
