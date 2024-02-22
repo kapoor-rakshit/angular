@@ -1067,6 +1067,8 @@ backend: { occ: { endpoints: { orderHistory: 'users/${userId}/orders?pageSize=${
 import { OrderHistoryFacade, OrderHistoryList, Order } from '@spartacus/order/root';
 constructor(private orderHistoryFacade: OrderHistoryFacade) { }
 A.
+.COMP.TS
+-------------------
 this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(takeUntil(this.unsubscribe$)).subscribe(
   (resp?: OrderHistoryList) => {
     this.OrderHistoryList = resp;
@@ -1097,6 +1099,16 @@ pageChange(page: number): void {
 private fetchOrders(event: OrderHistoryPage): void {
   this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
 }
+.COMP.HTML
+-------------------
+<select class="form-control" (change)="changeSortCode($any($event)?.target?.value ?? '')">
+  <option *ngFor="let option of sortOptions" [value]="option.code" [selected]="option?.selected">
+    {{ option.name || option.code }}
+  </option>
+</select>
+<div *ngIf="(OrderHistoryList?.pagination?.totalPages ?? 0) > 1">
+  <cx-pagination [pagination]="OrderHistoryList?.pagination" (viewPageEvent)="pageChange($event)"></cx-pagination>
+</div>
 B.
 this.orderHistoryFacade.loadOrderDetails(orderId);
 this.subscription = this.orderHistoryFacade.getOrderDetails()
