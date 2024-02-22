@@ -1064,17 +1064,50 @@ this.orderFacade.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
 ORDER HISTORY SERVICE
 ============================
 backend: { occ: { endpoints: { orderHistory: 'users/${userId}/orders?pageSize=${pageSize}&fields=FULL' } } }
-import { OrderHistoryFacade, OrderHistoryList } from '@spartacus/order/root';
+import { OrderHistoryFacade, OrderHistoryList, Order } from '@spartacus/order/root';
 constructor(private orderHistoryFacade: OrderHistoryFacade) { }
 A.
-this.orderHistoryFacade.loadOrderList(PAGE_SIZE, CURRENT_PAGE, SORT_CODE);
 this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(takeUntil(this.unsubscribe$)).subscribe(
   (resp?: OrderHistoryList) => {
     this.OrderHistoryList = resp;
+    setOrderHistoryParams(resp);
     this.cdRef.markForCheck();
   },
   () => {}
 );
+setOrderHistoryParams(orders?: OrderHistoryList) {
+  this.sortOptions = orders?.sorts ?? [];
+  this.sortType = orders?.pagination?.sort ?? '';
+}
+changeSortCode(sortCode: string): void {
+  const event: OrderHistoryPage = {
+    sortCode,
+    currentPage: 0,
+  };
+  this.sortType = sortCode;
+  this.fetchOrders(event);
+}
+pageChange(page: number): void {
+  const event: OrderHistoryPage = {
+    sortCode: this.sortType,
+    currentPage: page,
+  };
+  this.fetchOrders(event);
+}
+private fetchOrders(event: OrderHistoryPage): void {
+  this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
+}
+B.
+this.orderHistoryFacade.loadOrderDetails(orderId);
+this.subscription = this.orderHistoryFacade.getOrderDetails()
+                      .pipe(takeUntil(this.unsubscribe$)).subscribe(
+                        (orderData?: Order) => {
+                          this.currentOrder = orderData ?? {};
+                          this.subscription?.unsubscribe();
+                          this.cdRef.markForCheck();
+                        },
+                        () => {}
+                      );
 
 
 ORDER CONFIRMATION PAGE
