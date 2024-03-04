@@ -1227,28 +1227,7 @@ To use this response data , follow steps:
   b. TO APPLY SORT CODE
      this.productListCompService.sort(SORTCODE-VALUE);
 - CUSTOM-PRODUCT-LEFT-REFINEMENT.COMP.TS
-  a. TO APPLY FACETS (NOTE: REFER spartacus repo code)
-     - import { FacetList, ProductFacetNavigationComponent } from '@spartacus/storefront';
-       export class CUSTOM-LeftRefinementComponent extends ProductFacetNavigationComponent {
-        constructor(private productListCompService: CUSTOM-ProductListCompService) { }
-        this.productListCompService.model$.pipe(takeUntil(this.unsubscribe$)).subscribe(
-         (res) => {
-           this.facetList = { facets: resp.facets, activeFacets: resp.breadcrumbs };         // passed as @Input prop to CUSTOM-FacetListComponent
-           this.cd.markForCheck();
-         })}
-     - import { FacetListComponent, FacetService } from '@spartacus/storefront';
-       export class CUSTOM-FacetListComponent extends FacetListComponent {
-        constructor(protected _facetService: FacetService, protected _elementRef: ElementRef, protected _renderer: Renderer2) {
-         super(_facetService, _elementRef, _renderer);
-        }
-        this.facetList$ = of(this.facetList);
-       }
-     - import { FacetComponent, FacetService } from '@spartacus/storefront';                // This component is a child element in CUSTOM-FacetListComponent
-       export class CUSTOM-FacetComponent extends FacetComponent {                          // i.e. added to *ngFor loop of facetList.facets
-        constructor( protected _facetService: FacetService, protected _elementRef: ElementRef, protected _cd: ChangeDetectorRef) {
-         super(_facetService, _elementRef, _cd);
-        }
-       }
+  FOR FACETS , REFER   `misc/facets.txt`   code
 B.1.
 On landing to PDP (Product Details Page), composable storefront makes an API call for getting product data. This is handled by spartacus default url mapping.
 NOTE: This API call response may not have all fields. So, we can specify product URL in ENDPOINTS.CONST.TS file(spartacus-configuration.MODULE.TS) i.e.
