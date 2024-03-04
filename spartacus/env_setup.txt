@@ -504,6 +504,11 @@ PAGINATION WIDGET
 ========================
 1. MODULE.TS
 -----------------
+import { PaginationModule } from '@spartacus/storefront';
+@NgModule({
+    imports: [PaginationModule]
+})
+OR
 import {ListNavigationModule} from '@spartacus/storefront';
 @NgModule({
     imports: [ListNavigationModule]
@@ -512,6 +517,8 @@ import {ListNavigationModule} from '@spartacus/storefront';
 -----------------
 <div *ngIf="(searchResult.pagination?.totalPages ?? 0) > 1">
     <cx-pagination [pagination]="searchResult.pagination" queryParam="currentPage" [defaultPage]="0"></cx-pagination>
+    OR
+    <cx-pagination [pagination]="OrderHistoryList?.pagination" (viewPageEvent)="pageChange($event)"></cx-pagination>
 </div>
 3. COMP.TS
 ------------------
@@ -1067,8 +1074,14 @@ backend: { occ: { endpoints: { orderHistory: 'users/${userId}/orders?pageSize=${
 import { OrderHistoryFacade, OrderHistoryList, Order } from '@spartacus/order/root';
 constructor(private orderHistoryFacade: OrderHistoryFacade) { }
 A.
-.COMP.TS
--------------------
+A.1. COMP.MODULE.TS
+-----------------------
+import { PaginationModule } from '@spartacus/storefront';
+@NgModule({
+    imports: [PaginationModule]
+})
+A.2. COMP.TS
+-----------------------
 this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(takeUntil(this.unsubscribe$)).subscribe(
   (resp?: OrderHistoryList) => {
     this.OrderHistoryList = resp;
@@ -1099,8 +1112,8 @@ pageChange(page: number): void {
 private fetchOrders(event: OrderHistoryPage): void {
   this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
 }
-.COMP.HTML
--------------------
+A.3. COMP.HTML
+-----------------------
 <select class="form-control" (change)="changeSortCode($any($event)?.target?.value ?? '')">
   <option *ngFor="let option of sortOptions" [value]="option.code" [selected]="option?.selected">
     {{ option.name || option.code }}
@@ -1110,6 +1123,8 @@ private fetchOrders(event: OrderHistoryPage): void {
   <cx-pagination [pagination]="OrderHistoryList?.pagination" (viewPageEvent)="pageChange($event)"></cx-pagination>
 </div>
 B.
+B.1. COMP.TS
+----------------------
 this.orderHistoryFacade.loadOrderDetails(orderId);
 this.subscription = this.orderHistoryFacade.getOrderDetails()
                       .pipe(takeUntil(this.unsubscribe$)).subscribe(
