@@ -275,7 +275,364 @@ export class CUSTOM-FilterListComponent extends FacetListComponent implements On
   @extend %cx-facet-list;
 }
 
-11. CUSTOM-FacetService.TS
+11. FACET.COMP.HTML
+-------------------------------
+<ng-container *ngIf="state$ | async as state">
+  <div class="facet-desktop-container" *ngIf="!isMobile">
+    <button class="heading" (click)="toggleGroup($event)" [attr.aria-expanded]="isExpanded"
+      [attr.aria-label]="'productFacetNavigation.filterBy.name' | cxTranslate : { name: facet.name }">
+      {{ facet.name }}
+      <i class="fa-regular fa-angle-up collapse-icon"></i>
+      <i class="fa-regular fa-angle-down expand-icon"></i>
+    </button>
+
+    <div role="search" class="search-container" *ngIf="isSearchVisible">
+      <div class="searchbox form-group">
+        <input #searchInput [placeholder]="'productList.searchbox.placeholder' | cxTranslate" class="form-control"
+          autocomplete="off" aria-controls="results" [attr.aria-label]="'searchBox.placeholder' | cxTranslate"
+          (focus)="search(searchInput.value)" (click)="search(searchInput.value)" (input)="search(searchInput.value)"
+          (keydown.enter)="search(searchInput.value); updateChosenWord(searchInput.value)" value="{{ chosenWord }}" />
+        <div role="presentation" class="search-icon">
+          <!-- <cx-icon [type]="iconTypes.SEARCH"></cx-icon> -->
+          <img src="assets/search-interface-symbol.svg" class="search-icon-img" />
+        </div>
+      </div>
+    </div>
+
+    <div class="results filter-list" *ngIf="searchResult && searchResult.length > 0">
+      <a *ngFor="let value of searchResult" #facetValue routerLink="./" [queryParams]="getLinkParams(value)"
+        class="value" [class.selected]="value.selected" [cxFocus]="{ key: value.name }"
+        (keydown.space)="openLink($any($event))" [attr.role]="facet.multiSelect ? 'checkbox' : null"
+        [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+          'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+        }}">
+        <span aria-hidden="true">{{ value.name }}<span *ngIf="value.count" aria-hidden="true" class="count">{{
+            value.count }}</span></span>
+      </a>
+    </div>
+
+    <div *ngIf="!searchResult && componentId === 'plpFacet'" [id]="componentId" class="filter-list">
+      <a *ngFor="let value of facet.values | slice : 0 : state.topVisible" #facetValue routerLink="./"
+        [queryParams]="getLinkParams(value)" class="value" [class.selected]="value.selected"
+        [cxFocus]="{ key: value.name }" (keydown.space)="openLink($any($event))"
+        [attr.role]="facet.multiSelect ? 'checkbox' : null"
+        [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+          'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+        }}">
+        <span aria-hidden="true">{{ value.name }}<span *ngIf="value.count" aria-hidden="true" class="count">{{
+            value.count }}</span></span>
+      </a>
+
+      <div class="more">
+        <a *ngFor="let value of facet.values | slice : state.topVisible ?? 0 : state.maxVisible" #facetValue
+          routerLink="./" [queryParams]="getLinkParams(value)" class="value" [class.selected]="value.selected"
+          [cxFocus]="{ key: value.name }" (keydown.space)="openLink($any($event))">
+          <span>{{ value.name }}<span *ngIf="value.count" class="count">{{ value.count }}</span></span>
+        </a>
+        <button *ngIf="state.maxVisible && state.topVisible && state.maxVisible > state.topVisible"
+          (click)="decreaseVisibleValues()"
+          [cxAtMessage]="'productFacetNavigation.decreaseOptionsVisibility' | cxTranslate" aria-expanded="true"
+          attr.aria-label="{{ 'productFacetNavigation.ariaLabelShowLess' | cxTranslate }}" class="cx-action-link"
+          [cxFocus]="{ key: 'moreorless' }">
+          {{ 'productList.showLess' | cxTranslate }}
+        </button>
+
+        <button
+          *ngIf="state.maxVisible && facet.values && state.maxVisible > 0 && state.maxVisible < facet.values.length"
+          (click)="increaseVisibleValues()"
+          [cxAtMessage]="'productFacetNavigation.increaseOptionsVisibility' | cxTranslate" aria-expanded="false"
+          attr.aria-label="{{ 'productFacetNavigation.ariaLabelShowMore' | cxTranslate }}" class="cx-action-link"
+          [cxFocus]="{ key: 'moreorless' }">
+          {{ 'productList.showMore' | cxTranslate }}
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="!searchResult && componentId === 'orderHistoryFacet'" [id]="componentId" class="filter-list">
+      <a *ngFor="let value of facet.values | slice : 0 : state.topVisible" #facetValue routerLink="./"
+        (click)="getSelectedFacet(value)" class="value" [class.selected]="value.selected"
+        [cxFocus]="{ key: value.name }" (keydown.space)="openLink($any($event))"
+        [attr.role]="facet.multiSelect ? 'checkbox' : null"
+        [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+          'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+        }}">
+        <span aria-hidden="true">{{ value.name }}<span *ngIf="value.count" aria-hidden="true" class="count">{{
+            value.count }}</span></span>
+      </a>
+
+      <div class="more">
+        <a *ngFor="let value of facet.values | slice : state.topVisible ?? 0 : state.maxVisible" #facetValue
+          routerLink="./" [queryParams]="getLinkParams(value)" class="value" [class.selected]="value.selected"
+          [cxFocus]="{ key: value.name }" (keydown.space)="openLink($any($event))">
+          <span>{{ value.name }}<span *ngIf="value.count" class="count">{{ value.count }}</span></span>
+        </a>
+        <button *ngIf="state.maxVisible && state.topVisible && state.maxVisible > state.topVisible"
+          (click)="decreaseVisibleValues()"
+          [cxAtMessage]="'productFacetNavigation.decreaseOptionsVisibility' | cxTranslate" aria-expanded="true"
+          attr.aria-label="{{ 'productFacetNavigation.ariaLabelShowLess' | cxTranslate }}" class="cx-action-link"
+          [cxFocus]="{ key: 'moreorless' }">
+          {{ 'productList.showLess' | cxTranslate }}
+        </button>
+
+        <button
+          *ngIf="state.maxVisible && facet.values && state.maxVisible > 0 && state.maxVisible < facet.values.length"
+          (click)="increaseVisibleValues()"
+          [cxAtMessage]="'productFacetNavigation.increaseOptionsVisibility' | cxTranslate" aria-expanded="false"
+          attr.aria-label="{{ 'productFacetNavigation.ariaLabelShowMore' | cxTranslate }}" class="cx-action-link"
+          [cxFocus]="{ key: 'moreorless' }">
+          {{ 'productList.showMore' | cxTranslate }}
+        </button>
+      </div>
+
+      <div *ngIf="facet.name === 'Order place date'">
+        <p class="date-label">OR</p>
+        <input class="select-date" type="text" name="startDate" #startDate placeholder="Start Date"
+          onfocus="(this.type='date')" onblur="(this.type='text')" />
+        <input class="select-date" type="text" name="endDate" #endDate placeholder="End Date"
+          onfocus="(this.type='date')" onblur="(this.type='text')" />
+        <button class="searchDateBtn" (click)="searchByDate(startDate.value, endDate.value)">
+          Search result by date
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile View -->
+  <ng-container *ngIf="isMobile">
+    <div class="facet-container">
+      <div role="search" aria-label="search" class="search-container">
+        <label class="searchbox">
+          <input #searchInput [placeholder]="'productList.searchbox.placeholder' | cxTranslate" autocomplete="off"
+            aria-controls="results" [attr.aria-label]="'searchBox.placeholder' | cxTranslate"
+            (focus)="search(searchInput.value)" (click)="search(searchInput.value)" (input)="search(searchInput.value)"
+            (keydown.enter)="search(searchInput.value); updateChosenWord(searchInput.value)" value="{{ chosenWord }}" />
+          <div role="presentation" class="search-icon">
+            <cx-icon [type]="iconTypes.SEARCH"></cx-icon>
+          </div>
+        </label>
+      </div>
+      <div class="facet-mobile-container">
+        <button class="heading" (click)="toggleMobileGroup($event)" [attr.aria-expanded]="isExpanded"
+          [attr.aria-label]="'productFacetNavigation.filterBy.name' | cxTranslate : { name: facet.name }">
+          {{ facet.name }}
+          <cx-icon class="collapse-icon" [type]="collapseIcon"></cx-icon>
+          <cx-icon class="expand-icon" [type]="expandIcon"></cx-icon>
+        </button>
+      </div>
+      <div class="facet-checklist">
+        <div class="filter-list results" *ngIf="componentId === 'plpFacet' && searchResult && searchResult.length > 0">
+          <a *ngFor="let value of searchResult" #facetValue routerLink="./" [queryParams]="getLinkParams(value)"
+            class="value" [class.selected]="value.selected" [cxFocus]="{ key: value.name }"
+            (keydown.space)="openLink($any($event))" [attr.role]="facet.multiSelect ? 'checkbox' : null"
+            [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+              'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+            }}">
+            <span aria-hidden="true">{{ value.name }}<span aria-hidden="true" *ngIf="value.count" class="count">{{
+                value.count }}</span></span>
+          </a>
+        </div>
+
+        <div class="filter-list results"
+          *ngIf="componentId === 'orderHistoryFacet' && searchResult && searchResult.length > 0">
+          <a *ngFor="let value of searchResult" #facetValue routerLink="./" (click)="getSelectedFacet(value)"
+            class="value" [class.selected]="value.selected" [cxFocus]="{ key: value.name }"
+            (keydown.space)="openLink($any($event))" [attr.role]="facet.multiSelect ? 'checkbox' : null"
+            [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+              'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+            }}">
+            <span aria-hidden="true">{{ value.name }}<span aria-hidden="true" *ngIf="value.count" class="count">{{
+                value.count }}</span></span>
+          </a>
+        </div>
+
+        <div *ngIf="!searchResult && componentId === 'plpFacet'" class="filter-list">
+          <a *ngFor="let value of facet.values" #facetValue routerLink="./" [queryParams]="getLinkParams(value)"
+            class="value" [class.selected]="value.selected" [cxFocus]="{ key: value.name }"
+            (keydown.space)="openLink($any($event))" [attr.role]="facet.multiSelect ? 'checkbox' : null"
+            [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+              'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+            }}">
+            <span aria-hidden="true">{{ value.name }}<span *ngIf="value.count" aria-hidden="true" class="count">{{
+                value.count }}</span></span>
+          </a>
+        </div>
+
+        <div *ngIf="!searchResult && componentId === 'orderHistoryFacet'" class="filter-list">
+          <a *ngFor="let value of facet.values" #facetValue routerLink="./" (click)="getSelectedFacet(value)"
+            class="value" [class.selected]="value.selected" [cxFocus]="{ key: value.name }"
+            (keydown.space)="openLink($any($event))" [attr.role]="facet.multiSelect ? 'checkbox' : null"
+            [attr.aria-checked]="facet.multiSelect ? value.selected : null" attr.aria-label="{{
+              'productFacetNavigation.ariaLabelItemsAvailable' | cxTranslate : { name: value.name, count: value.count }
+            }}">
+            <span aria-hidden="true">{{ value.name }}<span *ngIf="value.count" aria-hidden="true" class="count">{{
+                value.count }}</span></span>
+          </a>
+
+          <div class="search-by-date" *ngIf="facet.name === 'Order place date'">
+            <p class="date-label">OR</p>
+            <input class="select-date" type="text" name="startDate" #startDate placeholder="Start Date"
+              onfocus="(this.type='date')" onblur="(this.type='text')" />
+            <input class="select-date" type="text" name="endDate" #endDate placeholder="End Date"
+              onfocus="(this.type='date')" onblur="(this.type='text')" />
+            <button class="searchDateBtn" (click)="searchByDate(startDate.value, endDate.value)">
+              Search result by date
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</ng-container>
+
+12. FACET.COMP.TS
+-------------------------------
+import { Facet, FacetValue } from '@spartacus/core';
+import { BREAKPOINT, BreakpointService, FacetComponent, FacetService, ICON_TYPE } from '@spartacus/storefront';
+export class CUSTOM-FacetComponent extends FacetComponent implements OnInit, OnDestroy {
+  /** configurable icon that is used to collapse the facet group  */
+  @Input() override expandIcon: ICON_TYPE = ICON_TYPE.CARET_DOWN;
+  @Input() override collapseIcon: ICON_TYPE = ICON_TYPE.CARET_UP;
+  @Input() facetList!: Facet[];
+  @Input() componentId!: string;
+
+  iconTypes = ICON_TYPE;
+
+  topVisibleFilters: number = 0;
+  maxVisibleFilters: number = 0;
+  chosenWord = '';
+  searchResult: FacetValue[] | undefined;
+  isSearchVisible: boolean = false;
+  isMobile!: boolean;
+  destroy$ = new Subject();
+
+  constructor(protected _facetService: FacetService, protected _elementRef: ElementRef, protected _cd: ChangeDetectorRef,
+              private breakPointService: BreakpointService, private productFacetService: CUSTOM-FacetService) {
+    super(_facetService, _elementRef, _cd);
+  }
+
+  ngOnInit(): void {
+    this.breakPointService
+      .isDown(BREAKPOINT.sm)
+      .pipe(distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((isMobile) => {
+        this.isMobile = isMobile;
+        if (!this.isMobile && this.facetList && this.facetList.length > 3) {
+          this.facetService.toggle(this.facetList[0], false);
+          this.facetService.toggle(this.facetList[1], false);
+          this.facetService.toggle(this.facetList[2], false);
+          this.facetList.slice(3).forEach((facet) => {
+            if (facet !== this.facetList[0]) {
+              this.facetService.toggle(facet, true);
+            }
+          });
+        } else if (isMobile && this.facetList) {
+          this.facetService.toggle(this.facetList[0], false);
+          this.facetList.forEach((facet) => {
+            if (facet !== this.facetList[0]) {
+              this.facetService.toggle(facet, true);
+            }
+          });
+        }
+        this._cd.markForCheck();
+      });
+
+    this.productFacetService.dialogClosed
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((value) => {
+        if (value) {
+          this.facetService.toggle(this.facetList[0], false);
+          this.facetList.forEach((facet) => {
+            if (facet !== this.facetList[0]) {
+              this.facetService.toggle(facet, true);
+            }
+          });
+          this.productFacetService.dialogClosed.next(false);
+        }
+      });
+
+    this.isSearchVisible =
+      this.facet?.values && this.facet.values.length > 15 ? true : false;
+  }
+
+  toggleMobileGroup(event: UIEvent) {
+    const host: HTMLElement = this.elementRef.nativeElement;
+    const isLocked = this.keyboardFocus?.isLocked;
+
+    this.facetList.forEach((facet) => {
+      if (facet !== this.facet) {
+        this.facetService.toggle(facet, true);
+      }
+    });
+
+    if (!this.isExpanded) {
+      this.facetService.toggle(this.facet, this.isExpanded);
+    }
+
+    if (!isLocked || this.isExpanded) {
+      host.focus();
+      event.stopPropagation();
+    }
+  }
+
+  updateChosenWord(chosenWord: string): void {
+    this.chosenWord = chosenWord;
+  }
+
+  search(query: string): void {
+    if (!query || query === '') {
+      this.clearResults();
+      return;
+    }
+
+    this.searchResult = this.facet.values?.filter((value: FacetValue) => {
+      return value.name?.toLowerCase().includes(query.toLowerCase());
+    });
+  }
+
+  clearResults(): void {
+    this.searchResult = undefined;
+  }
+
+  getSelectedFacet(value: FacetValue): void {
+    if (value.query?.query?.value && !value.selected) {
+      this.productFacetService.addselectedFacet(value);
+      value.selected = true;
+      this.cd.markForCheck();
+    } else {
+      this.productFacetService.removeSelectedFacet(value);
+      value.selected = false;
+      this.cd.markForCheck();
+    }
+  }
+
+  searchByDate(startDate: any, endDate: any) {
+    // TODO: logic for filtering orders
+    console.log(startDate, endDate);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+}
+
+13. FACET.COMP.SCSS
+-------------------------------
+@import 'bootstrap/scss/mixins';
+@import '@spartacus/styles/scss/cxbase/mixins';
+@import '@spartacus/styles/scss/_versioning.scss';
+@import '@spartacus/styles/scss/components/product/list/_facet.scss';
+:host {
+  $intialExpandedFacets: 1 !default;
+  $intialExpandedFacetsLarge: 3 !default;
+  @extend %facet-heading;
+  @extend %cx-facet;
+  button.heading {
+    @extend %facet-heading !optional;
+  }
+}
+
+14. CUSTOM-FacetService.TS
 -------------------------------
 import { FacetValue } from '@spartacus/core';
 import { FacetList } from '@spartacus/storefront';
