@@ -1,3 +1,10 @@
+NOTES
+1. Some facets are not visible in model$ data received. They are present in /search API response's facets object, but not available to spartacus.
+   To fix this
+2. Some facets only show 6 or less checkboxes and then a `Show More` button.
+   This is because 6 is default length of checkboxes items to be shown in each facet group, as configured in Spartacus.
+   However, in some cases they are less than 6, because facets object of /search API response is having another object `topValues[]` in it.
+
 1. MODULE.TS
 =====================================
 import { ActiveFacetsModule, AtMessageModule, FacetModule, GenericLinkModule, KeyboardFocusModule } from '@spartacus/storefront';
