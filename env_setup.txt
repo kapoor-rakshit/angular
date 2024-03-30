@@ -1636,7 +1636,56 @@ compares it will the previous values and if the change is detected, it propagate
     this.cdRef.markForCheck();
     this.cdRef.detectChanges();
   }
-  
+
+
+Angular SIGNALS
+=======================
+Angular v17 introduces Signals, which makes handling reactive data easier.
+Signals are like streams of data that you can easily read from and write to in a more efficient way.
+- Signals only check necessary components, avoiding unnecessary checks.
+- Signals eliminate need for Zones, which are like a security system.
+  While Zones can be helpful, they add complexity. Signals offer a more straightforward way to ensure security without the overhead.
+- Signals make testing Angular applications easier. They provide a predictable and deterministic way to trigger change detection.
+Before signals
+----------------
+  Zone.js -> Something might have changed -> Angular change detection -> Checks entire component tree for changes -> Update view for anything that has changed
+After signals
+----------------
+  Signal -> This specific thing changed -> Angular change detection -> Update view for anything that has changed
+Types of signals
+------------------
+NOTE: Signals may be either writable OR read-only.
+1. Writable Signals
+   These are signals you can directly update.
+   You can use the set() method to change a writable signal’s value, or the update() method to modify it based on a specific function.
+   Eg:
+   our_first_signal = signal<number>(0);				// definition of a signal with initial value 0
+   this.our_first_signal.set(8);					// set the value
+   this.our_first_signal.update((val) => val + 2);			// update the value
+   console.log(this.our_first_signal());      		                // expected results: 10
+2. Computed Signals
+   These signals get their value from other signals.
+   You set up a computed signal using the computed() function and telling it how to derive its value.
+   When any of the signals it depends on changes, the computed signal updates accordingly.
+   Eg:
+   const price = signal(10);						// Create two signals: price and quantity
+   const quantity = signal(5);
+   const totalCost = computed(() => price() * quantity());		// Create a computed signal for total cost based on price and quantity
+   console.log(totalCost()); 						// Output: 50
+3. Effects
+   An effect is a process that is triggered whenever there is a change in one or more signal values.
+   This functionality is implemented using the effect() function.
+   Eg:
+   isAuthenticated = signal(false);					// Create a signal for user authentication status
+   effect(() => {							// Create an effect to perform actions based on authentication status
+    if (this.isAuthenticated()) {
+      console.log('User is authenticated. Redirecting to dashboard…');
+    } else {
+      console.log('User is not authenticated. Redirecting to login page…');
+    }
+   });
+   this.isAuthenticated.set(true);
+ 
 
 PASSING VARIABLES/VALUES TO and FROM COMPONENTS
 =================================================
