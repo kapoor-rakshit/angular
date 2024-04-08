@@ -1876,8 +1876,9 @@ OR
   - In library , update version in `package.json` i.e. projects\<LIBRARY-NAME>\package.json
   - Make a build of <LIBRARY-NAME> library inside library's project  i.e.  `ng build <LIBRARY-NAME>`
   - Copy folder `<LIBRARY-NAME>` from  `<LIBRARY-PROJECT>\dist`
-  - Paste it here in a folder of actual project i.e.  `js-storefront\STOREFRONT\libs\<LIBRARY-NAME>`
+  - Paste it here in a folder of actual project i.e.  `js-storefront\<PROJECT>\libs\<LIBRARY-PROJECT>`
   - Now run  `npm link libs/<LIBRARY-PROJECT>/<LIBRARY-NAME> && ng serve`
+  NOTE: Add this folder path to .gitignore to avoid committing changes to git i.e. `/libs/<LIBRARY-PROJECT>/<LIBRARY-NAME>`
 7.c.
 If all is well, change `version` of library in `projects/LIBRARY-NAME/package.json`
 and run final build  `ng build <LIBRARY-NAME>`
