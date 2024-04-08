@@ -1864,13 +1864,20 @@ CHANGE IN EXISTING MODULE/COMPONENT -> BUILD -> TEST -> LIB VERSION CHANGE -> BU
 By running command from ROOT of project, build this library
 > ng build <LIBRARY-NAME>
 7.b.
-Test this build, by importing <MODULE-NAME> from `LIBRARY-NAME`,
-in relevant parent module & using selector in relevant parent comp of own angular ROOT project.
-- parent-module.MODULE.TS
-  import { MODULE-NAME } from 'LIBRARY-NAME';
-  imports: [MODULE-NAME]
-- parent-comp.HTML
-  <lib-COMP-NAME></lib-COMP-NAME>
+* Test this build, by importing <MODULE-NAME> from `LIBRARY-NAME`,
+  in relevant parent module & using selector in relevant parent comp of own angular ROOT project.
+  - parent-module.MODULE.TS
+    import { MODULE-NAME } from 'LIBRARY-NAME';
+    imports: [MODULE-NAME]
+  - parent-comp.HTML
+    <lib-COMP-NAME></lib-COMP-NAME>
+OR
+* Test this build in actual project, which will use/install this library, by using `npm link`
+  - In library , update version in `package.json` i.e. projects\<LIBRARY-NAME>\package.json
+  - Make a build of <LIBRARY-NAME> library inside library's project  i.e.  `ng build <LIBRARY-NAME>`
+  - Copy folder `<LIBRARY-NAME>` from  `<LIBRARY-PROJECT>\dist`
+  - Paste it here in a folder of actual project i.e.  `js-storefront\STOREFRONT\libs\<LIBRARY-NAME>`
+  - Now run  `npm link libs/<LIBRARY-PROJECT>/<LIBRARY-NAME> && ng serve`
 7.c.
 If all is well, change `version` of library in `projects/LIBRARY-NAME/package.json`
 and run final build  `ng build <LIBRARY-NAME>`
@@ -1927,7 +1934,7 @@ In file `projects/LIBRARY-NAME/ng-package.json` , add path to assets dir being u
   "lib": {
     "entryFile": "src/public-api.ts"
   },
-  "assets": ["PATH-TO-ASSETS-DIR-OF-LIBRARY"]
+  "assets": ["PATH-TO-ASSETS-DIR-OF-LIBRARY"]                       //Eg:- "assets": ["./assets"]
 }
 2.
 In `angular.json` of OTHER project, which is installing this LIBRARY, add LIBRARY assets object at following path:
