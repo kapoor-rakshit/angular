@@ -619,6 +619,19 @@ this.routingService.isNavigating().pipe(takeUntil(this.destroyed$)).subscribe((n
 });
 
 
+SCROLL TO TOP
+=========================
+Scroll to top button appears once user scrolls down a page, and disappears when already on top.
+It has a default CSS of fixed postion to bottom right.
+1. footer.MODULE.TS
+-----------------------
+import { ScrollToTopModule } from '@spartacus/storefront';
+imports: [ScrollToTopModule]
+2. footer.COMP.HTML
+-----------------------
+<cx-scroll-to-top></cx-scroll-to-top>
+
+
 ACTIONS
 ========================
 Some API calls are handled by spartacus and we do not have control over their success response or failure response.
@@ -1009,6 +1022,9 @@ this.reloadSub = combineLatest([
           this.reloadSub.unsubscribe();
         }
       }
+});
+this.multiCartService.isStable(cartId).pipe(takeUntil(this.destroy$)).subscribe((isloaded: boolean) => {
+   if (isloaded) { window.location.reload(); }
 });
 C.
 // Cart can be updated using builtin endpoint KEYS like 'addEntries', 'updateEntries', 'removeEntries' from defaultOccCartConfig of spartacus
