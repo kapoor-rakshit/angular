@@ -495,8 +495,62 @@ There are three main reasons to create a Universal version of your app:
 - Show the first page quickly with a first-contentful paint (FCP)
   With Angular Universal, you can generate landing pages for the app that look like the complete app. 
   The pages are pure HTML, and can display even if JavaScript is disabled. It will serve a static version of the landing page to hold the user's attention. 
-  At same time, you'll load full Angular app behind it. User perceives near-instant performance from landing page and gets full interactive experience after full app loads. 
+  At same time, you'll load full Angular app behind it.
+  User perceives near-instant performance from landing page and gets full interactive experience after full app loads. 
 
+HYDRATION
+============================
+NOTE: Before you can get started with hydration, you must have a server-side rendered (SSR) application.
+Angular hydration is a technique that boosts performance and speed of server-side rendered (SSR) applications.
+It achieves this by reusing server rendered DOM structures, persisting application state,
+transferring application data that was retrieved already by the server, and other processes.
+Without hydration enabled, SSR Angular applications will destroy and re-render the application's DOM,
+which may result in a visible UI flicker. This re-rendering can negatively impact Core Web Vitals like LCP and cause a layout shift.
+Enabling hydration allows the existing DOM to be re-used and prevents a flicker.
+Angular Hydration combines built elements from the server with interactive components from client to make your app fully functional.
+A. How to enable hydration on an SSR app
+--------------------------------------------
+> ng new <APP_NAME> --ssr     OR     ng add @angular/ssr
+This should add `provideClientHydration()` to your root app module's provider list.
+import {provideClientHydration} from '@angular/platform-browser';
+@NgModule({
+  declarations: [AppComponent],
+  exports: [AppComponent],
+  bootstrap: [AppComponent],
+  providers: [provideClientHydration()],
+})
+export class AppModule {}
+
+B. Verify hydration 
+----------------------------
+In console, you can see a statement like – "Angular hydrated 1 component(s) and 14 node(s), 0 component(s) were skipped."
+That means you have enabled SSR along with hydration.
+
+C. Hydration requirements
+-----------------------------
+- The HTML produced during server-side rendering must match the client’s DOM tree structures to avoid hydration problems.
+  Angular is unaware of these DOM changes and cannot resolve them during hydration.
+  Angular will expect a particular structure but if it encounters a different one when attempting to hydrate,
+  This mismatch will result in hydration failure and throw a DOM mismatch error. 
+- Application must have a valid HTML structure, this could result in a DOM mismatch error during hydration.
+  For example, here are some of the most common cases of this issue.
+  <table> without a <tbody> , <div> inside a <p> , <a> inside an <h1> , <a> inside another <a>
+- When using the hydration feature, it is recommend using the default `false` setting for preserveWhitespaces.
+  If this setting is not in your TS config, the value will be false, and no changes are required.
+  If you enable preserving whitespaces by adding preserveWhitespaces: true to your tsconfig, you may encounter issues with hydration.
+
+D. Skip Hydration
+---------------------
+Some components may not work correctly with hydration enabled due to above issues/requirements, 
+As a workaround, you can add `ngSkipHydration` attribute to component’s tag to skip hydrating entire component and its children.
+<COMPONENT-SELECTOR ngSkipHydration />
+OR
+Component({
+  selector: 'app-show-constraints',
+  templateUrl: './show-constraints.component.html',
+  styleUrls: ['./show-constraints.component.css'],
+  host: { ngSkipHydration: 'true' }
+})
 
 
 Make Angular application compatible with Internet Explorer (IE)
@@ -680,9 +734,9 @@ app.component.ts          --   defines @Component
                                                                       src={{ var }}                  // attribute values
 								      
 							    	      // Deactivate INTERPOLATION, using ngNonBindable
-								      // Eg:
 							    	      <p ngNonBindable>Expression: {{ 3 + 1 }}</p>      // Expression: {{ 3 + 1 }}
-
+								     // Preserve white space
+								     <div ngPreserveWhitespaces> hi   panda   </div>
                                 --   NOTE : INTERPOLATION is only for STRINGs | for integer,boolean use 
                                      PROPERTY BINDING                 [disabled] = 'VAR-FROM-TS'           // use of [] for attr and ' ' for vals
 								      [ngValue] = "option"                 // [value] is string,whereas with [ngValue] object can be passed
