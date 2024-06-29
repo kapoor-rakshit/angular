@@ -2299,6 +2299,64 @@ export const productRoutes: Routes = [{
 }];
 
 
+@defer | @if | @for | @switch in v17
+========================================
+@defer
+Angular has router-based lazy loading for avoiding loading unnecessary resources.
+but it has a limitation: it doesn't allow to lazy-load parts of a given template.
+It tells Angular that @defer section of page should be packaged into a separate Javascript bundle, and loaded separately.
+We can only use @defer to load STANDALONE components and their dependencies: components, directives, pipes, CSS, etc.
+@defer gives two levels of control over the process of loading partial resources:
+	1. we can control when the code gets fetched from the backend, and this is called prefetching.
+	2. we can also control separately when that code is applied/rendered to the page.
+A. No trigger, triggered by default when the browser is idle to load and render it.
+   Angular detects this by using the standard `requestIdleCallback` browser API
+   @defer { <large-component /> }
+B. Placeholder content, until @defer section is loaded and rendered.
+   minimum: atleast show for this much time
+   @defer { <large-component /> } 
+   @placeholder (minimum 2s) { <initial-content /> }
+C. Loader content, while loading of the bundle of the @defer block has started, and is still ongoing in background.
+   after: after how much time once loading has started show loader content
+   @defer { <large-component /> }
+   @loading (after 1s; minimum 2s) { <loading-spinner /> }
+D. Error block, loading of @defer block fails for some reason.
+   @defer { <large-component /> }
+   @error { <error-message /> }
+E. Triggers
+   `on` is used for PRE-DEFINED triggers, while `when` is used for CUSTOM triggers.
+   1. @defer (on idle; prefetch on idle) { <large-component /> }   is equivalent to default(render=idle, prefetch=idle), when no triggers are spcified
+   2. @defer (on viewport) { <large-component /> }
+      @placeholder { <loading-spinner /> }                         triggered when @placeholder block becomes visible in browser viewport.
+      OR
+      <div #VAR>Title</div>
+      @defer (on viewport(VAR)) { <large-component /> }            triggered when #VAR element becomes visible in viewport.
+   3. @defer (on interaction; prefetch on viewport) { <large-component /> }
+      @placeholder { <placeholder-component /> }                   triggered when interaction events(click or keydown) detected in <placeholder-component />
+      OR
+      <div #VAR>Title</div>
+      @defer (on interaction(VAR)) { <large-component /> }         triggered when interaction events(click or keydown) detected in #VAR
+   4. @defer (on hover) { <large-component /> }
+      @placeholder { <loading-spinner /> }                         triggered on hover of placeholder
+      OR
+      <div #VAR>Title</div>
+      @defer (on hover(VAR)) { <large-component /> }               triggered on hover of #VAR
+   5. @defer (on immediate) { <large-component /> }                triggered immediately, DO NOT wait for browser to be idle.
+   6. @defer (on timer(5s)) { <large-component /> }                triggered when timer duration is reached (ms / s)
+   7. @defer(when RENDER_VAR; prefetch when PREFETCH_VAR) { <large-component /> }
+      NOTE: if RENDER trigger gets fired before PREFETCH, the pre-fetching will be done instantly and prefetch condition will be bypassed.
+   8. @defer (on interaction; prefetch on viewport) { 
+       @if (someCondition) { <large-component /> } 
+       @placeholder { <placeholder-component /> }
+      }
+
+@if
+
+@for
+
+@switch
+
+
 create your own OBSERVABLES | RxJS operators
 ==============================================
 - Observables are lazy
