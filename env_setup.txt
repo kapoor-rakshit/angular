@@ -234,18 +234,14 @@ Angular 10, new stuff
    It provides reduced budget sizes that can be checked in `angular.json`
    Removes support for 'any' data type of variables that can be checked in `tslint.json` under key 'no-any' : true
    > ng new --strict <PROJECT_NAME>
-   
 2. Reduced bundle size of production build artifacts
    Angular 10 will only support ES6 (ES2015) and above modules due to which it will not work on older browsers IE 9, 10, 11.
    As a result production build artifacts generated using `ng build --prod` will only have es2015 compatible artifacts, whereas in prior versions it has both es5 and es2015 build artifacts.
    This can be configured in '.browserslistrc' file.
    > npx browserslist           /* This will give a list of all supported browsers for application */
-   
 3. &nbsp; &lt; and other markups will no longer be supported by Angular 10 as it is always discouraged by HTML 5.
    Instead we must use CSS properties padding , margin etc. for spacing.
- 
 NOTE : We may use Angular 9 if we need to support old browsers or Angular 10 for better performance, reduced bundle size.
-
 
 
 PWA experience to Angular
@@ -880,8 +876,7 @@ NOTE : For creating NEW PIPE
      ------------------
       <ng-content></ng-content>	    // NOT REPLACE HERE, since another <ng-content></ng-content> exists
       <div>inside child</div>
-      <ng-content></ng-content>     // REPLACE HERE <div>Child Component Details</div>, since it is last <ng-content></ng-content> in file
-      
+      <ng-content></ng-content>     // REPLACE HERE <div>Child Component Details</div>, since it is last <ng-content></ng-content> in file      
   b) Multi Slot Content Projection
      a selector can be ATTRIBUTE (by using ngProjectAs), ID, CLASS
   Eg:PARENT-COMP.HTML
@@ -899,7 +894,12 @@ NOTE : For creating NEW PIPE
       <ng-content select="#header"></ng-content>        // <p id="header">Header</p> <ng-container id="header">CONTAINER</ng-container>
       <ng-content select=".footer"></ng-content>        // <p class="footer">Footer</p>
       <ng-content select="[attrVAR]"></ng-content>      // <ng-container ngProjectAs="[attrVAR]">CONTAINER ATTR</ng-container>
-      
+  Default content in ng-content (v18)
+  ----------------------------------------
+  Fallback content to be displayed within a component’s <ng-content> projection when no projected content is available.
+  <ng-content> DEFAULT CONTENT </ng-content>
+  <ng-content select=".icon"> DEFAULT CONTENT </ng-content>
+
 
 ngDIRECTIVES
 =====================
@@ -2299,7 +2299,7 @@ export const productRoutes: Routes = [{
 }];
 
 
-@defer | @if | @for | @switch in v17
+@defer | Control Flows    in v17
 ========================================
 @defer
 Angular has router-based lazy loading for avoiding loading unnecessary resources.
@@ -2344,17 +2344,55 @@ E. Triggers
    5. @defer (on immediate) { <large-component /> }                triggered immediately, DO NOT wait for browser to be idle.
    6. @defer (on timer(5s)) { <large-component /> }                triggered when timer duration is reached (ms / s)
    7. @defer(when RENDER_VAR; prefetch when PREFETCH_VAR) { <large-component /> }
+      @defer(when RENDER_VAR === 'VALUE') { <large-component /> }
       NOTE: if RENDER trigger gets fired before PREFETCH, the pre-fetching will be done instantly and prefetch condition will be bypassed.
    8. @defer (on interaction; prefetch on viewport) { 
        @if (someCondition) { <large-component /> } 
        @placeholder { <placeholder-component /> }
       }
 
+Control Flows
+A new built-in syntax for control flow in v17.
+More ergonomic and much less verbose syntax.
+They are available in templates as part of template engine itself, without any additional imports(CommonModule/BrowserModule) coz they are not directives.
+The Angular CLI has an automated migration for upgrading all code to new syntax
+ng g @angular/core:control-flow
 @if
+It is an alternative to *ngIf, and additionally supports `else if`
+@if (VAR) { <h2>Hello</h2> } 
+@else if (VAR) { <h2>Goodbye</h2> } 
+@else { <h2>See you later</h2> }
 
 @for
+Compared to *ngFor structural directive, tracking function is mandatory, use of @empty, builtin variables with @for
+The tracking function tells Angular how to uniquely identify an element of the list and improve change detection performance
+A.
+@for (VAR of ARRAY; let ind = $index; track VAR) { <li>{{ VAR }}</li> }
+OR
+HTML   @for (VAR of ARRAY; track trackFn) { <li>{{ VAR }}</li> }
+TS     trackFn(index: number, item: any) { return item.KEY ?? index; }
+B.
+$first(boolean true if first elem), $last(boolean true if last elem)
+$odd(boolean true if odd index), $even(boolean true if even index)
+$count(number total elems of array)
+@for (VAR of ARRAY; track item; let first = $first, last = $last, odd = $odd, even = $even, count = $count) { <li>{{ item }}</li> }
+C.
+@for (VAR of ARRAY; track VAR) { <li>{{ VAR }}</li> }
+@empty { <li>No items found</li> }
 
 @switch
+It is alternative to [ngSwitch]
+@switch (VAR) {
+  @case ("VALUE") {
+      <div>Red</div>
+  } 
+  @case ("VALUE") {
+      <div>Blue</div>
+  } 
+  @default {
+      <div>Default</div>
+  }
+}
 
 
 create your own OBSERVABLES | RxJS operators
