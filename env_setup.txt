@@ -856,6 +856,12 @@ NOTE : For creating NEW PIPE
                                     And also has to call transform method on each digest 
                                     because even thought the observable parameter may not change the new value may arrive through this observable that needs to be processed by change detection.
                                   - However async pipe unsubscribes itself from observables on 'ngOnDestroy()'
+
+Using PIPES in TS
+-----------------------------
+import { CurrencyPipe } from '@angular/common';
+constructor(private currencyPipe: CurrencyPipe) { }
+let formattedValue = this.currencyPipe.transform(VALUE, 'USD');
                                     
 <ng-template>, <ng-container> and <ng-content>
 ================================================
