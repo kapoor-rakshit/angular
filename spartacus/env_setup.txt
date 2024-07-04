@@ -1049,6 +1049,7 @@ OR
 ORDER / CHECKOUT SERVICES
 ============================
 import { Order, OrderFacade } from '@spartacus/order/root';
+import { MultiCartService } from '@spartacus/cart/base/core';
 constructor(private checkoutDeliveryAddressFacade: CheckoutDeliveryAddressFacade,
             private checkoutDeliveryModesFacade: CheckoutDeliveryModesFacade,
             private checkoutPaymentFacade: CheckoutPaymentFacade,
@@ -1077,11 +1078,12 @@ D.
 backend: { occ: { endpoints: { placeOrder: 'orgUsers/${userId}/orders?cartId=${cartId}&termsChecked=true&fields=FULL' } } }
 // Places an order
 this.orderFacade.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
-  (orderData: Order) => {
-    this.router.navigate(['order-confirmation']);
-  },
+  (orderData: Order) => { this.router.navigate(['order-confirmation']); },
   (_) => { }
 );
+// Sets provided order as current
+this.orderFacade.setPlacedOrder(orderData);
+this.multiCartService.deleteCart(orderData.code ?? '', OCC_CART_ID_CURRENT);
 
 
 ORDER HISTORY SERVICE
@@ -1154,7 +1156,7 @@ this.subscription = this.orderHistoryFacade.getOrderDetails()
 
 
 ORDER CONFIRMATION PAGE
-============================
+==============================
 import { Order, OrderFacade } from '@spartacus/order/root';
 constructor(private orderFacade: OrderFacade) { }
 A.
