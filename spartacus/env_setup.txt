@@ -1083,7 +1083,6 @@ this.orderFacade.placeOrder(true).pipe(takeUntil(this.unsubscribe$)).subscribe(
 );
 // Sets provided order as current
 this.orderFacade.setPlacedOrder(orderData);
-this.multiCartService.deleteCart(orderData.code ?? '', OCC_CART_ID_CURRENT);
 
 
 ORDER HISTORY SERVICE
@@ -1168,6 +1167,8 @@ this.orderFacade.getOrderDetails().pipe(takeUntil(this.unsubscribe$)).subscribe(
   },
   () => {}
 );
+// This will clear current Active Cart and create new cart for the user
+this.cartService.reloadActiveCart();
 B.
 // Clears the current order
 ngOnDestroy(): void {
