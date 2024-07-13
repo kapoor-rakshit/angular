@@ -557,31 +557,24 @@ FOR PRODUCTION BUILD   (ng build --prod)
 1. Install a couple of npm packages
 >  npm install --save classlist.js
 >  npm install --save web-animations-js
-
 2. Edit `polyfills.ts`
 -  uncomment two commented out lines in   `APP_NAME\\src\\polyfills.ts`
    import 'classlist.js';
    import 'web-animations-js';
-   
 3. Edit `browserslist`
 -  remove not from   not IE 9-11   line in   `APP_NAME\\browserslist`
    IE 9-11
-   
 FOR DEVELOPMENT   (ng serve)
 ------------------------------
 1. Edit tsconfig.json
 -  change "target": "es2015"  to  "target": "es5"  in  `APP_NAME\\tsconfig.json`
-   "compilerOptions": {
-   	"target": "es5"
-   }
-
+   "compilerOptions": { "target": "es5" }
 
 
 jQuery / Bootstrap in Angular
 ================================
 > npm install jquery                                    // Install jQuery plugin
 > npm install bootstrap                                 // Install Bootstrap plugin
-
 NOTE : After installing jQuery or bootstrap we need to make it global. 
        In the module (inside node_modules), .min.js under ‘dist’ folder is not public.
        To make them global, add .min.js 
@@ -597,32 +590,95 @@ NOTE : After installing jQuery or bootstrap we need to make it global.
                    "node_modules/bootstrap/dist/css/bootstrap.min.css",
                    "src/styles.css"
                  ]
-        
 To use jQuery inside a component
         - import * as $ from 'jquery'
-        
 Also now we can use Bootstrap as usual with class names in our CSS files.
-
 
 
 INTERNATIONALIZATION (i18n) | LOCALIZATION (l10n)
 =====================================================
 REFER : https://angular.io/guide/i18n
-
+Angular localization is a process of making an application support rendering in multiple languages.
+Internationalization develops the website in a way that the localization of the site becomes easier.
+This means loading it with dynamic content as per the user’s language preference or user’s location.
+1. Add required Internationalization plugin 
+   - ng add @angular/localize
+2. Set locales for your application, to allow application to decide which locale to render based on viewer local.
+   Angular uses `en-US` as default locale to render content if specific locale is not supported by application.
+   APP.MODULE.TS
+   import { registerLocaleData } from '@angular/common';
+   import localeFr from '@angular/common/locales/fr';
+   import localeDe from '@angular/common/locales/de';
+   registerLocaleData(localeFr);
+   registerLocaleData(localeDe);
+   @NgModule({ declarations:[], imports: [], providers: [], bootstrap: [AppComponent] })
+   export class AppModule { }
+3. Mark HTML tags with attribute `i18n` , `meaning | description` , `@@ID`
+   <h6 i18n>we are ready to help you</h6>
+   <h6 i18n="slidersubheading|Pointer text for the customer">we are ready to help you</h6>
+   <h6 i18n="@@subtopicslider">we are ready to help you</h6>
+4. Generate custom label files for each locale that we plan to support
+   a. generate default locale file `messages.xlf` by extracting all tagged labels
+      - ng xi18n   OR   ng extract-i18n
+      To change path and/or name of default XLF file
+      - ng extract-i18n --output-path src/locale --out-file source.xlf
+   b. create other locale files by copying default `messages.xlf` file and renaming it to each required locale
+      `messages.fr.xlf` and `messages.de.xlf`
+   c. Send each (*.LOCALE.xlf) translation file to a translator
+      Translator uses an XLIFF file editor to create translation and edit translation.
+      The first <trans-unit> element is translation unit, also known as text node,
+      represents translation of tag that was previously marked with `i18n` attribute.
+      Here, copy the <source>...</source> element in text node,
+      rename it to <target>...</target>, and then replace content with LOCALE text
+      Eg:
+      <trans-unit id="introductionHeader" datatype="html">
+        <source>Hello i18n!</source>
+        <target>Bonjour i18n !</target>
+        <note priority="1" from="description">An introduction header for this sample</note>
+        <note priority="1" from="meaning">User welcome</note>
+      </trans-unit>
+5. ANGULAR.JSON configuration
+   "projects": {
+     "PROJECT_NAME": {
+       "projectType": "application",
+       "i18n": {
+         "locales": {
+           "fr": "messages.fr.xlf",
+           "de": "messages.de.xlf"
+         }
+       },
+     "architect": {
+       "build": {
+         "configurations": {
+           "production": { },
+           "fr": { "localize": ["fr"] },
+           "de": { "localize": ["de"] }
+         }
+       },
+       "serve": {
+         "configurations": {
+           "production": { "browserTarget": "internationalisation:build:production" },
+           "fr": { "browserTarget": "internationalisation:build:fr" },
+           "de": { "browserTarget": "internationalisation:build:de" }
+         }
+       }
+6. SERVE
+   - ng serve --configuration=fr
+   - ng serve --configuration=de
+   BUILD
+   creates localized build for all supported languages `dist\PROJECT_NAME\en-US`,`dist\PROJECT_NAME\de`,`dist\PROJECT_NAME\fr`
+   - ng build --prod --localize
 
 
 JIT / AOT
 ===================
 - In the beginning, a compiler was responsible for turning a high-level language into object code (machine instructions), 
   which would then be linked into an executable.
-  
 - just-in-time (JIT) compilation (also dynamic translation or run-time compilations) is a way of executing computer code 
   that involves  compilation during execution of a program — at run time — rather than prior to execution.
   Or stated more simply, it is that the code gets compiled when it is needed, not before runtime.
-  
   A just-in-time (JIT) compiler is a feature of the run-time interpreter, that instead of interpreting bytecode every time a method is invoked, 
   will compile the bytecode into the machine code instructions of the running machine, and then invoke this object code instead.
-  
   In JIT, not all the code is converted into machine code initially. Only code that is necessary (used immediately) will be converted into machine code. 
   Then if a method or functionality called and is not in machine code, then that will also be turned into machine code. 
   This reduces the burden on the CPU and makes the app render faster because it only uses what is needed.
@@ -630,13 +686,11 @@ JIT / AOT
 - ahead-of-time compilation (AOT compilation) is the act of compiling a higher-level programming language such as C or C++, or an 
   intermediate representation such as Java bytecode or .NET Framework Common Intermediate Language (CIL) code, 
   into a native (system-dependent) machine code so that the resulting binary file can execute natively.
-  
   An ahead-of-time (AOT) compiler converts your code during the build time before the browser downloads and runs that code. 
   Compiling your application during the build process provides a faster rendering in the browser.
-  
   Benefits
+  ---------------
   Faster rendering, Fewer asynchronous requests, Smaller Angular framework download size, Detect template errors earlier, Better security
-  
 - JIT compilation is the default when you run the `ng build` or `ng serve` CLI commands. This is for development.
   For AOT compilation, include the `--prod` or `--aot` option with the `ng build` or `ng serve` command, 
   NOTE : this parameter is configured in 'angular.json' with `AOT`.
@@ -3132,11 +3186,13 @@ REST APIs have certain types of parameters:
                                           'Content-Type':  'application/json'
                                         }),
 					params: new HttpParams({
-    					  'categoryId': 4095			  // appended as query string parameters in request URL
+    					  'categoryId': 4095	      // appended as query string parameters in request URL
   					}),
-					observe: 'events'                         // observe HTTP OPTION allows monitoring of request-response sequence
-					                                             It has values: 'body'(default), 'response'(full response obj received i.e. status, headers)
-										     'events'(seq. of events in req-resp lifecycle)
+					reportProgress: true,        // to get events of request progress. Use observe: 'events' for it
+					observe: 'events',           // 'body'(default),
+									'response'(full obj received i.e. .status, .headers, .body)
+									'events'(seq. of events in req-resp lifecycle)
+                                        responseType: 'text'         // 'json'(default), 'arraybuffer', 'blob', 'text'
                                      };
                                      constructor(private _http: HttpClient) { }
                                      addProduct(HTTP_BODY) {
