@@ -48,3 +48,19 @@
       "typescript.preferences.quoteStyle": "single",
       "prettier.jsxSingleQuote": true
    }
+
+5. To have same configs across all team mates in project using VS CODE:
+   a. Create a folder `.vscode` at root level of project
+   b. Create a file `.vscode\extensions.json` , to have VS CODE prompt opened up to install all required extensions in project
+      {
+        "recommendations": ["angular.ng-template", "esbenp.prettier-vscode"]
+      }
+
+   c. Create a file `.vscode\settings.json` , to have same User Settings in project
+      {
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+           "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
