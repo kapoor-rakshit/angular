@@ -850,8 +850,8 @@ PIPES
                               ----------------  eg:- {{ var | uppercase }}
                                                      {{ var | lowercase }}
                                                      {{ var | titlecase }}
-                                                     {{ var | date : "dd/mm/yyyy" }}               // var = new Date();
-                                                     {{ var | date : "shortTime" }}
+                                                     {{ var | date : "dd/MM/yyyy hh:mm:ss a" }}    // var = new Date("2024-10-28T19:00:00+0000");
+                                                     {{ var | date : "shortTime" }}                   // converts to local time, by default (29/October/2024 12:30:00 AM)
                                                      {{ var | currency : 'EUR' : true }}           // show euro symbol
                                                      {{ var | currency : 'EUR' : false }}          // donot show euro symbol , shows EUR
                                                      {{ var | json }}                              // converts JS object to JSON {"" : ""}
