@@ -538,6 +538,7 @@ imports: [
     addLast: true,
     addNext: true,
     addEnd: true,
+    substituteDotsForSingularPage: true,
   },
  })
 ]
