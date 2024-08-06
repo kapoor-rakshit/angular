@@ -961,6 +961,24 @@ let formattedValue = this.currencyPipe.transform(VALUE, 'USD');
   <ng-content select=".icon"> DEFAULT CONTENT </ng-content>
 
 
+*ngTemplateOutlet
+=====================
+To reuse same code within a template (.HTML) file
+Eg:
+  <ng-container *ngTemplateOutlet="storePillarData"></ng-container>
+  <ng-container *ngTemplateOutlet="productItems; context: { $implicit: products, cart: cart, showErrorwithIcon: false }"></ng-container>
+
+  <ng-template #storePillarData>  </ng-template>
+  <ng-template #productItems  let-items  let-cartData="cart"  let-showError="showErrorwithIcon">
+     <olympus-plp-item
+       *ngFor="let item of items"
+       [productConfig]="item"
+       [cartInfo]="cartData"
+       [errorVisible]="showError">
+     </olympus-plp-item>
+  </ng-template>
+
+
 ngDIRECTIVES
 =====================
 Written in html files
