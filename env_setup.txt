@@ -136,6 +136,18 @@ ng add makes adding new capabilities to your project easy. ng add will use your 
 invoke an installation script (implemented as a schematic) which can update your project with configuration changes, 
 add additional dependencies (e.g. polyfills), or scaffold package-specific initialization code
 
+To run on a different domain other than localhost:
+Make sure your hosts file in
+- Windows system ("C:\Windows\System32\drivers\etc\hosts")
+- MacOS system (sudo vi /etc/hosts)
+is updated with following configuration:
+127.0.0.1       campbells.local
+127.0.0.1       cstore.local
+127.0.0.1       supermarkets.local
+NOTE: You might need ADMIN RIGHTS on your machine for updating this file.
+Once done with updating hosts file, to run project use following command:
+> ng serve --host cstore.local --disable-host-check
+
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
 
@@ -1009,10 +1021,15 @@ Three types of directives:
      - It accepts DOM event to listen for and an array which is set of arguments to pass to handler method when the event occurs.
      - example :  @HostListener('click', ['$event.target']) onClickFn(btn) { }
                :  @HostListener('dragover', ['$event']) onDragOverFn(evt) { }
+               :  @HostListener('window:click', ['$event']) globalClickFn(evt) { }
+                  global target names that can be used to prefix an event name are `document:` , `window:` , `body:`
    - Configure custom attribute directive class (ex: MyDirective) in respective .module.ts in the 'declarations' array metadata of @NgModule.
    // example
       @Directive({
-         selector: '[colorChangeDirective]'
+	selector: 'button[counting]'             // works only on button , eg: <button counting> </button>
+      })
+      @Directive({
+         selector: '[colorChangeDirective]'     // works on any elem
       })  
       export class MyDirective {
          @Input('colorChangeVAR') dynamicColor: string;
@@ -1470,7 +1487,10 @@ Angular FORMS
 									   // Custom Async validators array(passed as third arg), allows to have asyncronous validation
 									      It is useful if we need to check on input data from external API call.
 									      It introduces a third state of form field as ng-pending, before giving ng-valid or ng-invalid
-        
+
+     // Change status explicitly of formControls / formGroup 
+	markAsTouched() , markAsUntouched() , markAllAsTouched() , markAsDirty() , markAsPristine()
+
      // dynamic setting/clearing of validators
         this.customerForm.get('<formControlName_ATTR>').setValidators([Validators.required]);     // setValidators: overwrites existing validators
 	this.customerForm.get('<formControlName_ATTR>').addValidators([Validators.required]);     // addValidators: without affecting other validators,
