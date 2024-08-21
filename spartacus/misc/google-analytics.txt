@@ -1,0 +1,66 @@
+REFERENCE: https://sap.github.io/spartacus-docs/tag-management-system-examples/
+Tag Management System (TMS) solutions, such as Google Tag Manager (GTM), Google Analytics (GA), and Adobe Experience Platform Launch (AEPL).
+
+1. APP.MODULE.TS
+==========================
+import { BaseTmsModule } from '@spartacus/tracking/tms/core';
+import { GtmModule } from '@spartacus/tracking/tms/gtm';
+import { CUSTOM-tagManagerConfig } from '../resolvers/gtm-config';
+imports: [ BaseTmsModule.forRoot(), GtmModule ],
+providers: [provideConfig(CUSTOM-tagManagerConfig)]
+
+2. CUSTOM-tagManagerConfig.TS
+=================================
+import { TmsConfig } from '@spartacus/tracking/tms/core';
+import { CUSTOM-GoogleAnalyticsCollectorService } from 'src/app/shared/services/google-analytics-collector.service';
+export const CUSTOM-tagManagerConfig = {
+  tagManager: {
+    gtm: { collector: CUSTOM-GoogleAnalyticsCollectorService }
+  }
+} as TmsConfig;
+
+3. CUSTOM-GoogleAnalyticsCollectorService.TS
+=================================================
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { OccEndpointsService, WindowRef } from '@spartacus/core';
+import { GtmCollectorService } from '@spartacus/tracking/tms/gtm';
+declare global {
+  interface Window {
+    dataLayer: any;
+  }
+}
+const GTM_Config = { gtmId: VALUE_FROM_CONFIG, authPreview: VALUE_FROM_CONFIG };
+@Injectable({ providedIn: 'root' })
+export class CUSTOM-GoogleAnalyticsCollectorService extends GtmCollectorService {
+  constructor(protected override winRef: WindowRef, private occEndpointService: OccEndpointsService, private http: HttpClient) {
+    super(winRef);
+    this.loadGtm();
+  }
+  private loadGtm() {
+    const gtmScript = this.winRef?.document?.createElement('script');
+    gtmScript.innerHTML = `
+          (function(w,d,s,l,i){
+            w[l]=w[l]||[];
+            w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
+            var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),
+            dl=l!='dataLayer'?'&l='+l:'';
+            j.async=true;
+            j.src='https://www.googletagmanager.com/gtm.js?id=${GTM_Config.gtmId}${GTM_Config.authPreview}';
+            f.parentNode.insertBefore(j,f);
+          })(window,document,'script','dataLayer','${GTM_Config.gtmId}');
+        `;
+    const head = this.winRef?.document?.getElementsByTagName('head')[0];
+    head.appendChild(gtmScript);
+  }
+
+  pushCustomEvent(event: any): void {
+    this.winRef?.nativeWindow?.window?.dataLayer.push(event);
+  }
+}
+
+4. COMP.TS
+====================
+constructor(private analyticsService: CUSTOM-GoogleAnalyticsCollectorService) { }
+let obj = { event: 'add_to_cart', event_location: 'PLP', ecommerce: {value: '$20.00', item: 'Chocolate'} };
+this.analyticsService.pushCustomEvent(obj);
