@@ -1714,11 +1714,13 @@ STYLE
                                            [ngClass] = "'firstCSSClass secondCSSClass'"                          // NOTE : use of '' over class names
                                            [ngClass] = "['firstCSSClass' , 'secondCSSClass']"
                                            [ngClass] = "{'firstCSSClass' : i%2==0 , 'secondCSSClass' : i%2==1}"
-					   [style.left]="'15px'"
-					   [style.background-color]="'blue'"
-					   [style.font-size]="Boolean_VAR_EXPRESSION ? '20px' : '12px'"
+					   [style.left] = "'15px'"
+					   [style.background-color] = "'blue'"
+					   [style.font-size] = "Boolean_VAR_EXPRESSION ? '20px' : '12px'"
+					   [style.width.px] = "styleVAR"
 					   [ngStyle] = "{'font-style' : styleVAR , 'font-weight' : 'bold'}"
-					   [ngStyle]="OBJECT-VAR-FROM-TS"					// OBJECT-VAR-FROM-TS = {'font-style' : '16px'};
+					   [ngStyle] = "{ 'width.%': styleVAR, 'height.px': 30 }"
+					   [ngStyle] = "OBJECT-VAR-FROM-TS"					// OBJECT-VAR-FROM-TS = {'font-style' : '16px'};
 					   
 VIEW ENCAPSULATION
 ========================
