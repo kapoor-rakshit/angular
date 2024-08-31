@@ -1453,16 +1453,76 @@ constructor(protected productSearchService: ProductSearchService, protected cms:
    this.pageType = PageType.CATEGORY_PAGE;
    this.pageTemplate = 'DepartmentPageTemplate';                                 // connect page resolver to specific pageTemplate
 }
-A. resolveTitle(): Observable<string> {
-    return of('Custom title');
-   }
-B. resolveDescription(): Observable<string> {
-    return this.productData$.pipe(
+A.1. override resolveTitle(): Observable<string> {                               // class CUSTOM-RESOLVER extends ProductPageMetaResolver
+      return this.productData$.pipe(                                             // productData$: Observable<any> = this.currentProductSerice.getProduct();
+      switchMap((product) =>
+        this.translation.translate('pageMetaResolver.product.title', {
+          productName: product.product.name,
+        })
+       )
+      );
+     }
+A.2. override resolveTitle(): Observable<string> {                               // class CUSTOM-RESOLVER extends CategoryPageMetaResolver
+      return (<Observable<ProductSearchPage>>this.searchPage$).pipe(
+      switchMap((p: any) =>
+        this.translation.translate('pageMetaResolver.category.title', {
+          query:
+            p?.category && p?.category?.seoTitle
+              ? p?.category?.seoTitle
+              : p.category && p.category?.name
+              ? p?.category?.name
+              : undefined,
+        })
+      ));
+     }
+     protected override searchPage$: Observable<ProductSearchPage | Page> = this.cms.getCurrentPage().pipe(
+      filter((page) => Boolean(page)),
+      switchMap((page: Page) =>
+      // only the existence of a plp component tells us if products
+      // are rendered or if this is an ordinary content page
+      this.hasProductListComponent(page)
+        ? this.productSearchService.getResults().pipe(filter((result) => Boolean(result)))
+        : of(page)
+      )
+     );
+     protected override hasProductListComponent(page: Page): boolean {
+      return !!Object.keys(page.slots || {}).find(
+      (key) =>
+        !!page.slots?.[key].components?.find(
+          (comp) =>
+            comp.flexType === 'ProductListComponent' ||
+            comp.typeCode === 'CMSProductListComponent' ||
+            comp.typeCode === 'ProductGridComponent'
+        )
+      );
+     }
+B.1. resolveDescription(): Observable<string> {                                 // class CUSTOM-RESOLVER extends ProductPageMetaResolver
+      return this.productData$.pipe(                                            // productData$: Observable<any> = this.currentProductSerice.getProduct();
       switchMap((product) =>
         this.translation.translate('pageMetaResolver.product.description', {
           description: product.metaDescription,
         })));
-   }
+     }
+B.2. resolveDescription(): Observable<string> {                                // class CUSTOM-RESOLVER extends CategoryPageMetaResolver
+      return this.cms.getCurrentPage().pipe(
+      filter((p) => Boolean(p)),
+      map((data: Page) => {
+        return data.description?.trim();
+      }),
+      switchMap((value?: string) => {
+        return of(value);
+      })
+      );
+     }
+B.3. resolveDescription(): Observable<string> {                               // class CUSTOM-RESOLVER extends SearchPageMetaResolver
+      return this.query$.pipe(
+      mergeMap((query) => {
+        return this.translation.translate('pageMetaResolver.search.description', {
+          query,
+        });
+      })
+      );
+     }
 C. resolveCanonicalUrl(): Observable<string> {
     return combineLatest([this.baseSiteService.get(), this.product$]).pipe(
       map(([baseSite, product]) => {
