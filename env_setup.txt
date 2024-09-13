@@ -3330,6 +3330,42 @@ Example : "component.html"        , <a routerLink="/targetComp/78990/kapoor" [fr
                                              console.log(`${frag}`);
                                          });
 	                            }
+File Upload Example
+-----------------------
+.COMP.TS
+startProgress(file: any) {
+    this.progress = 1;
+    let formData = new FormData();
+    formData.append('file', file, file.name);
+    this.mediaService.uploadMedia(formData).pipe(takeUntil(this.unsubscribe$)).subscribe(
+        (event: any) => {
+          if (event.type === HttpEventType.UploadProgress) {
+            // This is an upload progress event. Compute and show the % done:
+            this.progress = Math.round((100 / event.total) * event.loaded);
+          } else if (event instanceof HttpResponse) {
+            // FILE UPLOAD COMPLETED
+            this.progress = 0;
+          }
+          this.changedef.markForCheck();
+        },
+        () => { this.progress = 0; }
+      );
+}
+.COMP.HTML
+<div *ngIf="progress">
+  <div [ngStyle]="{ 'width.%': progress }"></div>
+</div>
+.SERVICE.TS
+uploadMedia(formData: any) {
+    const url = this.occEndpointService.buildUrl('uploadOrderCSV', {
+      urlParams: { userId: OCC_USER_ID_CURRENT },
+    });
+    const req = new HttpRequest('POST', url, formData, {
+      reportProgress: true,
+    });
+    return this.http.request(req);
+}
+
 CONTEXT PATH
 =================
 Add a suffix to server hostname (IP/PORT) that is common and specific to our whole angular application.
