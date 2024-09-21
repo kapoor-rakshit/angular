@@ -2544,7 +2544,7 @@ from(new Promise((resolve, reject) => {
 })).subscribe((val) => console.log(val));				// Hello World
    
 a.1) pipe() | skip() | take() | takeUntil() | takeUntilDestroyed() | takeWhile() |
-     pluck() |
+     pluck() | distinctUntilChanged()
      retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
 skip() allows to ignore first x emissions from the source. It is oppposite to take().
@@ -2553,6 +2553,8 @@ takeUntil() operator receive values from Observable until other specified Observ
 takeUntilDestroyed() from v16, complete an observable when calling context (component, directive, service, or a pipe) is destroyed.
 takeWhile() operator continue receiving values until specified func returns true. Once it becomes false, unsubscribe automatically.
 pluck() operator is similar to map(), difference is that it has a builtin null check, whereas map() does not have it.
+distinctUntilChanged(cmpFn) only emit when current value is different than LAST EMITTED value(not actual [] value). It uses === comparison by default.
+distinctUntilKeyChanged(key, cmpFn) only emit when the specified KEYs value has changed.
 retry() operator lets you retry a failed request. NOTE : Use the retry operator before the catchError operator.
 catchError() is a function that takes in input Observable, and outputs an Output Observable. We need to pass it a function which is error handling function.
 Example:
@@ -2569,9 +2571,16 @@ const apiData = ajax('/api/data').pipe(
     }
     return res.response;
   }),
-  map((object) => object?.employee?.address?.houseNumber),	      // NOTE: use of nullish operator `?` ,absence of this may cause error and halt program exec
-  pluck('employee', 'address', 'houseNumber'),                        // this is equivalent to   object?.employee?.address?.houseNumber
-  retry(3),                                                           // Retry up to 3 times before failing
+  map((object) => object?.employee?.address?.houseNumber),	 // NOTE: use of nullish operator `?` ,absence of this may cause error and halt program exec
+  pluck('employee', 'address', 'houseNumber'),                   // this is equivalent to   object?.employee?.address?.houseNumber
+  distinctUntilChanged(),					 // from([1, 2, 2, 3, 3, 2]) , OUTPUT: 1,2,3,2
+  distinctUntilChanged((prev, curr) => prev.KEY === curr.KEY),   // from([{name:'A'},{name:'B'},{name:'B'},{name:'C'}])
+								    drop value if condition is met. OUTPUT: {name:'A'},{name:'B'},{name:'C'}
+  distinctUntilKeyChanged('name')				 // from([{name:'A'},{name:'B'},{name:'B'},{name:'C'}]) , OUTPUT: {name:'A'},{name:'B'},{name:'C'}
+  distinctUntilKeyChanged('name', (x, y) => x.substring(0, 3) === y.substring(0, 3))
+								 // from([{age:4,name:'Foo1'},{age:7,name:'Bar'},{age:5,name:'Foo2'},{age:6,name:'Foo3'}])
+								    drop value if condition is met. {age:4,name:'Foo1'},{age:7,name:'Bar'},{age:5,name:'Foo2'}
+  retry(3),                                                      // Retry up to 3 times before failing
   catchError((err: Error) => { return throwError(err.message); })
 );
 
