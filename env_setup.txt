@@ -2544,7 +2544,7 @@ from(new Promise((resolve, reject) => {
 })).subscribe((val) => console.log(val));				// Hello World
    
 a.1) pipe() | skip() | take() | takeUntil() | takeUntilDestroyed() | takeWhile() |
-     pluck() | distinctUntilChanged()
+     pluck() | distinctUntilChanged() | distinctUntilKeyChanged(KEY)
      retry() | catchError() | throwError()
 pipe() function takes as its arguments the functions you want to combine, and returns new function that, when executed, runs composed functions in sequence.
 skip() allows to ignore first x emissions from the source. It is oppposite to take().
