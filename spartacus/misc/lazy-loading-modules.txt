@@ -2,7 +2,7 @@
 ===============================
 imports: [
  ConfigModule.withConfig({
-      cmsComponents: { CMS_BE_COMPONENT: { component: CUSTOM_FE_COMPONENT } },
+      cmsComponents: { CMS_BE_COMPONENT_FLEX-TYPE-CODE: { component: CUSTOM_FE_COMPONENT } },
  })
 ],
 exports: [CUSTOM_FE_COMPONENT]
@@ -15,7 +15,7 @@ import { FEATURE_NAME } from 'src/app/core/constants/cs-enums';
 export function default-CUSTOM-Config(): CmsConfig {
   const config: CmsConfig = {
     featureModules: {
-      [FEATURE_NAME.CUSTOM_NAME]: { cmsComponents: ['CMS_BE_COMPONENT'] },
+      [FEATURE_NAME.CUSTOM_NAME]: { cmsComponents: ['CMS_BE_COMPONENT_FLEX-TYPE-CODE'] },
     },
   };
   return config;
