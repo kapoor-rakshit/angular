@@ -1,0 +1,49 @@
+1. COMP-PAGE-MODULE.TS
+===============================
+imports: [
+ ConfigModule.withConfig({
+      cmsComponents: { CMS_BE_COMPONENT: { component: CUSTOM_FE_COMPONENT } },
+ })
+],
+exports: [CUSTOM_FE_COMPONENT]
+export class COMP-PageModule {}
+
+2. CUSTOM-ROOT-MODULE.TS
+================================
+import { CmsConfig, provideDefaultConfigFactory } from '@spartacus/core';
+import { FEATURE_NAME } from 'src/app/core/constants/cs-enums';
+export function default-CUSTOM-Config(): CmsConfig {
+  const config: CmsConfig = {
+    featureModules: {
+      [FEATURE_NAME.CUSTOM_NAME]: { cmsComponents: ['CMS_BE_COMPONENT'] },
+    },
+  };
+  return config;
+}
+@NgModule({
+  providers: [provideDefaultConfigFactory(default-CUSTOM-Config)],
+})
+export class CUSTOM-RootModule {}
+
+3. CUSTOM-FEATURE.MODULE.TS
+=================================
+import { CmsConfig, provideConfig } from '@spartacus/core';
+import { FEATURE_NAME } from 'src/app/core/constants/cs-enums';
+import { CUSTOM-RootModule } from '/CUSTOM-ROOT.module';
+@NgModule({
+  imports: [CUSTOM-RootModule],
+  providers: [
+    provideConfig(<CmsConfig>{
+      featureModules: {
+        [FEATURE_NAME.CUSTOM_NAME]: {
+          module: () => import('../../comp-page.module').then((m) => m.COMP-PageModule),
+        },},
+    }),
+  ],
+})
+export class CUSTOM-FeatureModule {}
+
+4. spartacus-features.module.TS
+=================================
+import { CUSTOM-FeatureModule } from './features/FEATURE/CUSTOM-FEATURE.MODULE';
+imports: [ CUSTOM-FeatureModule ]
