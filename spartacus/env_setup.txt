@@ -840,6 +840,20 @@ ConfigModule.withConfig({
 })
 
 
+DEFER LOADING OF COMPs
+========================
+It defers loading of components on page, till they are visible in users viewport
+import { DeferLoadingStrategy } from '@spartacus/core';
+ConfigModule.withConfig({
+    cmsComponents: {
+        TYPE-CODE: {
+            component: FE-COMPONENT,
+             deferLoading: DeferLoadingStrategy.DEFER
+        }
+    }
+})
+
+
 HTTP REQUESTS (services)
 ===========================
 1. SERVICE.TS
