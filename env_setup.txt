@@ -2891,11 +2891,14 @@ A) declare this service class in "providers" array of ROOT module metadata i.e. 
    
 B.1.) declare this service class in "providers" array of EAGERLY LOADED SUB module metadata i.e. "MODULE.ts"  to have same instance app wide.
       this is same as declaring in providers of "app.module.TS"   or   adding providedIn: 'root' metadata to @Injectable({}) decorator.
-   
 B.2.) declare this service class in "providers" array of LAZY LOADED SUB module metadata i.e. "MODULE.ts"  to have different instance, but same within sub-module only
       eg: if service provided in both providers array of ROOT module and sub-module, we will have two instances of that service
+B.3.) To keep service only to a certain module, add metadata providedIn: MODULE_NAME to @Injectable({}) decorator
+      import { MODULE_NAME } from 'path_to_module';
+      @Injectable({ providedIn: MODULE_NAME })
+      export class SERVICE { }
    
-C) declare this service class in "providers" array of COMPONENT metadata to have different instance, but same within component & it's child components only.
+C) declare this service class in "providers"/"viewProviders" array of COMPONENT metadata to have different instance, but same within component & it's child components only.
    eg: if service provided in both providers array of ROOT module and component, we will have two instances of that service
 
 PROVIDERS ARRAY
