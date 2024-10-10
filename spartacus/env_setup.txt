@@ -10,6 +10,12 @@ Storefront Version
 REFERENCE: https://github.com/SAP/spartacus#requirements
 For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
 
+Storefront Update
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/10a8bc7f635b4e3db6f6bb7880e58a7d/7266f6f01edb4328b4e09df299ea09be.html
+NOTE: When update has finished running, inspect your code for comments that begin with // TODO:Spartacus
+NOTE: Also update `manifest.json` file , present in 'js-storefront' directory
+      So that CCv2 can pick correct version of NodeJS as per storefront version
+
 SmartEdit
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/a4b1ea8d8a7249d28ec4aa0e58ff5518.html
            https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/
@@ -75,13 +81,6 @@ SETUP
       --baseSite: name of storefront
       --ssr: enable SSR features of app
       --pwa: enable PWA features of app
-  OR
-  ng update @spartacus/schematics@VERSION         // After update is done, inspect your code for comments that begin with TODO:Spartacus
-> check `package.json` for correct version of @spartacus libs and
-  delete node_modules(if already exists) and then run:
-  npm install or yarn install
-> update `manifest.json` file , present in 'js-storefront' directory
-  (REFER: deployment -> manifest.json   in angular repo)
 
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
@@ -838,6 +837,19 @@ ConfigModule.withConfig({
         }
     }
 })
+
+
+Redirect URL configuration
+==============================
+On navigation to a page, browser keeps track of last visited page.
+So that after logout, when user logs in again, it redirects back to last visited page automatically.
+To override this behavior we can use `AuthRedirectStorageService`:
+import { AuthRedirectStorageService } from '@spartacus/core';
+constructor(private redirectService: AuthRedirectStorageService) { }
+A.
+this.redirectService.getRedirectUrl().pipe(takeUntil(this.destroy$)).subscribe((url) => { });
+B.
+this.redirectService.setRedirectUrl('/');
 
 
 DEFER LOADING OF COMPs
