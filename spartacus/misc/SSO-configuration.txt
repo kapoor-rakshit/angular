@@ -1,0 +1,1 @@
+REFERENCE: https://community.sap.com/t5/crm-and-cx-blogs-by-sap/spartacus-sso-integration-with-microsoft-azure-active-directory/ba-p/13564825
