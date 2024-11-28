@@ -112,6 +112,13 @@ node.js terminal is a CMD terminal with NODEJs and NPM path variables set for us
 NOTE : application <my-app> and its corresponding <my-app>-e2e application are in the 'projects' folder.
      : ng s <my-app> [options]    or    ng serve <my-app> [options]           will start the application
 
+NOTE:
+Starting in Angular version 17 new projects will be STANDALONE by default.
+To create a project with NgModule use
+> ng new <my-app> --no-standalone
+OR
+> ng new <my-app> --standalone=false
+
 > ng update
 Perform a basic update to the current stable release of application and its dependencies.
 If no package name and option is specified , it will merely check updates available.
