@@ -1352,6 +1352,40 @@ API call: POST | URL: https://BASE-URL-public.model-t.cc.commerce.ondemand.com/a
           REQUEST BODY: {baseSite:'', token_type_hint:'', token:''} | RESPONSE: NA
 Redirect to: `/login` on successful logout
 this.auth.logout();
+D.
+Overriding AuthService
+D.1.
+app.module.TS
+--------------------
+import { AuthService } from '@spartacus/core';
+providers: [{ provide: AuthService, useExisting: CUSTOM-AuthService }];
+
+D.2.
+CUSTOM-AuthService.service.TS
+----------------------------------
+import { Store } from '@ngrx/store';
+import {AuthRedirectService,AuthService,AuthStorageService,OAuthLibWrapperService,RoutingService,StateWithClientAuth,UserIdService} from '@spartacus/core';
+@Injectable({ providedIn: 'root' })
+export class CUSTOM-AuthService extends AuthService {
+  constructor(store: Store<StateWithClientAuth>,userIdService: UserIdService,oAuthLibWrapperService: OAuthLibWrapperService,
+    authStorageService: AuthStorageService,authRedirectService: AuthRedirectService,routingService: RoutingService) {
+      super(store, userIdService, oAuthLibWrapperService, authStorageService, authRedirectService, routingService);
+  }
+
+  override async loginWithCredentials(userId: string, password: string) {
+    await super.loginWithCredentials(userId, password).then(() => this.performPostLoginActions());
+  }
+
+  override async coreLogout() {
+    super.coreLogout().then(() => this.performPostLogoutActions());
+  }
+
+  private performPostLoginActions(): void {
+    this.cartService.requireLoadedCart().subscribe();
+  }
+
+  private performPostLogoutActions(): void { }
+}
 
 
 USER SERVICES
