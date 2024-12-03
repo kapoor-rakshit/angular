@@ -88,6 +88,16 @@ SETUP
       --ssr: enable SSR features of app
       --pwa: enable PWA features of app
 
+B2B setup
+----------------
+When you run this command (ng add @spartacus/schematics), you are first asked to choose either a B2C or B2B configuration.
+The only difference between the two options is that the B2B configuration has a few additional OCC endpoints and a different checkout configuration.
+Specifically, the B2B configuration adds the `defaultB2bOccConfig` and `defaultB2bCheckoutConfig` from @spartacus/setup.
+NOTE:
+Spartacus does not support B2C and B2B storefronts running together in a single storefront application.
+When you enable B2B Commerce Organization, the B2C storefront will load but not work properly.
+
+
 1. It creates a directory named `spartacus` and inside it:
     1. creates module `spartacus-configuration.module.TS`
        // This will have all configs for spartacus like baseUrl, baseSite etc.
