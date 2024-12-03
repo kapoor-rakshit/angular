@@ -472,9 +472,12 @@ export class CUSTOM-FacetComponent extends FacetComponent implements OnInit, OnD
     this.breakPointService.isDown(BREAKPOINT.sm).pipe(distinctUntilChanged(), takeUntil(this.destroy$)).subscribe((isMobile) => {
         this.isMobile = isMobile;
         if (!this.isMobile && this.facetList && this.facetList.length > 3) {
+          // TO KEEP n number of FACETS EXPANDED BY DEFAULT
           this.facetService.toggle(this.facetList[0], false);
           this.facetService.toggle(this.facetList[1], false);
           this.facetService.toggle(this.facetList[2], false);
+
+          // TO KEEP n number of FACETS COLLAPSED BY DEFAULT
           this.facetList.slice(3).forEach((facet) => {
             if (facet !== this.facetList[0]) {
               this.facetService.toggle(facet, true);
