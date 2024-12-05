@@ -948,8 +948,8 @@ backend: { occ: { endpoints: {
   } } }
 - APP.MODULE.TS
   import { ActiveCartService, CartAdapter, CartEntryAdapter, MultiCartService } from '@spartacus/cart/base/core';
-  providers: [{ provide: CartAdapter, useClass: CUSTOM-CartAdapter}, { provide: ActiveCartService, useExisting: CUSTOM-CartService, multi: true }
-              { provide: CartEntryAdapter, useClass: CUSTOM-CartEntryAdapterService } , MultiCartService]
+  providers: [{provide: CartAdapter, useClass: CUSTOM-CartAdapter}, {provide: ActiveCartService, useExisting: CUSTOM-CartService, multi: true}
+              {provide: CartEntryAdapter, useClass: CUSTOM-CartEntryAdapterService}, {provide: MultiCartService, useExisting: CUSTOM-MultiCartService}]
 - CUSTOM-CartAdapter.SERVICE.TS
   import { OccCartAdapter } from '@spartacus/cart/base/occ';
   import { Cart, CART_NORMALIZER } from '@spartacus/cart/base/root';
@@ -988,12 +988,81 @@ backend: { occ: { endpoints: {
         this.multiCartService.addEntry(userId, getCartIdByUserId(cart, userId), productCode, quantity, pickupStore);
       });
     }
+    override removeEntry(entry: OrderEntry, recalculateCart?: boolean): void {
+      this.activeCartId$.pipe(withLatestFrom(this.userIdService.getUserId()), take(1)).subscribe(([cartId, userId]) => {
+        this.multiCartService.removeEntry(userId, cartId, entry.entryNumber as number, recalculateCart);
+      });
+    }
     addItemEntry(userId: string, cartId: string, code: string, quantity: number) {
       const url = this.occEndpointsService.buildUrl('addEntries', {
         urlParams: { userId, cartId, code, quantity },
       });
       const headers = new HttpHeaders({'Content-Type': 'application/json'});
       return this.http.post<CartModification>(url, { headers });
+    }
+  }
+- CUSTOM-MultiCartService.SERVICE.TS
+  import { Store } from '@ngrx/store';
+  import { CartActions, MultiCartService, StateWithMultiCart } from '@spartacus/cart/base/core';
+  import { CART_NORMALIZER } from '@spartacus/cart/base/root';
+  import { ConverterService, Occ, OccEndpointsService, UserIdService } from '@spartacus/core';
+  @Injectable({providedIn: 'root'})
+  export class CUSTOM-MultiCartService extends MultiCartService {
+    constructor(store: Store<StateWithMultiCart>,userIdService: UserIdService,protected occEndpointsService: OccEndpointsService,
+                protected http: HttpClient,protected converterService: ConverterService) { super(store, userIdService); }
+    /**
+     * Overrides the reloadCart method from Spartacus.
+     * @param cartId - CartId to reload
+     * @param extraData - Additional parameters such as active flag(from spartacus) and force calculate flag.
+     */
+    override reloadCart(cartId: string, extraData?: { active?: boolean; forceCalculate?: boolean }): void {
+      this.userIdService.takeUserId().subscribe((userId) => this.loadMyCart(userId, cartId, extraData?.forceCalculate));
+    }
+
+   /**
+    * Overrides the removeEntry method from Spartacus.
+    * @param userId - The ID of the user.
+    * @param cartId - The ID of the cart.
+    * @param entryNumber - The entry number to be removed.
+    * @param recalculateCart - Optional flag to trigger cart recalculation.
+   */
+   override removeEntry(userId: string, cartId: string, entryNumber: number, recalculateCart?: boolean): void {
+     // Delegate the removal process to the custom method.
+     this.removeMyEntry(userId, cartId, entryNumber, recalculateCart);
+   }
+
+   /**
+    * Loads the cart and dispatches appropriate actions.
+    * @param userId - The ID of the user.
+    * @param cartId - The ID of the cart to load.
+    * @param forceCalculate - Optional flag to notify the backend when force cart calculation is required.
+    */
+    private loadMyCart(userId: string, cartId: string, forceCalculate?: boolean): void {
+     this.http.get<Occ.Cart>(this.occEndpointsService.buildUrl('cart', { urlParams: { userId, cartId }, queryParams: { forceCalculate } }))
+      .pipe(this.converterService.pipeable(CART_NORMALIZER)).subscribe((cart) => {
+        if (cart) {
+          // Dispatch success action when the cart is successfully loaded to update store.
+          this.store.dispatch(new CartActions.LoadCartSuccess({ userId, cart, cartId }));
+        }
+        // Note: Failure cases are not handled here, as Spartacus does not handle them either.
+        // Add failure handling if required.
+      });
+    }
+
+    /**
+     * @param userId - The ID of the user.
+     * @param cartId - The ID of the cart.
+     * @param entryNumber - The entry number to be removed.
+     * @param recalculateCart - Optional flag to trigger cart recalculation.
+     */
+    private removeMyEntry(userId: string, cartId: string, entryNumber: number, recalculateCart?: boolean): void {
+      const headers = new HttpHeaders({'Content-Type': 'application/x-www-form-urlencoded'});
+      const url = this.occEndpointsService.buildUrl('removeEntries', {urlParams: {userId,cartId,entryNumber}});
+      this.http.delete(url, { headers }).subscribe(() => {
+        this.loadMyCart(userId, cartId, recalculateCart);
+        // Note: Failure cases are not handled here, as Spartacus does not handle them either.
+        // Add failure handling if required.
+      });
     }
   }
 - CUSTOM-CartEntryAdapterService.SERVICE.TS
@@ -1031,17 +1100,14 @@ A.
   this.activeCartService.requireLoadedCart().pipe(takeUntil(this.unsubscribe$)).subscribe((cart) => {
     if (cart.code) {
       this.cartId = cart.code;
-      this.activeCartService.addItemEntry(OCC_USER_ID_CURRENT, cart.code, evt.product.code, evt.unitQuantity)
-                            .pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
-        // To Update Cart State in Spartacus Store, when calling our custom API
-        this.multiCartService.reloadCart(this.cartId);              
-      });
+      this.activeCartService.addItemEntry(OCC_USER_ID_CURRENT, cart.code, evt.product.code, evt.unitQuantity).pipe(takeUntil(this.unsubscribe$))
+            .subscribe(() => {
+                  // To Update Cart State in Spartacus Store, when calling our custom API
+                  this.multiCartService.reloadCart(this.cartId);              
+            });
     }
   });
 B.1.
-- .MODULE.TS
-  import { MultiCartService } from '@spartacus/cart/base/core';
-  providers: [MultiCartService]
 - COMP.TS
   // Subscribe to any cart related changes and get cart data
   this.activeCartService.getActive().pipe(takeUntil(this.unsubscribe$)).subscribe((cart: CART-TYPE) => {
@@ -1052,6 +1118,9 @@ B.1.
 B.2.
 // Reload/Refresh cart at app level by calling API, to have changes if any reflected in getActive() cart subscription (REFER: B.1. point)
 // Eg: A product is added to cart, and we need some UI change depending on updated cart data after this product is added to cart.
+i.
+this.multiCartService.reloadCart(this.cartData.code ?? '', { forceCalculate: true });
+ii.
 this.reloadSub = combineLatest([
     this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
 ]).subscribe(([userId, cartId]: [string, string]) => {
@@ -1078,7 +1147,7 @@ constructor(protected cartService: CUSTOM-CartService) { }
 C.1.
 this.cartService.updateEntry(orderEntry.entryNumber, quantity);
 C.2.
-this.cartService.removeEntry(orderEntry);
+this.cartService.removeEntry(orderEntry, true);
 D.
 // A cart and all it's associated data is also deleted from BackOffice/HAC, depending on GUID or CODE
 OR
