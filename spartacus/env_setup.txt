@@ -48,12 +48,109 @@ ASM (Assisted Service Mode)
 Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
 `AsmFeatureModule` module is imported in `spartacus-features.module.ts`.
 To access ASM : append `?asm=true` to website. Eg: https://HOSTNAME.com?asm=true
-A.
+A. 
+
+B.
+Login with credentials and custom backend API will let you know that logged in user is AGENT or NORMAL user.
+If AGENT, then it will redirect to /selectCustomer screen, to choose customer to emulate as.
+We will set userId to as selected customer id and it is then available for entire application, to be passed in API calls.
+On Logout, it will first logout from customer session and redirect to /selectCustomer screen,
+here again on /selectCustomer screen, click of Logout, will logout AGNET.
+B.1. Login component
+-------------------------
+this.customAsmService.isCustomerSupportAgentLoggedIn().pipe(distinctUntilChanged(),tap((loggedIn) => {
+  if (loggedIn) { this.router.navigate(['/selectCustomer']); }
+})).subscribe();
+
+this.customAsmService.checkIfAsmBranchManager(userId).subscribe((isAgent) => {
+  if (isAgent) {
+      this.customAsmService.authorizeCustomerSupportAgent(userId, password).then(() => {
+              this.windowRef.localStorage?.setItem('user_login_type', LOGIN_TYPE.ASM);
+              this.router.navigate(['/selectCustomer']);
+              this.cd.markForCheck();
+      })
+      .catch((err) => {
+              this.globalMessageService.remove(GlobalMessageType.MSG_TYPE_ERROR);
+              this.invalidCredentials = true;
+              this.cd.markForCheck();
+      });
+  } else {
+          // NORMAL USER LOGIN , REFER: SIGNUP / LOGIN / LOGOUT SERVICES notes
+  }
+},
+(error) => { }
+);
+B.2. On Logout
+-------------------------
+// IMPLEMENT CUSTOM-AUTH SERVICE , REFER: SIGNUP / LOGIN / LOGOUT SERVICES notes
+override async coreLogout() {
+    let isCustomerEmulated;
+    this.userIdService
+      .isEmulated()
+      .subscribe((emulated) => (isCustomerEmulated = emulated))
+      .unsubscribe();
+    if (isCustomerEmulated) {
+      this.windowRef.localStorage?.setItem('user_login_type', LOGIN_TYPE.ASM);
+      this.router.navigate(['/selectCustomer']);
+    } else {
+      this.windowRef.localStorage?.setItem('user_login_type', LOGIN_TYPE.USER);
+      super.coreLogout();
+    }
+}
+B.3. CUSTOM-ASM.service.TS
+-----------------------------
+import { Store } from '@ngrx/store';
+import { AsmAuthStorageService } from '@spartacus/asm/root';
+import {AuthActions,AuthToken,OAuthLibWrapperService,OccEndpointsService,UserIdService,WindowRef} from '@spartacus/core';
+export class CUSTOM-ASM-SERVICE {
+  constructor(private occEndpointService: OccEndpointsService,private http: HttpClient,protected authStorageService: AsmAuthStorageService,
+    protected userIdService: UserIdService,protected oAuthLibWrapperService: OAuthLibWrapperService,
+    protected store: Store,protected windowRef: WindowRef) { }
+
+  public isCustomerSupportAgentLoggedIn(): Observable<boolean> {
+    return this.authStorageService.getToken().pipe(map((token) =>
+            Boolean(token?.access_token) && this.windowRef.localStorage?.getItem('user_login_type') === LOGIN_TYPE.ASM
+        ));
+  }
+
+  async authorizeCustomerSupportAgent(userId: any, password: any): Promise<void> {
+    let userToken: AuthToken | undefined;
+    this.authStorageService.getToken().subscribe((token) => (userToken = token)).unsubscribe();
+    try {
+      await this.oAuthLibWrapperService.authorizeWithPasswordFlow(userId, password);
+      if (userToken !== undefined) {
+        this.store.dispatch(new AuthActions.Login());
+      }
+    } finally { }
+  }
+
+  public startCustomerEmulationSession(customerId: string): void {
+    this.store.dispatch(new AuthActions.Logout());
+    this.userIdService.setUserId(customerId);
+    this.store.dispatch(new AuthActions.Login());
+    this.windowRef.localStorage?.setItem('user_login_type', LOGIN_TYPE.USER);
+  }
+
+  checkIfAsmBranchManager(name: string) {
+    const url = this.occEndpointService.buildUrl('checkAsmBranchManager', { urlParams: { userName: name } });
+    return this.http.get(url, {}).pipe(catchError((err) => throwError(err)));
+  }
+}
+B.4. comp.COMPONENT.TS
+-----------------------------
+1.
+// Check if customer emulated session is ON
 import { CsAgentAuthService } from '@spartacus/asm/root';
 constructor(private csAgentAuthService: CsAgentAuthService) { }
-this.csAgentAuthService.isCustomerEmulated().pipe(takeUntil(this.destroy$)).subscribe((isEnabled: boolean) => {
-  this.isASMEnabled = isEnabled;
-});
+this.csAgentAuthService.isCustomerEmulated().pipe(takeUntil(this.destroy$)).subscribe((isEnabled: boolean) => { this.isASMEnabled = isEnabled; });
+OR
+import { UserIdService } from '@spartacus/core';
+constructor(private userIdService: UserIdService) { }
+this.userIdService.isEmulated().pipe(takeUntil(this.destroy$)).subscribe((emulated) => { isCustomerEmulated = emulated });
+2.
+// GET current userId, this will be used in APIs to replace variable ${userId}
+this.userIdService.getUserId().pipe(take(1)).subscribe((userId) => { this.userId = userId; });
+
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 It is for administrator to handle entire functions and operations in website like:
