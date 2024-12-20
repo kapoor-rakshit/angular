@@ -3473,6 +3473,7 @@ HTTP INTERCEPTORS
        
        if(req.body && req.headers && req.params){
           duplicate = req.clone({
+	    url: req.url.replace('userID', 'newUSERID'),
             headers: req.headers.set('Authorization', "mytoken"),                    // .set()    - overwrites(if existing) or add new(if not existing) header
 	                                                                             // .append() - adds multiple values(if existing) or add new(if not existing) header
             params: req.params.set('filter', 'completed'),
