@@ -114,13 +114,8 @@ export class CUSTOM-ASM-SERVICE {
   }
 
   async authorizeCustomerSupportAgent(userId: any, password: any): Promise<void> {
-    let userToken: AuthToken | undefined;
-    this.authStorageService.getToken().subscribe((token) => (userToken = token)).unsubscribe();
     try {
       await this.oAuthLibWrapperService.authorizeWithPasswordFlow(userId, password);
-      if (userToken !== undefined) {
-        this.store.dispatch(new AuthActions.Login());
-      }
     } finally { }
   }
 
