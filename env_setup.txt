@@ -1041,8 +1041,11 @@ Three types of directives:
       export class MyDirective {
          @Input('colorChangeVAR') dynamicColor: string;
          @Input() defaultValueVAR: string; 
-         
          constructor(private elRef: ElementRef) { this.defaultValueVAR = "white"; }
+
+	 private changeBackgroundColor(color: string) {
+            this.elRef.nativeElement.style.backgroundColor = color;
+         }
          
          @HostListener('mouseenter') onMouseEnterEventFunctionName() {
             this.changeBackgroundColor(this.dynamicColor || this.defaultValueVAR);
@@ -1054,9 +1057,10 @@ Three types of directives:
 	 @HostListener('mouseleave') mouseUpLeaveHandler() {              // NOTE: USE OF MULTIPLE @HOSTLISTENER ANNOTATION WHEN SAME FUNCTIONALITY IS REQUIRED
     	    this.isDown = false;
   	 }
-         private changeBackgroundColor(color: string) {
-            this.elRef.nativeElement.style.backgroundColor = color;
-         }    
+	 @HostListener('window:beforeunload', ['$event']) pageUnloadEvent(evt: Event) {
+	    evt.preventDefault();
+            evt.returnValue = true;
+	 }
       }
       <p colorChangeDirective colorChangeVAR="yellow" defaultValueVAR="red">....Test text....</p>
  
