@@ -154,7 +154,9 @@ this.userIdService.isEmulated().pipe(takeUntil(this.destroy$)).subscribe((emulat
 this.userIdService.getUserId().pipe(take(1)).subscribe((userId) => { this.userId = userId; });
 OR
 // in a service method
-this.userIdService.takeUserId().pipe(switchMap((userID: string) => { return this.http.get(url); }))
+this.userIdService.takeUserId().pipe(switchMap((userID: string) => {
+  return this.http.get(url); 
+}));
 B.6. USER-ID-INTERCEPTOR.TS
 -------------------------------
 import { UserIdService } from '@spartacus/core';
@@ -923,6 +925,7 @@ ROUTING
 Many routes are built-in with SPARTACUS, and render templates accordingly.
 However, we can create CUSTOM routes too.
 A
+=======
 1. APP.MODULE.TS
 -------------------
 imports: [
@@ -950,8 +953,8 @@ navigateFabricSamples() {
       cxRoute: 'FE_PATH_2',
     });
 }
-
 B
+======
 1. MODULE.TS
 --------------------
 import { RouterModule, Routes } from '@angular/router';
