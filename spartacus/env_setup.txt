@@ -52,10 +52,10 @@ A.
 
 B.
 Login with credentials and custom backend API will let you know that logged in user is AGENT or NORMAL user.
-If AGENT, then it will redirect to /selectCustomer screen, to choose customer to emulate as.
+If AGENT, then it will redirect to /selectCustomer component screen, to choose customer to emulate as.
 We will set userId to as selected customer id and it is then available for entire application, to be passed in API calls.
-On Logout, it will first logout from customer session and redirect to /selectCustomer screen,
-here again on /selectCustomer screen, click of Logout, will logout AGNET.
+On Logout, it will first logout from customer session and redirect to /selectCustomer component screen,
+here again on /selectCustomer component screen, click of Logout, will logout AGENT.
 B.1. Login component
 -------------------------
 this.customAsmService.isCustomerSupportAgentLoggedIn().pipe(distinctUntilChanged(),tap((loggedIn) => {
@@ -124,6 +124,7 @@ export class CUSTOM-ASM-SERVICE {
     } finally { }
   }
 
+  // called after selecting customer on /selectCustomer component screen
   public startCustomerEmulationSession(customerId: string): void {
     this.store.dispatch(new AuthActions.Logout());
     this.userIdService.setUserId(customerId);
@@ -136,7 +137,13 @@ export class CUSTOM-ASM-SERVICE {
     return this.http.get(url, {}).pipe(catchError((err) => throwError(err)));
   }
 }
-B.4. comp.COMPONENT.TS
+B.4. SELECT-CUSTOMER.comp.TS
+-------------------------------
+import { UserIdService } from '@spartacus/core';
+constructor(private userIdService: UserIdService) { 
+  this.userIdService.clearUserId();
+}
+B.5. comp.COMPONENT.TS
 -----------------------------
 1.
 // Check if customer emulated session is ON
@@ -150,6 +157,30 @@ this.userIdService.isEmulated().pipe(takeUntil(this.destroy$)).subscribe((emulat
 2.
 // GET current userId, this will be used in APIs to replace variable ${userId}
 this.userIdService.getUserId().pipe(take(1)).subscribe((userId) => { this.userId = userId; });
+OR
+// in a service method
+this.userIdService.takeUserId().pipe(switchMap((userID: string) => { return this.http.get(url); }))
+B.6. USER-ID-INTERCEPTOR.TS
+-------------------------------
+import { UserIdService } from '@spartacus/core';
+@Injectable()
+export class UpdateUserIdInterceptor implements HttpInterceptor {
+  constructor(private userIdService: UserIdService) {}
+  intercept(req: HttpRequest<any>, handler: HttpHandler): Observable<HttpEvent<any>> {
+    return this.userIdService.getUserId().pipe(take(1),switchMap((userId: any) => {
+        let modifiedReq = req;
+        // CHECK IF URL IS A PLP , PDP or ANY OTHER BUILT-IN SPARTACUS URL
+        if (req.url.includes('fields=PLP_FULL') || req.url.includes('fields=PDP_FULL')) {
+          if (userId) {
+            const updatedUrl = modifiedReq.url.replace('${userId}', encodeURI(userId));
+            modifiedReq = modifiedReq.clone({ url: updatedUrl });
+          }
+        }
+        return handler.handle(modifiedReq);
+      })
+    );
+  }
+}
 
 
 HAC (Hybris Administrative Console or BackOffice Admin Console)
@@ -950,6 +981,25 @@ ConfigModule.withConfig({
         }
     }
 })
+A. CUSTOM-GUARD.TS
+----------------------
+// example custom guard for preventing route to /selectCustomer component , REFER: ASM notes
+import { AuthRedirectService, AuthService, SemanticPathService } from '@spartacus/core';
+@Injectable({providedIn: 'root'})
+export class selectCustomerGuard implements CanActivate {
+  constructor(protected authService: AuthService,protected authRedirectService: AuthRedirectService,protected semanticPathService: SemanticPathService) {}
+  canActivate(): Observable<boolean | UrlTree> {
+    return this.asmService.isCustomerSupportAgentLoggedIn().pipe(
+      map((isLoggedIn) => {
+        if (!isLoggedIn) {
+          this.authRedirectService.saveCurrentNavigationUrl();
+          return this.router.parseUrl(this.semanticPathService.get('login') ?? '');
+        }
+        return isLoggedIn;
+      })
+    );
+  }
+}
 
 
 Redirect URL configuration
