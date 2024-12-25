@@ -58,10 +58,6 @@ On Logout, it will first logout from customer session and redirect to /selectCus
 here again on /selectCustomer component screen, click of Logout, will logout AGENT.
 B.1. Login component
 -------------------------
-this.customAsmService.isCustomerSupportAgentLoggedIn().pipe(distinctUntilChanged(),tap((loggedIn) => {
-  if (loggedIn) { this.router.navigate(['/selectCustomer']); }
-})).subscribe();
-
 this.customAsmService.checkIfAsmBranchManager(userId).subscribe((isAgent) => {
   if (isAgent) {
       this.customAsmService.authorizeCustomerSupportAgent(userId, password).then(() => {
@@ -105,7 +101,12 @@ import {AuthActions,AuthToken,OAuthLibWrapperService,OccEndpointsService,UserIdS
 export class CUSTOM-ASM-SERVICE {
   constructor(private occEndpointService: OccEndpointsService,private http: HttpClient,protected authStorageService: AsmAuthStorageService,
     protected userIdService: UserIdService,protected oAuthLibWrapperService: OAuthLibWrapperService,
-    protected store: Store,protected windowRef: WindowRef) { }
+    protected store: Store,protected windowRef: WindowRef) { 
+      /* IF USER TRIES TO CHANGE URL FROM ADDRESS BAR WITHOUT SELECTING CUSTOMER, DO NOT ALLOW NAVIGATION */
+      this.isCustomerSupportAgentLoggedIn().subscribe((isASMuser) => {
+            if (isASMuser) { this.router.navigate(['/selectCustomer']); }
+      });
+  }
 
   public isCustomerSupportAgentLoggedIn(): Observable<boolean> {
     return this.authStorageService.getToken().pipe(map((token) =>
@@ -134,10 +135,41 @@ export class CUSTOM-ASM-SERVICE {
 }
 B.4. SELECT-CUSTOMER.comp.TS
 -------------------------------
+i. COMPONENT TO SELECT CUSTOMERS FOR EMULATION
 import { UserIdService } from '@spartacus/core';
 constructor(private userIdService: UserIdService) { 
   this.userIdService.clearUserId();
 }
+ii. ROUTE GUARD FOR /selectCustomer
+/* Only ASM user can open select customer component. */
+   REFER: ROUTE GUARDS notes
+iii. ROUTE GUARD FOR /login
+/*
+Checks if there isn't any logged in user. Use to protect pages dedicated only for guests (eg. login page) so that ASM user cannot go back to /login page.
+Added to LOGIN-PAGE-MODULE
+ConfigModule.withConfig({ cmsComponents: { ReturningCustomerLoginComponent: {
+      component: CUSTOM-LoginPageComponent,
+      guards: [CUSTOM-NotAuthGuard],
+}}})
+*/
+import { Router, UrlTree } from '@angular/router';
+import { AuthService, SemanticPathService } from '@spartacus/core';
+@Injectable({providedIn: 'root'})
+export class CUSTOM-NotAuthGuard {
+  constructor(protected authService: AuthService,private asmauthService: CUSTOM-ASM-Service,protected semanticPathService: SemanticPathService,
+              protected router: Router) {}
+  canActivate(): Observable<boolean | UrlTree> {
+    return this.authService.isUserLoggedIn().pipe(
+      withLatestFrom(this.asmauthService.isCustomerSupportAgentLoggedIn()),
+      map(([isLoggedIn, isASMuser]) => {
+        if (isLoggedIn) {
+          if (isASMuser) {
+            return this.router.createUrlTree(['/selectCustomer']);
+          }
+          return this.router.parseUrl(this.semanticPathService.get('home') ?? '');
+        }
+        return !isLoggedIn;
+}));}}
 B.5. comp.COMPONENT.TS
 -----------------------------
 1.
@@ -994,10 +1026,7 @@ export class selectCustomerGuard implements CanActivate {
           return this.router.parseUrl(this.semanticPathService.get('login') ?? '');
         }
         return isLoggedIn;
-      })
-    );
-  }
-}
+}));}}
 
 
 Redirect URL configuration
