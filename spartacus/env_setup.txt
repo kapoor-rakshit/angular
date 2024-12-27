@@ -1597,18 +1597,23 @@ A.7. LISTING-PAGE-FACET.COMP.HTML
 -------------------------------------
 NOTE: ALSO REFER `SPARTACUS/MISC/FACETS.TXT` NOTES, WHERE PRODUCTFACETNAVIGATIONCOMPONENT AND FACETLISTCOMPONENT ARE EXTENDED
 B.
-B.1. COMP.TS
-----------------------
+B.1. DETAILS-PAGE-COMP.TS
+----------------------------
+import { Order, OrderHistoryFacade } from '@spartacus/order/root';
+constructor(private orderHistoryFacade: OrderHistoryFacade) {}
+this.loaderService.show();
 this.orderHistoryFacade.loadOrderDetails(orderId);
-this.subscription = this.orderHistoryFacade.getOrderDetails()
-                      .pipe(takeUntil(this.unsubscribe$)).subscribe(
-                        (orderData?: Order) => {
-                          this.currentOrder = orderData ?? {};
-                          this.subscription?.unsubscribe();
-                          this.cdRef.markForCheck();
-                        },
-                        () => {}
-                      );
+this.orderHistoryFacade.getOrderDetails().pipe(takeUntil(this.unsubscribe$),filter((x: any) => x.code && x.code === this.orderID)).subscribe(
+  (orderData?: Order) => {
+      this.currentOrder = orderData ?? {};
+      this.loaderService.hide();
+      this.cdRef.markForCheck();
+  },
+  () => {
+      this.currentOrder = null;
+      this.loaderService.hide();
+  }
+);
 
 
 ORDER CONFIRMATION PAGE
