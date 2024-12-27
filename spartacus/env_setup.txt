@@ -1568,6 +1568,7 @@ A.5. LISTING-PAGE-COMP.HTML
 </ng-container>
 A.6. LISTING-PAGE-FACET.COMP.TS
 -------------------------------------
+NOTE: ALSO REFER `SPARTACUS/MISC/FACETS.TXT` NOTES, WHERE PRODUCTFACETNAVIGATIONCOMPONENT AND FACETLISTCOMPONENT ARE EXTENDED
 import { CUSTOM-OrderHistoryService } from 'src/app/shared/services/order-history.service';
 export class OrderHistoryRefinementComponent implements OnInit, OnDestroy {
   public orderHistoryFilters: any;
@@ -1578,14 +1579,12 @@ export class OrderHistoryRefinementComponent implements OnInit, OnDestroy {
         if (res) { this.orderHistoryFilters = res; this.cdRef.markForCheck(); }
     });
   }
-
   handleFilteredData(value: any) {
     this.loaderService.show();
     this.selectedFilter = value;
     this.orderService.updateSelectedFilters(value);
     this.orderService.fetchOrderHistory.next();
   }
-
   clearAll(value: any) {
     this.loaderService.show();
     this.selectedFilter = value;
@@ -1596,7 +1595,7 @@ export class OrderHistoryRefinementComponent implements OnInit, OnDestroy {
 }
 A.7. LISTING-PAGE-FACET.COMP.HTML
 -------------------------------------
-REFER: misc notes for facet services.
+NOTE: ALSO REFER `SPARTACUS/MISC/FACETS.TXT` NOTES, WHERE PRODUCTFACETNAVIGATIONCOMPONENT AND FACETLISTCOMPONENT ARE EXTENDED
 B.
 B.1. COMP.TS
 ----------------------
