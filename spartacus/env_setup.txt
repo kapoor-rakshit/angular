@@ -1414,7 +1414,6 @@ export class CUSTOM-OrderHistoryAdapterService extends OccOrderHistoryAdapter im
     if (pageSize) { params['pageSize'] = pageSize.toString(); }
     if (currentPage) { params['currentPage'] = currentPage.toString(); }
     if (sort) { params['sort'] = sort.toString(); }
-
     // NOTE: change keys based on filters available in facet and sent to API
     this.orderHistoryService.getselectedFilters().pipe(take(2)).subscribe((data) => {
         params['orderNumber'] = data?.orderNumber ?? null;
@@ -1423,9 +1422,7 @@ export class CUSTOM-OrderHistoryAdapterService extends OccOrderHistoryAdapter im
         params['selectedOrderStatus'] = data?.orderStatuses ?? null;
         params['selectedOrderType'] = data?.orderTypes ?? null;
     });
-
     const url = this.occEndpoints.buildUrl('orderHistory', {urlParams: { userId }, queryParams: params});
-
     return this.http.get<Occ.OrderHistoryList>(url).pipe(this.converter.pipeable(ORDER_HISTORY_NORMALIZER),
       tap((response) => {this.orderHistoryService.setOrderHistory(response);}),
       map((data: any) => { return {
@@ -1450,14 +1447,12 @@ export class CUSTOM-OrderHistoryService {
   private selectedFilter = new BehaviorSubject<any>({});
   fetchOrderHistory = new Subject<void>();
   private _isSelectedFilterCleared = new BehaviorSubject<boolean>(false);
-
   setOrderHistory(data: any) {
     this.orderHistory.next(data);
   }
   getOrderHistory() {
     return this.orderHistory.asObservable();
   }
-
   updateSelectedFilters(data: any) {
     this.selectedFilter.next(data);
   }
@@ -1467,31 +1462,22 @@ export class CUSTOM-OrderHistoryService {
   getselectedFiltersValue() {
     return this.selectedFilter.value;
   }
-
   isSelectedFilterCleared() {
     return this._isSelectedFilterCleared.value;
   }
   setClearFilterFlag() {
     this._isSelectedFilterCleared.next(true);
   }
-
   clear() {
     this.orderHistory.next({});
     this.selectedFilter.next({});
     this.fetchOrderHistory.next();
     this._isSelectedFilterCleared.next(false);
   }
-
   // NOTE: change keys based on filters available in facet and sent to API
   getSelectedData(): boolean {
     let selectedFilter = this.getselectedFiltersValue();
-    return !!(
-      selectedFilter?.orderNumber ||
-      selectedFilter?.fromDate ||
-      selectedFilter?.toDate ||
-      selectedFilter?.orderStatuses ||
-      selectedFilter?.orderTypes
-    );
+    return !!(selectedFilter?.orderNumber || selectedFilter?.fromDate || selectedFilter?.toDate || selectedFilter?.orderTypes);
 }}
 A.4. LISTING-PAGE-COMP.TS
 ----------------------------
@@ -1512,14 +1498,12 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, 0, this.sortType);
     });
   }
-
   // NOTE: change keys based on filters available in facet and sent to API
   getSelectedData(): boolean {
     let selectedFilter = this.orderService.getselectedFiltersValue();
     let isSelectedFilterCleared = this.orderService.isSelectedFilterCleared();
     return (!!(selectedFilter?.orderNumber || selectedFilter?.fromDate || selectedFilter?.toDate) || isSelectedFilterCleared);
   }
-
   getOrderHistoryList() {
     this.loaderService.show();
     this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE);
@@ -1536,21 +1520,17 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
         }
       );
   }
-
   getOrderDetails(order: Order) {
     this.router.navigate(['my-account/order', order.code]);
   }
-
   changeSortCode(sortCode: string): void {
     const event: OrderHistoryPage = { sortCode, currentPage: 0 };
     this.fetchOrders(event);
   }
-
   pageChange(page: number): void {
     const event: OrderHistoryPage = { sortCode: this.sortType, currentPage: page };
     this.fetchOrders(event);
   }
-
   private fetchOrders(event: OrderHistoryPage): void {
     this.loaderService.show();
     this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
@@ -1600,20 +1580,29 @@ B.
 B.1. DETAILS-PAGE-COMP.TS
 ----------------------------
 import { Order, OrderHistoryFacade } from '@spartacus/order/root';
-constructor(private orderHistoryFacade: OrderHistoryFacade) {}
-this.loaderService.show();
-this.orderHistoryFacade.loadOrderDetails(orderId);
-this.orderHistoryFacade.getOrderDetails().pipe(takeUntil(this.unsubscribe$),filter((x: any) => x.code && x.code === this.orderID)).subscribe(
-  (orderData?: Order) => {
-      this.currentOrder = orderData ?? {};
-      this.loaderService.hide();
-      this.cdRef.markForCheck();
-  },
-  () => {
-      this.currentOrder = null;
-      this.loaderService.hide();
-  }
-);
+constructor(private orderHistoryFacade: OrderHistoryFacade, private route: ActivatedRoute) {}
+ngOnInit(): void {
+    this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe((params) => {
+      this.orderID = params['orderCode'] ?? '';
+      if (this.orderID) { this.getOrderDetails(this.orderID); }
+    });
+}
+getOrderDetails(orderId: string) {
+      this.loaderService.show();
+      this.orderHistoryFacade.loadOrderDetails(orderId);
+      this.orderHistoryFacade.getOrderDetails().pipe(take(1)).subscribe(
+        (orderData?: Order) => {
+            this.currentOrder = orderData ?? {};
+            this.loaderService.hide();
+            this.cdRef.markForCheck();
+        },
+        () => {
+            this.currentOrder = null;
+            this.loaderService.hide();
+            this.cdRef.markForCheck();
+        }
+      );
+}
 
 
 ORDER CONFIRMATION PAGE
