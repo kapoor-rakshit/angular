@@ -1375,58 +1375,228 @@ this.orderFacade.setPlacedOrder(orderData);
 
 ORDER HISTORY SERVICE
 ============================
-backend: { occ: { endpoints: { orderHistory: 'users/${userId}/orders?pageSize=${pageSize}&fields=FULL' } } }
-import { OrderHistoryFacade, OrderHistoryList, Order } from '@spartacus/order/root';
-constructor(private orderHistoryFacade: OrderHistoryFacade) { }
+backend: { occ: { endpoints: {
+      orderHistory: 'users/${userId}/orders/list?fields=FULL',
+      orderDetail: 'users/${userId}/orders/${orderId}?fields=FULL'
+} } }
 A.
-A.1. COMP.MODULE.TS
------------------------
-import { PaginationModule } from '@spartacus/storefront';
+A.1. src\app\spartacus\features\order\order-feature.module.ts - ORDER-FEATURE.MODULE.TS
+---------------------------------------------------------------------------------------------
+import { OrderModule } from '@spartacus/order';
+import { orderTranslationChunksConfig, orderTranslations } from '@spartacus/order/assets';
+import { OrderHistoryAdapter } from '@spartacus/order/core';
+import { OrderRootModule } from '@spartacus/order/root';
+import { CUSTOM-OrderHistoryAdapterService } from 'src/app/shared/services/order-history-adapter.service';
 @NgModule({
-    imports: [PaginationModule]
+  declarations: [],
+  imports: [OrderRootModule, OrderModule],
+  providers: [
+    { provide: OrderHistoryAdapter, useClass: CUSTOM-OrderHistoryAdapterService },
+    provideConfig(<I18nConfig>{i18n: { resources: orderTranslations,chunks: orderTranslationChunksConfig },
+  })]
 })
-A.2. COMP.TS
------------------------
-this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(takeUntil(this.unsubscribe$)).subscribe(
-  (resp?: OrderHistoryList) => {
-    this.OrderHistoryList = resp;
-    setOrderHistoryParams(resp);
-    this.cdRef.markForCheck();
-  },
-  () => {}
-);
-setOrderHistoryParams(orders?: OrderHistoryList) {
-  this.sortOptions = orders?.sorts ?? [];
-  this.sortType = orders?.pagination?.sort ?? '';
+export class OrderFeatureModule {}
+A.2. CUSTOM-OrderHistoryAdapterService.SERVICE.TS
+--------------------------------------------------------
+import { ConverterService, Occ, OccEndpointsService } from '@spartacus/core';
+import { OrderHistoryAdapter } from '@spartacus/order/core';
+import { OccOrderHistoryAdapter } from '@spartacus/order/occ';
+import { ORDER_HISTORY_NORMALIZER, OrderHistoryList } from '@spartacus/order/root';
+import { CUSTOM-OrderHistoryService } from './order-history.service';
+@Injectable({providedIn: 'root'})
+export class CUSTOM-OrderHistoryAdapterService extends OccOrderHistoryAdapter implements OrderHistoryAdapter {
+  constructor(protected override http: HttpClient,protected override occEndpoints: OccEndpointsService,
+              protected override converter: ConverterService,private orderHistoryService: CUSTOM-OrderHistoryService) {
+                super(http, occEndpoints, converter);
+  }
+  public override loadHistory(userId: string,pageSize?: number,currentPage?: number,sort?: string): Observable<OrderHistoryList> {
+    const params: { [key: string]: string } = {};
+    if (pageSize) { params['pageSize'] = pageSize.toString(); }
+    if (currentPage) { params['currentPage'] = currentPage.toString(); }
+    if (sort) { params['sort'] = sort.toString(); }
+
+    // NOTE: change keys based on filters available in facet and sent to API
+    this.orderHistoryService.getselectedFilters().pipe(take(2)).subscribe((data) => {
+        params['orderNumber'] = data?.orderNumber ?? null;
+        params['fromDate'] = data?.fromDate ?? null;
+        params['toDate'] = data?.toDate ?? null;
+        params['selectedOrderStatus'] = data?.orderStatuses ?? null;
+        params['selectedOrderType'] = data?.orderTypes ?? null;
+    });
+
+    const url = this.occEndpoints.buildUrl('orderHistory', {urlParams: { userId }, queryParams: params});
+
+    return this.http.get<Occ.OrderHistoryList>(url).pipe(this.converter.pipeable(ORDER_HISTORY_NORMALIZER),
+      tap((response) => {this.orderHistoryService.setOrderHistory(response);}),
+      map((data: any) => { return {
+          // NOTE: change keys as per response received in API
+          orders: data.searchPageData.results.map((data: any) => {
+            return {code: data.orderNumber,placed: data.orderPlaced,status: data.orderStatus,total: data.total}
+          }),
+          pagination: data.searchPageData.pagination,
+          sorts: data.searchPageData.sorts,
+          isEmptyOrderList: !data.searchPageData.results.length,
+        };
+      })
+    );
+  }
 }
-changeSortCode(sortCode: string): void {
-  const event: OrderHistoryPage = {
-    sortCode,
-    currentPage: 0,
-  };
-  this.sortType = sortCode;
-  this.fetchOrders(event);
+A.3. CUSTOM-OrderHistoryService.SERVICE.TS
+---------------------------------------------
+@Injectable({providedIn: 'root'})
+export class CUSTOM-OrderHistoryService {
+  constructor(protected http: HttpClient, private occEndpointsService: OccEndpointsService) {}
+  private orderHistory = new BehaviorSubject<any>({});
+  private selectedFilter = new BehaviorSubject<any>({});
+  fetchOrderHistory = new Subject<void>();
+  private _isSelectedFilterCleared = new BehaviorSubject<boolean>(false);
+
+  setOrderHistory(data: any) {
+    this.orderHistory.next(data);
+  }
+  getOrderHistory() {
+    return this.orderHistory.asObservable();
+  }
+
+  updateSelectedFilters(data: any) {
+    this.selectedFilter.next(data);
+  }
+  getselectedFilters() {
+    return this.selectedFilter.asObservable();
+  }
+  getselectedFiltersValue() {
+    return this.selectedFilter.value;
+  }
+
+  isSelectedFilterCleared() {
+    return this._isSelectedFilterCleared.value;
+  }
+  setClearFilterFlag() {
+    this._isSelectedFilterCleared.next(true);
+  }
+
+  clear() {
+    this.orderHistory.next({});
+    this.selectedFilter.next({});
+    this.fetchOrderHistory.next();
+    this._isSelectedFilterCleared.next(false);
+  }
+
+  // NOTE: change keys based on filters available in facet and sent to API
+  getSelectedData(): boolean {
+    let selectedFilter = this.getselectedFiltersValue();
+    return !!(
+      selectedFilter?.orderNumber ||
+      selectedFilter?.fromDate ||
+      selectedFilter?.toDate ||
+      selectedFilter?.orderStatuses ||
+      selectedFilter?.orderTypes
+    );
+}}
+A.4. LISTING-PAGE-COMP.TS
+----------------------------
+import { Order, OrderHistoryFacade, OrderHistoryList } from '@spartacus/order/root';
+import { CUSTOM-OrderHistoryService } from 'src/app/shared/services/order-history.service';
+export class OrderHistoryComponent implements OnInit, OnDestroy {
+  OrderHistoryList?: OrderHistoryList;
+  constructor(private orderHistoryFacade: OrderHistoryFacade,private orderService: CUSTOM-OrderHistoryService) {}
+  ngOnInit(): void {
+    this.loaderService.show();
+    this.orderHistoryFacade.getOrderHistoryListLoaded().pipe(takeUntil(this.unsubscribe$)).subscribe(
+        (isLoaded: boolean) => { isLoaded ? this.loaderService.hide() : this.loaderService.show(); },
+        () => { this.loaderService.hide(); }
+    );
+    this.getOrderHistoryList();
+    this.orderService.fetchOrderHistory.pipe(takeUntil(this.unsubscribe$)).subscribe(() => {
+      this.loaderService.show();
+      this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, 0, this.sortType);
+    });
+  }
+
+  // NOTE: change keys based on filters available in facet and sent to API
+  getSelectedData(): boolean {
+    let selectedFilter = this.orderService.getselectedFiltersValue();
+    let isSelectedFilterCleared = this.orderService.isSelectedFilterCleared();
+    return (!!(selectedFilter?.orderNumber || selectedFilter?.fromDate || selectedFilter?.toDate) || isSelectedFilterCleared);
+  }
+
+  getOrderHistoryList() {
+    this.loaderService.show();
+    this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE);
+    this.orderHistoryFacade.getOrderHistoryList(ORDER_HISTORY_PAGE_SIZE).pipe(
+        filter((resp?: any) => { return !!(resp?.orders?.length || resp?.isEmptyOrderList); }),
+        takeUntil(this.unsubscribe$)
+      ).subscribe((resp?: OrderHistoryList) => {
+          this.OrderHistoryList = resp;
+          setTimeout(() => { this.loaderService.hide(); }, 500);
+          this.cdRef.markForCheck();
+        },
+        () => {
+          setTimeout(() => { this.loaderService.hide(); }, 500);
+        }
+      );
+  }
+
+  getOrderDetails(order: Order) {
+    this.router.navigate(['my-account/order', order.code]);
+  }
+
+  changeSortCode(sortCode: string): void {
+    const event: OrderHistoryPage = { sortCode, currentPage: 0 };
+    this.fetchOrders(event);
+  }
+
+  pageChange(page: number): void {
+    const event: OrderHistoryPage = { sortCode: this.sortType, currentPage: page };
+    this.fetchOrders(event);
+  }
+
+  private fetchOrders(event: OrderHistoryPage): void {
+    this.loaderService.show();
+    this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
+  }
 }
-pageChange(page: number): void {
-  const event: OrderHistoryPage = {
-    sortCode: this.sortType,
-    currentPage: page,
-  };
-  this.fetchOrders(event);
+A.5. LISTING-PAGE-COMP.HTML
+------------------------------
+<ng-container *ngIf="OrderHistoryList?.orders?.length || getSelectedData(); else noOrders">
+  <div *ngFor="let order of orderHistoryList.orders; let i = index">
+    <a (click)="getOrderDetails(order)">VIEW DETAILS</a>
+  </div>
+  <div class="OrderPagination" *ngIf="(OrderHistoryList?.pagination?.totalPages ?? 0) > 1">
+    <cx-pagination [pagination]="OrderHistoryList?.pagination" (viewPageEvent)="pageChange($event)"></cx-pagination>
+  </div>
+</ng-container>
+A.6. LISTING-PAGE-FACET.COMP.TS
+-------------------------------------
+import { CUSTOM-OrderHistoryService } from 'src/app/shared/services/order-history.service';
+export class OrderHistoryRefinementComponent implements OnInit, OnDestroy {
+  public orderHistoryFilters: any;
+  selectedFilter: any = {};
+  constructor(public orderService: CUSTOM-OrderHistoryService) {}
+  ngOnInit(): void {
+    this.orderService.getOrderHistory().pipe(takeUntil(this.unsubscribe$)).subscribe((res: any) => {
+        if (res) { this.orderHistoryFilters = res; this.cdRef.markForCheck(); }
+    });
+  }
+
+  handleFilteredData(value: any) {
+    this.loaderService.show();
+    this.selectedFilter = value;
+    this.orderService.updateSelectedFilters(value);
+    this.orderService.fetchOrderHistory.next();
+  }
+
+  clearAll(value: any) {
+    this.loaderService.show();
+    this.selectedFilter = value;
+    this.orderService.updateSelectedFilters(value);
+    this.orderService.setClearFilterFlag();
+    this.orderService.fetchOrderHistory.next();
+  }
 }
-private fetchOrders(event: OrderHistoryPage): void {
-  this.orderHistoryFacade.loadOrderList(ORDER_HISTORY_PAGE_SIZE, event.currentPage, event.sortCode);
-}
-A.3. COMP.HTML
------------------------
-<select class="form-control" (change)="changeSortCode($any($event)?.target?.value ?? '')">
-  <option *ngFor="let option of sortOptions" [value]="option.code" [selected]="option?.selected">
-    {{ option.name || option.code }}
-  </option>
-</select>
-<div *ngIf="(OrderHistoryList?.pagination?.totalPages ?? 0) > 1">
-  <cx-pagination [pagination]="OrderHistoryList?.pagination" (viewPageEvent)="pageChange($event)"></cx-pagination>
-</div>
+A.7. LISTING-PAGE-FACET.COMP.HTML
+-------------------------------------
+REFER: misc notes for facet services.
 B.
 B.1. COMP.TS
 ----------------------
