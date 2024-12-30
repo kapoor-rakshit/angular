@@ -1582,26 +1582,24 @@ B.1. DETAILS-PAGE-COMP.TS
 import { Order, OrderHistoryFacade } from '@spartacus/order/root';
 constructor(private orderHistoryFacade: OrderHistoryFacade, private route: ActivatedRoute) {}
 ngOnInit(): void {
-    this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe((params) => {
-      this.orderID = params['orderCode'] ?? '';
-      if (this.orderID) { this.getOrderDetails(this.orderID); }
-    });
-}
-getOrderDetails(orderId: string) {
       this.loaderService.show();
-      this.orderHistoryFacade.loadOrderDetails(orderId);
-      this.orderHistoryFacade.getOrderDetails().pipe(take(1)).subscribe(
+      this.orderHistoryFacade.getOrderDetails().pipe(takeUntil(this.unsubscribe$)).subscribe(
         (orderData?: Order) => {
             this.currentOrder = orderData ?? {};
             this.loaderService.hide();
             this.cdRef.markForCheck();
         },
         () => {
-            this.currentOrder = null;
+            this.currentOrder = {};
             this.loaderService.hide();
             this.cdRef.markForCheck();
         }
       );
+
+    this.route.params.pipe(takeUntil(this.unsubscribe$)).subscribe((params) => {
+      this.orderID = params['orderCode'] ?? '';
+      if (this.orderID) { this.orderHistoryFacade.loadOrderDetails(this.orderID); }
+    });
 }
 
 
