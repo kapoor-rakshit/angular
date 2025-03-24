@@ -1057,7 +1057,7 @@ Three types of directives:
 	 @HostListener('mouseleave') mouseUpLeaveHandler() {              // NOTE: USE OF MULTIPLE @HOSTLISTENER ANNOTATION WHEN SAME FUNCTIONALITY IS REQUIRED
     	    this.isDown = false;
   	 }
-	 @HostListener('window:beforeunload', ['$event']) pageUnloadEvent(evt: Event) {
+	 @HostListener('window:beforeunload', ['$event']) pageUnloadEvent(evt: Event) {   // BROWSER CLOSE or TAB CLOSE event
 	    evt.preventDefault();
             evt.returnValue = true;
 	 }
@@ -3234,6 +3234,37 @@ Create file         "app.routing-module.ts"   in project's app component root di
                                   }
                               }
                             }
+
+BROWSER BACK BUTTON NAVIGATION
+==================================
+A.
+this.router.events.pipe(takeUntil(this.unsubscribe$)).subscribe((event) => {
+      if (event instanceof NavigationStart) {
+          this.navigateToUrl = event.url;
+          if (event.navigationTrigger === 'popstate') {
+	    // SAVE DATA TO SESSION STORAGE
+            // HANDLE BROWSER BACK BUTTON ACTION via HOSTLISTENER
+            this.windowRef?.sessionStorage?.setItem(LOCALSTORAGE_KEYS.BACK_BUTTON_URL, this.navigateToUrl);
+            this.windowRef?.sessionStorage?.setItem(LOCALSTORAGE_KEYS.LAST_MODIFIED_PRODUCTS, JSON.stringify(this.currentListData?.entries ?? []));
+	  }
+	}
+});
+B.
+@HostListener('window:popstate')
+browserBackButton(): void {
+  if (this.listDataChanged || this.isProductResequenced) {
+    this.windowRef?.nativeWindow?.history?.go(1);         // MOVE FORWARD IN HISTORY, which is current page
+  }
+}
+C.
+if (this.windowRef?.sessionStorage?.getItem(LOCALSTORAGE_KEYS.BACK_BUTTON_URL)) {
+   // UPDATE DATA FROM SESSION STORAGE, RATHER THAN N/W API RESPONSE
+   listData.entries = JSON.parse(this.windowRef?.sessionStorage?.getItem(LOCALSTORAGE_KEYS.LAST_MODIFIED_PRODUCTS) ?? '[]');
+   this.navigateToUrl = this.windowRef?.sessionStorage?.getItem(LOCALSTORAGE_KEYS.BACK_BUTTON_URL) ?? '';
+
+   this.windowRef?.sessionStorage?.removeItem(LOCALSTORAGE_KEYS.LAST_MODIFIED_PRODUCTS);
+   this.windowRef?.sessionStorage?.removeItem(LOCALSTORAGE_KEYS.BACK_BUTTON_URL);         
+}
 
 DYNAMIC ROUTING
 ===================
