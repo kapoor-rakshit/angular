@@ -1157,6 +1157,10 @@ backend: { occ: { endpoints: {
                 protected http: HttpClient, protected occEndpointsService: OccEndpointsService) {
       super(multiCartFacade, userIdService, winRef);
     }
+    override reloadActiveCart(forceCalculate?: boolean) {
+      this.getActiveCartId().pipe(take(1), map((cartId) => {this.multiCartService.reloadCart(cartId, { active: true, forceCalculate });
+        })).subscribe();
+    }
     override addEntry(productCode: string, quantity: number, pickupStore?: string): void {
       this.requireLoadedCart().pipe(withLatestFrom(this.userIdService.getUserId())).subscribe(([cart, userId]) => {
         this.multiCartService.addEntry(userId, getCartIdByUserId(cart, userId), productCode, quantity, pickupStore);
@@ -1218,8 +1222,8 @@ backend: { occ: { endpoints: {
           // Dispatch success action when the cart is successfully loaded to update store.
           this.store.dispatch(new CartActions.LoadCartSuccess({ userId, cart, cartId }));
         }
-        // Note: Failure cases are not handled here, as Spartacus does not handle them either.
-        // Add failure handling if required.
+      }, () => {
+            // ERROR HANDLING
       });
     }
 
@@ -1234,8 +1238,8 @@ backend: { occ: { endpoints: {
       const url = this.occEndpointsService.buildUrl('removeEntries', {urlParams: {userId,cartId,entryNumber}});
       this.http.delete(url, { headers }).subscribe(() => {
         this.loadMyCart(userId, cartId, recalculateCart);
-        // Note: Failure cases are not handled here, as Spartacus does not handle them either.
-        // Add failure handling if required.
+      }, () => {
+            // ERROR HANDLING
       });
     }
   }
