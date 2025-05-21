@@ -1,0 +1,29 @@
+1. src\app\core\config\font-awesome-config.ts
+===========================================================
+import { ICON_TYPE, IconConfig, IconResourceType } from '@spartacus/storefront';
+export const fontawesomeIconConfig: IconConfig = {
+  icon: {
+    resources: [
+      {
+        type: IconResourceType.LINK,
+        url: 'https://kit.fontawesome.com/YOUR_FONTAWESOME_KIT_CODE.css',
+      },
+      {
+        type: IconResourceType.SVG,
+        url: './assets/sprite.svg',
+        types: [ICON_TYPE.INFO, ICON_TYPE.WARNING],
+      },
+    ],
+  },
+};
+
+2. src\app\app.module.ts
+==============================
+import { ConfigModule } from '@spartacus/core';
+import { fontawesomeIconConfig } from './core/config/font-awesome-config';
+@NgModule({
+  imports: [
+    ConfigModule.withConfig(fontawesomeIconConfig)
+  ]
+})
+export class AppModule {}
