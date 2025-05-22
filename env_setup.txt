@@ -2031,25 +2031,26 @@ CHANGE IN EXISTING MODULE/COMPONENT -> BUILD -> TEST -> LIB VERSION CHANGE -> BU
 By running command from ROOT of project, build this library
 > ng build <LIBRARY-NAME>
 7.b.
-* Test this build, by importing <MODULE-NAME> from `LIBRARY-NAME`,
-  in relevant parent module & using selector in relevant parent comp of own angular ROOT project.
-  - parent-module.MODULE.TS
-    import { MODULE-NAME } from 'LIBRARY-NAME';
-    imports: [MODULE-NAME]
-  - parent-comp.HTML
-    <lib-COMP-NAME></lib-COMP-NAME>
-OR
-* Test this build in actual project, which will use/install this library, by using `npm link`
-  - In library , update version in `package.json` i.e. projects\<LIBRARY-NAME>\package.json
+Test this build in actual project, which will use/install this library, by using `npm link`
+  - In library , update version in `package.json` i.e. projects\<LIBRARY-NAME>\package.json to something like 0.0.0
   - Make a build of <LIBRARY-NAME> library inside library's project  i.e.  `ng build <LIBRARY-NAME>`
   - Copy folder `<LIBRARY-NAME>` from  `<LIBRARY-PROJECT>\dist`
   - Paste it here in a folder of actual project i.e.  `js-storefront\<PROJECT>\libs\<LIBRARY-PROJECT>`
   - Now run  `npm link libs/<LIBRARY-PROJECT>/<LIBRARY-NAME> && ng serve`
   NOTE: Add this folder path to .gitignore to avoid committing changes to git i.e. `/libs/<LIBRARY-PROJECT>/<LIBRARY-NAME>`
 7.c.
-If all is well, change `version` of library in `projects/LIBRARY-NAME/package.json`
+If your changes work as expected,
+change `version` of library in `projects/LIBRARY-NAME/package.json` to next latest version as per Azure Artifacts Cloud
 and run final build  `ng build <LIBRARY-NAME>`
 because same version libraries cannot be published to cloud.
+7.d.
+If your changes do NOT work as expected,
+Make changes in file(s) as required in library.
+Create a new build with same version (Eg: "0.0.0" as above) using `ng build <LIBRARY-NAME>`
+Copy folder `<LIBRARY-NAME>` from  `<LIBRARY-PROJECT>\dist`
+Paste it here in folder of actual project i.e.  `js-storefront\<PROJECT>\libs\<LIBRARY-PROJECT>`
+IF your STOREFRONT is already in running state, it will automatically pick up these new set of changes.
+ELSE you may start it again using  `npm link libs/<LIBRARY-PROJECT>/<LIBRARY-NAME> && ng serve`
 8.
 Now we can publish this build. NOTE: For reference to setup Azure, refer B. below
 > cd dist/LIBRARY-NAME
