@@ -1,1 +1,68 @@
+REFERENCE: https://developers.google.com/search/docs/crawling-indexing/robots-meta-tag
 
+In /pages API n/w response we get a key `robotTag`.
+Eg:
+{ robotTag: "NOINDEX_NOFOLLOW" }
+This helps add robots <meta> tag to <head> of our page.
+Eg:
+<meta name="robots" content="NOINDEX, NOFOLLOW">
+noindex
+Do not show this page, media, or resource in search results.
+If you don't specify this rule, the page, media, or resource may be indexed and shown in search results.
+nofollow
+Do not follow the links on this page.
+If you don't specify this rule, Search Engine may use the links on the page to discover those linked pages.
+
+
+1. src\robots.txt
+NOTE: THIS FILE IS UPLOADED TO CCv2 PORTAL IN STATIC FILES
+      AND IS ALSO KEPT IN FRONTEND CODE SO THAT IT IS ACCESSIBLE VIA https://YOUR-APP-SITE/robots.txt
+=============================================================================================================
+# For all robots
+User-agent: *
+
+# Block access to specific groups of pages
+Disallow: /catalogue
+Disallow: /search
+Disallow: /login/forgot-customer-id
+Disallow: /login/forgot-password
+
+User-agent: facebookexternalhit
+Crawl-delay: 5
+
+User-agent: meta-externalagent
+Crawl-delay: 5
+
+User-agent: AhrefsBot
+Crawl-delay: 5
+
+User-agent: anthropic-ai
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Amazonbot
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Block MJ12bot as it is just noise
+User-agent: MJ12bot
+Disallow: /
+
+Sitemap: https://YOUR-APP-SITE/sitemap.xml
+
+2. angular.json
+===========================================
+"architect": {
+  "build": {          
+    "options": {            
+      "assets": ["src/robots.txt"],
+    }
+  }
+}
