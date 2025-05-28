@@ -891,7 +891,7 @@ this.baseSiteService.get().pipe(takeUntil(this.destroyed$)).subscribe((baseSite)
 
 CMS SERVICE
 ==========================
-import { CmsService, Page } from '@spartacus/core';
+import { CmsService, Page, ContentSlotData } from '@spartacus/core';
 constructor(private cmsService: CmsService) { }
 A.
 public pageData!: Page;
@@ -903,6 +903,17 @@ B.
 this.cmsService.getComponentData('COMP-UID').pipe(takeUntil(this.destroyed$)).subscribe((compData: CmsComponent) => {
     this.navNode = compData?.navigationNode;
 }, () => {});
+C.
+this.cmsService.getContentSlot('SLOT-POSITION').pipe(switchMap((slotData: ContentSlotData) => {
+      return combineLatest([
+            this.cmsService.getComponentData((slotData?.components && slotData.components[0]?.uid) ?? ''),
+            this.cmsService.getComponentData((slotData?.components && slotData.components[1]?.uid) ?? ''),
+          ]);
+        })).pipe(takeUntil(this.destroy$)).subscribe((compData: CmsComponent) => {
+              this.shopStorePillar = compData[0]?.headline;
+              this.storePartnerMedia = compData[0]?.imageGrids?.split(' ');
+              this.cd.markForCheck();
+            });
 
 
 NAVIGATION SERVICE (navigation menus)
