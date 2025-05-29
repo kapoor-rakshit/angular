@@ -154,6 +154,8 @@ is updated with following configuration:
 NOTE: You might need ADMIN RIGHTS on your machine for updating this file.
 Once done with updating hosts file, to run project use following command:
 > ng serve --host cstore.local --disable-host-check
+NOTE:
+To run localhost or any local domain on HTTPS, REFER  `misc/localhost-https.txt`  notes
 
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
