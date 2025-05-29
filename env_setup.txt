@@ -98,7 +98,6 @@ node.js terminal is a CMD terminal with NODEJs and NPM path variables set for us
 (MULTI-REPO)  :  every new angular project created will have its own node_modules, files (angular.json, package.json), folders.
 > ng new <APP_NAME> 
 > ng serve
-> set NODE_OPTIONS=--openssl-legacy-provider && ng serve      // if `ng serve` throws error of SSL/SOCKET etc. , use this command
 > ng build --prod
   ng build --prod --output-hashing=none           // prevents hash-number to be attached to build artifacts
 
@@ -156,6 +155,11 @@ Once done with updating hosts file, to run project use following command:
 > ng serve --host cstore.local --disable-host-check
 NOTE:
 To run localhost or any local domain on HTTPS, REFER  `misc/localhost-https.txt`  notes
+
+NOTE:
+If while running on local, compiler throws some error like SSL/SOCKET etc,
+we may try modifying `package.json` for 'start' command:
+"start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
 
 "npm start"   command will work same as   "ng serve"    command.
 because the "start" key of package.json is having value "ng serve -o".
