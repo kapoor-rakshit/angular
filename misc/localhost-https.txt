@@ -17,3 +17,16 @@
 
 NOTE: If while running on local, compiler throws some error, we may try modifying `package.json` for 'start' command:
       "start": "set NODE_OPTIONS=--openssl-legacy-provider && ng serve",
+
+NOTE:
+To run on a different domain other than localhost:
+Make sure your hosts file in
+- Windows system ("C:\Windows\System32\drivers\etc\hosts")
+- MacOS system (sudo vi /etc/hosts)
+is updated with following configuration:
+127.0.0.1       campbells.local
+127.0.0.1       cstore.local
+127.0.0.1       supermarkets.local
+NOTE: You might need ADMIN RIGHTS on your machine for updating this file.
+Once done with updating hosts file, to run project use following command:
+> ng serve --host cstore.local --disable-host-check --ssl --ssl-key .\\certs\\localhost.key --ssl-cert .\\certs\\localhost.crt
