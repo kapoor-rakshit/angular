@@ -837,12 +837,51 @@ export class COMP-MODULE {}
 ------------------------
 export const appTranslations = {
     en: {
-        HEADER: {                                     // NOTE: same HEADER name inside HEADER
+        HEADER: {                                     // NOTE: same HEADER(keyName) should be inside HEADER(keyName)
             HEADER: {
                 KEY_1: 'VAL_1',
                 KEY_2: 'VAL_2 {{VARIABLE}} VAL_2',    // NOTE: use of VARIABLE in {{ }}
             }
-        }
+        },
+                                                      // NOTE: There are some builtin exposed keyNames like common, user etc...
+        common: {                                     // they are used: {{'miniCart.title' | cxTranslate}},{{'pageMetaResolver.category.title' | cxTranslate}}
+            miniCart: {
+              title: 'Cart',
+              items: 'Items',
+            },
+            httpHandlers: {
+              badRequest: {
+                bad_credentials: '{{ errorMessage }}. Please login again.',
+                user_is_disabled: '{{ errorMessage }}. Please contact administration.',
+              },
+              sessionExpired: 'Your session has expired. Please login again.',
+              cartNotFound: 'Cart not found.',
+              validationErrors: {
+                invalid: {
+                  code: 'Code is not valid.',
+                },
+              },
+            },
+            pageMetaResolver: {
+              search: {
+                description: 'Search results for {{query}} on ALM',
+                title: 'Search results for "{{query}}"',
+              },
+              category: {
+                title: '{{query}}',
+              },
+              product: {
+                title: '{{productName}}',
+                description: '{{productName}} on ALM',
+              },
+            },
+        },
+
+        user: {
+          authMessages: {
+            signedOutSuccessfully: 'You have successfully signed out.',
+          },
+        },
     }
 }
 3.A. COMP.TS
