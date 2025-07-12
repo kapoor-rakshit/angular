@@ -1170,7 +1170,8 @@ backend: { occ: { endpoints: {
       return this.http.post<Occ.Cart>(this._occEndpointsService.buildUrl('createCart', {urlParams: { userId }, queryParams: params }), toAdd)
                                      .pipe(this._converterService.pipeable(CART_NORMALIZER));
     }
-      OR
+    OR
+    // Just reload the cart when anonymous cart is not supported, it creates new cart whenever invoked.
     override create(userId: string, oldCartId?: string, toMergeCartGuid?: string): Observable<any> {
           return this.load(userId, OCC_CART_ID_CURRENT);
     }
@@ -1251,7 +1252,7 @@ backend: { occ: { endpoints: {
           this.store.dispatch(new CartActions.LoadCartSuccess({ userId, cart, cartId }));
         }
       }, () => {
-            // ERROR HANDLING
+            this.apiFailureHandler();
       });
     }
 
@@ -1267,8 +1268,14 @@ backend: { occ: { endpoints: {
       this.http.delete(url, { headers }).subscribe(() => {
         this.loadMyCart(userId, cartId, recalculateCart);
       }, () => {
-            // ERROR HANDLING
+           this.apiFailureHandler();
       });
+    }
+
+    private apiFailureHandler(): void {
+      // Dispatch CLEAR CART action to update store with new cartID loaded via N/W API call of  `/carts`
+      this.store.dispatch(new CartActions.ClearCartState());
+      this.loaderService.hide();
     }
   }
 - CUSTOM-CartEntryAdapterService.SERVICE.TS
