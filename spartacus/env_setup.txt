@@ -1345,8 +1345,8 @@ backend: { occ: { endpoints: {
     }
   }
 A.
-// Create new cart if not exists by calling API, else return existing cart (REFER: localstorage of browser for cartID)
 - COMP.TS
+i. // Create new cart if not exists by calling API, else return existing cart (REFER: localstorage of browser for cartID)
   import { MultiCartService } from '@spartacus/cart/base/core';
   constructor(private activeCartService: CUSTOM-CartService, private multiCartService: MultiCartService) {}
   this.activeCartService.requireLoadedCart().pipe(takeUntil(this.unsubscribe$)).subscribe((cart) => {
@@ -1359,6 +1359,10 @@ A.
             });
     }
   });
+ii. // Dispatch CLEAR CART action to update store with new cartID loaded via n/w API call of  `/carts`
+  import { Store } from '@ngrx/store';
+  constructor(store: Store<StateWithMultiCart>) {}
+  this.store.dispatch(new CartActions.ClearCartState());
 B.1.
 - COMP.TS
   // Subscribe to any cart related changes and get cart data
