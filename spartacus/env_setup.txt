@@ -1170,9 +1170,33 @@ backend: { occ: { endpoints: {
            updateEntries: 'users/${userId}/carts/${cartId}/entries/${entryNumber}',
            removeEntries: 'users/${userId}/carts/${cartId}/entries/${entryNumber}',
   } } }
+- CUSTOM-CartBaseModule.MODULE.TS
+  import { CartBaseModule } from '@spartacus/cart/base';
+  import { CartAdapter } from '@spartacus/cart/base/core';
+  @NgModule({
+    declarations: [],
+    imports: [CartBaseModule],
+    providers: [{ provide: CartAdapter, useClass: CUSTOM-CartAdapter }],
+  })
+  export class CUSTOM-CartBaseModule {}
+- CartBaseFeatureModule.MODULE.TS 
+  // NOTE: This file (src\app\spartacus\features\cart\cart-base-feature.module.ts) is imported by default in `src\app\spartacus\spartacus-features.module.ts`
+  import {CART_BASE_FEATURE, CartBaseRootModule} from '@spartacus/cart/base/root';
+  @NgModule({
+    declarations: [],
+    imports: [CartBaseRootModule],
+    providers: [
+      provideConfig(<CmsConfig>{
+        featureModules: {
+          [CART_BASE_FEATURE]: { module: () => import('../../../PATH_TO_CUSTOM_CART_BASE_MODULE.module').then((m) => m.CUSTOM-CartBaseModule) },
+        },
+      }),
+    ],
+  })
+  export class CartBaseFeatureModule {}
 - APP.MODULE.TS
   import { ActiveCartService, CartAdapter, CartEntryAdapter, MultiCartService } from '@spartacus/cart/base/core';
-  providers: [{provide: CartAdapter, useClass: CUSTOM-CartAdapter}, {provide: ActiveCartService, useExisting: CUSTOM-CartService, multi: true}
+  providers: [{provide: ActiveCartService, useExisting: CUSTOM-CartService, multi: true},
               {provide: CartEntryAdapter, useClass: CUSTOM-CartEntryAdapterService}, {provide: MultiCartService, useExisting: CUSTOM-MultiCartService}]
 - CUSTOM-CartAdapter.SERVICE.TS
   import { OccCartAdapter } from '@spartacus/cart/base/occ';
@@ -1361,6 +1385,7 @@ i. // Create new cart if not exists by calling API, else return existing cart (R
   });
 ii. // Dispatch CLEAR CART action to update store with new cartID loaded via n/w API call of  `/carts`
   import { Store } from '@ngrx/store';
+  import { CartActions, StateWithMultiCart } from '@spartacus/cart/base/core';
   constructor(store: Store<StateWithMultiCart>) {}
   this.store.dispatch(new CartActions.ClearCartState());
 B.1.
