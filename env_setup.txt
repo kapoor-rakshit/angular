@@ -1319,12 +1319,22 @@ D.
 this.renderer.setStyle(this.el.nativeElement, 'border-left', '2px dashed olive');
 this.renderer.removeStyle(this.el.nativeElement, 'border-left');
 E.
+private clicklistener!: Function;
 this.clicklistener = this.renderer.listen(this.elemRef.nativeElement, 'click', (evt) => { });
-ngOnDestroy() { this.clicklistener.unsubscribe(); }
+ngOnDestroy() { 
+  if (this.clicklistener) {
+    this.clicklistener();		// Clean up the listener to avoid memory leaks
+  }
+}
 F.
 // Global target names that can be used for an event name are `document` , `window` , `body`
+private clicklistener!: Function;
 this.clicklistener = this.renderer.listen('window', 'click', (e: Event) => { });
-ngOnDestroy() { this.clicklistener.unsubscribe(); }
+ngOnDestroy() { 
+  if (this.clicklistener) {
+    this.clicklistener();	       // Clean up the listener to avoid memory leaks
+  }
+}
 
 
 Angular Animations
