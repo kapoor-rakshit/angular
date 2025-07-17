@@ -2866,6 +2866,9 @@ ENUMs
 		NUM_KEY_2			  // NUM_KEY_2 = 6, increments by 1 after numeric key val
 	}
 // 3
+	let VAR_KEY: keyof typeof EmployeesActionTypes = "NUM_KEY_2";		// NOTE: use of  `keyof typeof`  to access ENUM key as a VARIABLE
+	EmployeesActionTypes[VAR_KEY];
+// 4
 	EmployeesActionTypes.SHOW_COMPANY_NAME = 'NEW VAL';	// ERROR: Cannot assign 'SHOW_COMPANY_NAME' because it is read-only property
 	EmployeesActionTypes.NEW_KEY = "NEW VAL";		// ERROR: Property 'NEW_KEY' does not exist on type 'typeof EmployeesActionTypes'.
 	
