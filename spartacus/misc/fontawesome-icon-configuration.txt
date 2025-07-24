@@ -3,6 +3,12 @@
 import { ICON_TYPE, IconConfig, IconResourceType } from '@spartacus/storefront';
 export const fontawesomeIconConfig: IconConfig = {
   icon: {
+    symbols: {
+      CART: "CUSTOM_CLASS_VALUE_1a CUSTOM_CLASS_VALUE_1b",
+      VISA: "CUSTOM_CLASS_VALUE_2a CUSTOM_CLASS_VALUE_2b CUSTOM_CLASS_VALUE_2c",
+      CUSTOM_ICON_1: "CUSTOM_CLASS_1",
+      CUSTOM_ICON_2: "CUSTOM_CLASS_2",
+    },
     resources: [
       {
         type: IconResourceType.LINK,
@@ -10,8 +16,8 @@ export const fontawesomeIconConfig: IconConfig = {
       },
       {
         type: IconResourceType.SVG,
-        url: './assets/sprite.svg',
-        types: [ICON_TYPE.INFO, ICON_TYPE.WARNING],
+        url: 'assets/sprite.svg',
+        types: ['CUSTOM_ICON_1', 'CUSTOM_ICON_2'],
       },
     ],
   },
@@ -27,3 +33,57 @@ import { fontawesomeIconConfig } from './core/config/font-awesome-config';
   ]
 })
 export class AppModule {}
+
+3. COMP.MODULE
+==============================
+import { IconModule } from '@spartacus/storefront';
+@NgModule({
+  imports: [IconModule]
+})
+
+4. COMP.HTML
+===============================
+a. <cx-icon type="CART"></cx-icon>
+If `CART` key is NOT specified in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`
+it will render default class(if known to SPARTACUS)  `fas fa-shopping-cart`  i.e. <cx-icon type="CART" class="cx-icon fas fa-shopping-cart"></cx-icon>
+If `CART` key is specified in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`
+it will render class as per `symbols` obj i.e. <cx-icon type="CART" class="cx-icon CUSTOM_CLASS_VALUE_1a CUSTOM_CLASS_VALUE_1b"></cx-icon>
+
+b. <cx-icon type="CUSTOM_ICON_1"></cx-icon>
+To use icon from SPRITE SVG, that icon i.e. `CUSTOM_ICON_1`
+must be defined in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`  and
+must be included in `types` array i.e.     types: ['CUSTOM_ICON_1', 'CUSTOM_ICON_2']
+it will render on DOM as follows:
+<cx-icon type="CUSTOM_ICON_1" class="cx-icon CUSTOM_CLASS_1">
+  <svg>
+    <use xlink:href="assets/sprite.svg#CUSTOM_CLASS_1"></use>
+  </svg>
+</cx-icon>
+
+5. SAMPLE SPRITE FILES
+==================================
+a. Each icon specified as a <symbol> ID
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="CUSTOM_CLASS_1" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="10" />
+  </symbol>
+  <symbol id="CUSTOM_CLASS_2" viewBox="0 0 20 20">
+    <path d="M20,7 L92,50 L6,93 z" stroke-width="5" stroke="#00f" fill="#00f" fill-opacity="0.5" />
+  </symbol>
+</svg>
+
+b. Each icon specified as a <g> ID
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style><![CDATA[
+      .sprite { display: none; }
+      .sprite:target { display: inline; }
+    ]]></style>
+  </defs>
+  <g class="sprite" id="CUSTOM_CLASS_1">
+    <rect y="5" x="5" width="90" height="90" stroke-width="5" stroke="#f00" fill="#f00" fill-opacity="0.5" />
+  </g>
+  <g class="sprite" id="CUSTOM_CLASS_2">
+    <path d="M20,7 L92,50 L6,93 z" stroke-width="5" stroke="#00f" fill="#00f" fill-opacity="0.5" />
+  </g>
+</svg>
