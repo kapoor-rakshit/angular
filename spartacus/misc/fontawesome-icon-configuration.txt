@@ -44,25 +44,60 @@ import { IconModule } from '@spartacus/storefront';
 4. COMP.HTML
 ===============================
 a. <cx-icon type="CART"></cx-icon>
+---------------------------------------------
 If `CART` key is NOT specified in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`
 it will render default class(if known to SPARTACUS)  `fas fa-shopping-cart`  i.e. <cx-icon type="CART" class="cx-icon fas fa-shopping-cart"></cx-icon>
 If `CART` key is specified in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`
 it will render class as per `symbols` obj i.e. <cx-icon type="CART" class="cx-icon CUSTOM_CLASS_VALUE_1a CUSTOM_CLASS_VALUE_1b"></cx-icon>
 
 b. <cx-icon type="CUSTOM_ICON_1"></cx-icon>
+------------------------------------------------
 To use icon from SPRITE SVG, that icon i.e. `CUSTOM_ICON_1`
 must be defined in `symbols` obj of file  `src\app\core\config\font-awesome-config.ts`  and
 must be included in `types` array i.e.     types: ['CUSTOM_ICON_1', 'CUSTOM_ICON_2']
 it will render on DOM as follows:
 <cx-icon type="CUSTOM_ICON_1" class="cx-icon CUSTOM_CLASS_1">
   <svg>
-    <use xlink:href="assets/sprite.svg#CUSTOM_CLASS_1"></use>
-  </svg>
+    <use xlink:href="assets/sprite.svg#CUSTOM_CLASS_1"></use>      // Since SVG 2, the `xlink:href` attribute is deprecated in favor of `href`
+  </svg>                                                           // <use href="assets/sprite.svg#CUSTOM_CLASS_1"></use>
 </cx-icon>
 
-5. SAMPLE SPRITE FILES
+5. COMP.SCSS
+==================================
+::ng-deep cx-icon {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  svg {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    fill: transparent;
+  }
+  &.CUSTOM_CLASS_1 use {
+    x: 5;                                    // x,y coordinate of additional final offset transformation applied to <use> element
+    y: 5;
+    @include media-breakpoint-up(md) {
+      x: 17;
+      y: 15;
+    }
+  }
+  &.CUSTOM_CLASS_2 use {
+    x: -159;
+    y: 4;
+    @include media-breakpoint-up(md) {
+      x: -147;
+      y: 13;
+    }
+  }
+}
+
+6. SAMPLE SPRITE FILES
 ==================================
 a. Each icon specified as a <symbol> ID
+-------------------------------------------------
 <svg xmlns="http://www.w3.org/2000/svg">
   <symbol id="CUSTOM_CLASS_1" viewBox="0 0 20 20">
     <circle cx="10" cy="10" r="10" />
@@ -73,6 +108,7 @@ a. Each icon specified as a <symbol> ID
 </svg>
 
 b. Each icon specified as a <g> ID
+--------------------------------------------------
 <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <style><![CDATA[
