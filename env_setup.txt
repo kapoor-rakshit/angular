@@ -1500,9 +1500,11 @@ Angular FORMS
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>'],
            <formControlName_ATTR>: ['<INITIAL_VALUE_WIDGET>']
         }, { validators: [this.CUSTOM_VALIDATOR_FUNCTION.bind(this)] });
+		OR
+		this.customerForm.addValidators(this.CUSTOM_VALIDATOR_FUNCTION(this.customerForm));
                                                                           // Custom Validator function for entire formGroup
-                                                                             private CUSTOM_VALIDATOR_FUNCTION(fg: FormGroup): ValidatorFn {
-									       return (): ValidationErrors | null => {
+                                                                             private CUSTOM_VALIDATOR_FUNCTION = (fg: FormGroup): ValidatorFn => {
+									       									  return (): ValidationErrors | null => {
                                                                                const password = fg.controls['formControlName_ATTR'];
                                                                                const cnfpassword = fg.controls['formControlName_ATTR'];
                                                                                 if(password.value.trim() == "") {
@@ -1512,8 +1514,8 @@ Angular FORMS
                                                                                     cnfpassword.setErrors({'CUSTOM_ERROR_NAME': true});
                                                                                 }
                                                                                 return null;
-                                                                              }
-									     }
+                                                                              };
+									     									 };
 									      
 									   // Custom Async validators array(passed as third arg), allows to have asyncronous validation
 									      It is useful if we need to check on input data from external API call.
