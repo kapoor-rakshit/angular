@@ -1502,6 +1502,7 @@ Angular FORMS
         }, { validators: [this.CUSTOM_VALIDATOR_FUNCTION.bind(this)] });
 		OR
 		this.customerForm.addValidators(this.CUSTOM_VALIDATOR_FUNCTION(this.customerForm));
+		this.customerForm.updateValueAndValidity();
                                                                           // Custom Validator function for entire formGroup
                                                                              private CUSTOM_VALIDATOR_FUNCTION = (fg: FormGroup): ValidatorFn => {
 									       									  return (): ValidationErrors | null => {
