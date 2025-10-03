@@ -2034,46 +2034,52 @@ export const CUSTOM-PageMetaConfig: PageMetaConfig = {
 -------------------------
 NOTE: For CUSTOM-RESOLVERS implementations defined in `useExisting`, refer SPARTACUS DEMO-CODE REPO, cloned from GITHUB
 Eg:
-constructor(protected productSearchService: ProductSearchService, protected cms: CmsService, protected translation: TranslationService,
-            protected basePageMetaResolver: BasePageMetaResolver) {
-   super(productSearchService, cms, translation, basePageMetaResolver);
-   this.pageType = PageType.CATEGORY_PAGE;
-   this.pageTemplate = 'DepartmentPageTemplate';                                 // connect page resolver to specific pageTemplate
-}
-A.1. override resolveTitle(): Observable<string> {                               // class CUSTOM-RESOLVER extends ProductPageMetaResolver
-      return this.productData$.pipe(                                             // productData$: Observable<any> = this.currentProductSerice.getProduct();
-      switchMap((product) =>
-        this.translation.translate('pageMetaResolver.product.title', {
-          productName: product.product.name,
-        })
-       )
-      );
-     }
-A.2. override resolveTitle(): Observable<string> {                               // class CUSTOM-RESOLVER extends CategoryPageMetaResolver
-      return (<Observable<ProductSearchPage>>this.searchPage$).pipe(
-      switchMap((p: any) =>
-        this.translation.translate('pageMetaResolver.category.title', {
-          query:
-            p?.category && p?.category?.seoTitle
-              ? p?.category?.seoTitle
-              : p.category && p.category?.name
-              ? p?.category?.name
-              : undefined,
-        })
-      ));
-     }
-     protected override searchPage$: Observable<ProductSearchPage | Page> = this.cms.getCurrentPage().pipe(
-      filter((page) => Boolean(page)),
-      switchMap((page: Page) =>
+A. CUSTOM-CategoryPageMetaResolver
+---------------------------------------
+import { NavigationEnd, Router } from '@angular/router';
+import {BasePageMetaResolver,CategoryPageMetaResolver,CmsService,Page,PageLinkService,PageType,ProductSearchPage,ProductSearchService,TranslationService} from '@spartacus/core';
+/**
+ * Resolves the page data for the Product Listing Page.
+ * The page title, and breadcrumbs are resolved in this implementation only.
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class CUSTOM-CategoryPageMetaResolver extends CategoryPageMetaResolver {
+  // reusable observable for search page data
+  protected override searchPage$: Observable<ProductSearchPage | Page> = this.cms.getCurrentPage().pipe(
+    filter((page) => Boolean(page)),
+    switchMap((page: Page) =>
       // only the existence of a plp component tells us if products
       // are rendered or if this is an ordinary content page
       this.hasProductListComponent(page)
         ? this.productSearchService.getResults().pipe(filter((result) => Boolean(result)))
         : of(page)
-      )
-     );
-     protected override hasProductListComponent(page: Page): boolean {
-      return !!Object.keys(page.slots || {}).find(
+    )
+  );
+  constructor(
+    protected override productSearchService: ProductSearchService,
+    protected override cms: CmsService,
+    protected override translation: TranslationService,
+    protected override basePageMetaResolver: BasePageMetaResolver,
+    private router: Router,
+    private pageLinkService: PageLinkService
+  ) {
+    super(productSearchService, cms, translation, basePageMetaResolver);
+    this.pageType = PageType.CATEGORY_PAGE;
+  }
+  override resolveTitle(): Observable<string> {
+    return (<Observable<ProductSearchPage>>this.searchPage$).pipe(
+      switchMap((p: any) => {
+        const categorySize = p?.categoryBreadcrumbs?.length ?? 0;
+        return this.translation.translate('pageMetaResolver.category.title', {
+          query: categorySize ? p?.categoryBreadcrumbs?.[categorySize - 1]?.name : undefined,
+        });
+      })
+    );
+  }
+  protected override hasProductListComponent(page: Page): boolean {
+    return !!Object.keys(page.slots || {}).find(
       (key) =>
         !!page.slots?.[key].components?.find(
           (comp) =>
@@ -2081,17 +2087,13 @@ A.2. override resolveTitle(): Observable<string> {                              
             comp.typeCode === 'CMSProductListComponent' ||
             comp.typeCode === 'ProductGridComponent'
         )
-      );
-     }
-B.1. resolveDescription(): Observable<string> {                                 // class CUSTOM-RESOLVER extends ProductPageMetaResolver
-      return this.productData$.pipe(                                            // productData$: Observable<any> = this.currentProductSerice.getProduct();
-      switchMap((product) =>
-        this.translation.translate('pageMetaResolver.product.description', {
-          description: product.metaDescription,
-        })));
-     }
-B.2. resolveDescription(): Observable<string> {                                // class CUSTOM-RESOLVER extends CategoryPageMetaResolver
-      return this.cms.getCurrentPage().pipe(
+    );
+  }
+  resolveDescription(): Observable<string> {
+    return this.resolveMetaData();
+  }
+  protected resolveMetaData(): Observable<any> {
+    return this.cms.getCurrentPage().pipe(
       filter((p) => Boolean(p)),
       map((data: Page) => {
         return data.description?.trim();
@@ -2099,18 +2101,107 @@ B.2. resolveDescription(): Observable<string> {                                /
       switchMap((value?: string) => {
         return of(value);
       })
-      );
-     }
-B.3. resolveDescription(): Observable<string> {                               // class CUSTOM-RESOLVER extends SearchPageMetaResolver
-      return this.query$.pipe(
+    );
+  }
+  /**
+   * Resolves the canonical url for the category listing page.
+   * The default options will be used to resolve the url, which means that
+   * all query parameters are removed and https and www are added explicitly.
+   */
+  override resolveCanonicalUrl(): Observable<string> {
+    return this.router.events.pipe(
+      filter((ev) => ev instanceof NavigationEnd),
+      startWith(null),
+      map(() => {
+        const ss = this.pageLinkService.getCanonicalUrl();
+        return ss;
+      })
+    );
+  }
+}
+B. CUSTOM-SearchPageMetaResolver
+---------------------------------------
+import {BasePageMetaResolver,ProductSearchService,RoutingService,SearchPageMetaResolver,TranslationService} from '@spartacus/core';
+/**
+ * Resolves the page data for the Search Result Page based on the
+ * `PageType.CATEGORY_PAGE` and the `SearchResultsListPageTemplate` template.
+ * Only the page title is resolved in the standard implementation.
+ */
+@Injectable({ providedIn: 'root' })
+export class CUSTOM-SearchPageMetaResolver extends SearchPageMetaResolver {
+  constructor(
+    protected override routingService: RoutingService,
+    protected override productSearchService: ProductSearchService,
+    protected override translation: TranslationService,
+    protected override basePageMetaResolver: BasePageMetaResolver
+  ) {
+    super(routingService, productSearchService, translation, basePageMetaResolver);
+  }
+  override resolveTitle(): Observable<string> {
+    return this.query$.pipe(
+      mergeMap((query) => {
+        return this.translation.translate('pageMetaResolver.search.title', {
+          query,
+        });
+      })
+    );
+  }
+  resolveDescription(): Observable<string> {
+    return this.query$.pipe(
       mergeMap((query) => {
         return this.translation.translate('pageMetaResolver.search.description', {
           query,
         });
       })
-      );
-     }
-C. resolveCanonicalUrl(): Observable<string> {
+    );
+  }
+}
+C. CUSTOM-ProductPageMetaResolver
+---------------------------------------
+import {BasePageMetaResolver,PageLinkService,ProductPageMetaResolver,ProductService,RoutingService,TranslationService} from '@spartacus/core';
+import { CurrentProductService } from '@spartacus/storefront';
+/**
+ * Resolves the page data for the Product Detail Page
+ * based on the `PageType.PRODUCT_PAGE`.
+ * The page title, heading, description, breadcrumbs and
+ * first GALLERY image are resolved if available in the data.
+ */
+@Injectable({ providedIn: 'root' })
+export class CUSTOM-ProductPageMetaResolver extends ProductPageMetaResolver {
+  constructor(
+    protected override routingService: RoutingService,
+    protected override productService: ProductService,
+    protected override translation: TranslationService,
+    protected override basePageMetaResolver: BasePageMetaResolver,
+    protected override pageLinkService: PageLinkService,
+    private currentProductSerice: CurrentProductService
+  ) {
+    super(routingService, productService, translation, basePageMetaResolver, pageLinkService);
+  }
+  protected productData$: Observable<any> = this.currentProductSerice.getProduct() as Observable<any>;
+  override resolveTitle(): Observable<string> {
+    return this.productData$.pipe(
+      switchMap((product) =>
+        this.translation.translate('pageMetaResolver.product.title', {
+          productName: product?.product?.name ?? product?.product?.shelfticketname ?? product?.name,
+        })
+      )
+    );
+  }
+  /**
+   * Resolves the page description for the Product Detail Page. The description
+   * is based on the `product.summary`.
+   */
+  override resolveDescription(): Observable<string> {
+    return this.productData$.pipe(
+      switchMap((product) =>
+        this.translation.translate('pageMetaResolver.product.description', {
+          productName: product?.product?.name ?? product?.name,
+        })
+      )
+    );
+  }
+  override resolveCanonicalUrl(): Observable<string> {
     return combineLatest([this.baseSiteService.get(), this.product$]).pipe(
       map(([baseSite, product]) => {
         const baseUrl = (baseSite as any).configMap.entry.find(
@@ -2119,6 +2210,7 @@ C. resolveCanonicalUrl(): Observable<string> {
         const url = `${baseUrl}${product.url}`;
         return this.pageLinkService.getCanonicalUrl({}, url);}));
    }
+}
 
 
 OUTLETS
