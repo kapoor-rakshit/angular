@@ -1885,7 +1885,8 @@ D.1.
 app.module.TS
 --------------------
 import { AuthService } from '@spartacus/core';
-providers: [{ provide: AuthService, useExisting: CUSTOM-AuthService }];
+import { LogoutGuard } from '@spartacus/storefront';
+providers: [{ provide: AuthService, useExisting: CUSTOM-AuthService }, { provide: LogoutGuard, useExisting: CUSTOM-LogoutGuard }];
 
 D.2.
 CUSTOM-AuthService.service.TS
@@ -1912,6 +1913,35 @@ export class CUSTOM-AuthService extends AuthService {
   }
 
   private performPostLogoutActions(): void { }
+}
+
+D.3.
+CUSTOM-LogoutGuard.service.TS
+---------------------------------
+import { Actions, ofType } from '@ngrx/effects';
+import { AuthActions,AuthService,CmsService,GlobalMessageService,GlobalMessageType,ProtectedRoutesService,SemanticPathService} from '@spartacus/core';
+import { LogoutGuard } from '@spartacus/storefront';
+@Injectable({providedIn: 'root'})
+export class CUSTOM-LogoutGuard extends LogoutGuard {
+  constructor(auth: AuthService,cms: CmsService,semanticPathService: SemanticPathService,protectedRoutes: ProtectedRoutesService,
+              router: Router,private actions$: Actions,private globalMessageService: GlobalMessageService) {
+    super(auth, cms, semanticPathService, protectedRoutes, router);
+
+    this.actions$.pipe(ofType(AuthActions.LOGOUT), take(1)).subscribe(() => {
+      this.globalMessageService.add({ key: 'authMessages.signedOutSuccessfully' }, GlobalMessageType.MSG_TYPE_CONFIRMATION);
+    });
+  }
+
+   /**
+     * Whenever there is no specific "logout" page configured in the CMS,
+     * we redirect after the user is logged out.
+     *
+     * The user gets redirected to the homepage, unless the homepage is protected.
+     * We'll redirect to the login page instead.
+   */
+  protected override getRedirectUrl(): any {
+    return this.router.parseUrl('login');
+  }
 }
 
 
