@@ -1435,9 +1435,11 @@ D.
 // A cart and all it's associated data is also deleted from BackOffice/HAC, depending on GUID or CODE
 OR
 - COMP.TS
-  import { MultiCartService } from '@spartacus/cart/base/core';
+  import { Actions, ofType } from '@ngrx/effects';
+  import { CartActions, MultiCartService } from '@spartacus/cart/base/core';
   import { UserIdService } from '@spartacus/core';
-  constructor(protected cartService: CUSTOM-CartService, private multiCartService: MultiCartService, private userIdService: UserIdService) { }
+  constructor(protected cartService: CUSTOM-CartService, private multiCartService: MultiCartService, 
+              private userIdService: UserIdService, private actions$: Actions) { }
 i.
 this.actions$.pipe(ofType(CartActions.DELETE_CART_SUCCESS, CartActions.DELETE_CART_FAIL),
         tap((action: CartActions.DeleteCartSuccess | CartActions.DeleteCartFail) => {
