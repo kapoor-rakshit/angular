@@ -1308,12 +1308,14 @@ backend: { occ: { endpoints: {
     * @param forceCalculate - Optional flag to notify the backend when force cart calculation is required.
     */
     private loadMyCart(userId: string, cartId: string, forceCalculate?: boolean): void {
+     this.loaderService.show();
      this.http.get<Occ.Cart>(this.occEndpointsService.buildUrl('cart', { urlParams: { userId, cartId }, queryParams: { forceCalculate } }))
       .pipe(this.converterService.pipeable(CART_NORMALIZER)).subscribe((cart) => {
         if (cart) {
           // Dispatch success action when the cart is successfully loaded to update store.
           this.store.dispatch(new CartActions.LoadCartSuccess({ userId, cart, cartId }));
         }
+        this.loaderService.hide();
       }, () => {
             this.apiFailureHandler();
       });
@@ -1401,7 +1403,7 @@ B.2.
 // Eg: A product is added to cart, and we need some UI change depending on updated cart data after this product is added to cart.
 i.
 this.multiCartService.reloadCart(this.cartData.code ?? '', { forceCalculate: true });
-ii.
+OR
 this.reloadSub = combineLatest([
     this.userIdService.getUserId().pipe(take(1)), this.activeCartService.getActiveCartId().pipe(take(1))
 ]).subscribe(([userId, cartId]: [string, string]) => {
@@ -1416,8 +1418,8 @@ this.reloadSub = combineLatest([
         if (this.reloadSub) {
           this.reloadSub.unsubscribe();
         }
-      }
-});
+      }});
+ii.
 this.multiCartService.isStable(cartId).pipe(takeUntil(this.destroy$)).subscribe((isloaded: boolean) => {
    if (isloaded) { window.location.reload(); }
 });
@@ -1436,7 +1438,17 @@ OR
   import { MultiCartService } from '@spartacus/cart/base/core';
   import { UserIdService } from '@spartacus/core';
   constructor(protected cartService: CUSTOM-CartService, private multiCartService: MultiCartService, private userIdService: UserIdService) { }
+i.
+this.actions$.pipe(ofType(CartActions.DELETE_CART_SUCCESS, CartActions.DELETE_CART_FAIL),
+        tap((action: CartActions.DeleteCartSuccess | CartActions.DeleteCartFail) => {
+          this.loaderService.hide();
+          if (action.type === CartActions.DELETE_CART_SUCCESS) {} 
+          else if (action.type === CartActions.DELETE_CART_FAIL) {}
+        })
+      ).subscribe();
+ii.
   this.cartService.getActiveCartId().pipe(withLatestFrom(this.userIdService.getUserId()), take(1), tap(([cartId, userId]) => {
+    this.loaderService.show();
     this.multiCartService.deleteCart(cartId, userId);
   })).subscribe(() => { });
 
