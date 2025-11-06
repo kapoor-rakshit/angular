@@ -2179,13 +2179,13 @@ This makes it the perfect place to do any of the initialization work/logic for t
 
 ngDoCheck()	
 Detect and act upon changes that Angular can't or won't detect on its own.
-Called during every change detection run, immediately after ngOnChanges() and after ngOnInit() on the first run.
+Called during a. EVERY change detection run (even if changeDetection is OnPush), b. immediately after ngOnChanges() and c. after ngOnInit() on first run.
 NOTE: In DEVELOPMENT MODE Angular always runs ngDoCheck() twice, second time for double detect changes i.e. a notify b, and b notify a
       In production mode change detection is only run once.
 example:
 <app-rates [rates]="ratesVAR"></app-rates>
 this.rates.inr = 550; // NOT tracked by ngOnChanges() as there is NOT REFERENCE change of prop
-		      // However, it is tracked by ngDoCheck()
+		              // However, it is tracked by ngDoCheck()
 
 ngAfterContentInit()
 Content is what is passed as children usually to be projected at some <ng-content> element of a component.
@@ -2217,9 +2217,35 @@ Unsubscribe Observables and detach event handlers to avoid memory leaks.
 Called just before Angular destroys the directive/component.
 
 Example:
+A.
 Written in  ".component.ts"  of  respective COMPONENT
         export class COMPONENTNAME implements OnInit , OnChanges , OnDestroy{  }
-        
+B.
+In case we have a PARENT-CHILD component hierarchy
+ParentComponent: Constructor
+ChildComponent: Constructor
+ParentComponent: OnInit
+ParentComponent: DoCheck
+ParentComponent: AfterContentInit
+ParentComponent: AfterContentChecked
+ChildComponent: OnChanges
+ChildComponent: OnInit
+ChildComponent: DoCheck
+ChildComponent: AfterContentInit
+ChildComponent: AfterContentChecked
+ChildComponent: AfterViewInit
+ChildComponent: AfterViewChecked
+ParentComponent: AfterViewInit
+ParentComponent: AfterViewChecked
+ChildComponent: OnDestroy
+ParentComponent: OnDestroy
+/*** NOTE: ONLY IN DEVELOPMENT MODE, BELOW METHODS ARE AGAIN CALLED ***/
+ParentComponent: DoCheck
+ParentComponent: AfterContentChecked
+ChildComponent: DoCheck
+ChildComponent: AfterContentChecked
+ChildComponent: AfterViewChecked
+ParentComponent: AfterViewChecked
         
         
 Feature MODULES
