@@ -2154,8 +2154,9 @@ Angular 2’s DI (dependency injection) also tries to find providers that match 
 
 ngOnChanges()	 {  }
 Called once before ngOnInit() ONLY IF IT HAS @INPUT props, OTHERWISE NOT CALLED and also
-Respond when @Input properties REFERENCE change i.e. this.rates.inr = 550;    // NOT CALL, still @Input() property changes if changeDetection is NOT OnPush
-						     this.rates = {inr: 550}; // CALL
+Respond when @Input properties REFERENCE change i.e. this.rates = {inr: 550}; // TRACKED by ngOnChanges
+                                                     this.rates.inr = 550;    // NOT TRACKED by ngOnChanges,
+                                                                              // still @Input() property changes if changeDetection is NOT OnPush
 The method receives a SimpleChanges object of current and previous property values.
 example:
         TS  (child.comp.ts)
