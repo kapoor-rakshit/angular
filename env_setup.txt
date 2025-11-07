@@ -2085,6 +2085,11 @@ and run command  `npm run Opublish`
 To use this library in another angular project
 > npm install <LIBRARY-NAME>
 And import module + use selector of component from library
+NOTE: ALWAYS USE ABSOLUTE PATH OF LIBRARY IN THIS PROJECT WHICH IS USING/INSTALLING LIBRARY
+eg: // CORRECT
+	import { MODULE-NAME } from 'LIBRARY-NAME';
+	// INCORRECT
+    import { MODULE-NAME } from 'libs/<LIBRARY-PROJECT>/<LIBRARY-NAME>';
 - other-project-module.MODULE.TS
   import { MODULE-NAME } from 'LIBRARY-NAME';
   imports: [MODULE-NAME]
@@ -2093,7 +2098,7 @@ And import module + use selector of component from library
 
 B. Setup Azure and configure .npmrc
 ------------------------------------------
-- Navigate to Azure Artifacts.
+- Navigate to Azure Artifacts (https://dev.azure.com/AZURE_ORGANIZATION_NAME/AZURE_PROJECT/_artifacts/feed/AZURE_FEED)
 - Create a FEED, which is like a page that allows users to store their packages and control who can access them.
 - Click on Connect to FEED, and choose NPM for project setup steps.
 - Under Project Setup, choose Other.
@@ -2105,10 +2110,10 @@ B. Setup Azure and configure .npmrc
 registry=https://pkgs.dev.azure.com/ORGANIZATION_NAME/PROJECT_NAME/_packaging/FEED_NAME/npm/registry/
 always-auth=true
 ; begin auth token
-//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:username=ORGANIZATION_NAME
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:username=AZURE_ORGANIZATION_NAME
 //pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:_password=[BASE64_ENCODED_PERSONAL_ACCESS_TOKEN]
 //pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/registry/:email=npm requires email to be set but doesn't use the value
-//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:username=ORGANIZATION_NAME
+//pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:username=AZURE_ORGANIZATION_NAME
 //pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:_password=[BASE64_ENCODED_PERSONAL_ACCESS_TOKEN]
 //pkgs.dev.azure.com/<ORGANIZATION_NAME>/<PROJECT_NAME>/_packaging/<FEED_NAME>/npm/:email=npm requires email to be set but doesn't use the value
 ; end auth token
@@ -2155,7 +2160,7 @@ Angular 2’s DI (dependency injection) also tries to find providers that match 
 ngOnChanges()	 {  }
 Called once before ngOnInit() ONLY IF IT HAS @INPUT props, OTHERWISE NOT CALLED and also
 Respond when @Input properties REFERENCE change i.e. this.rates = {inr: 550}; // TRACKED by ngOnChanges
-                                                     this.rates.inr = 550;    // NOT TRACKED by ngOnChanges,
+                                                     this.rates.inr = 550;    // NOT TRACKED by ngOnChanges, but TRACKED by ngDoCheck
                                                                               // still @Input() property changes if changeDetection is NOT OnPush
 The method receives a SimpleChanges object of current and previous property values.
 example:
@@ -2185,9 +2190,9 @@ NOTE: In DEVELOPMENT MODE Angular always runs ngDoCheck() twice, second time for
       In production mode change detection is only run once.
 example:
 <app-rates [rates]="ratesVAR"></app-rates>
-this.rates.inr = 550; // NOT tracked by ngOnChanges() as there is NOT REFERENCE change of prop
-		              // However, it is tracked by ngDoCheck()
-
+this.rates.inr = 550; // TRACKED by ngDoCheck() always, even if changeDetection is OnPush
+					  // NOT TRACKED by ngOnChanges() as there is NOT REFERENCE change of prop
+					  // still @Input() property changes if changeDetection is NOT OnPush
 ngAfterContentInit()
 Content is what is passed as children usually to be projected at some <ng-content> element of a component.
 View is the template of the current component.
