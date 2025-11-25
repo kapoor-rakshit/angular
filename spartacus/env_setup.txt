@@ -358,6 +358,8 @@ MODULES / COMPONENTS / LAYOUT
 // To use feature components that are available via Spartacus Storefront, they are to be imported.
 // `withConfig` defines that it is a CMS component.
 // flexType or typeCode value that we receive from backend is used for mapping to our SPARTACUS component
+// flexType: It changes with each component. Eg: `FFStoreSearchComponent` and should be used for mapping.
+// typeCode: It is a reserved spartacus keyword for component's type. Eg: `CMSFlexComponent` and should be AVOIDED for mapping.
 custom-pdp.module.TS
 ----------------------
 @NgModule({
@@ -467,8 +469,8 @@ ADD CMS COMPONENT/DATA FROM SLOT, INSIDE ANGULAR COMPONENT
   providers: [
     provideConfig(<CmsConfig>{
       cmsComponents: {
-        TYPE-CODE: {                            // TYPE-CODE is same value as given to  [cxComponentWrapper]  typeCode in COMP.HTML
-          component: COMP-NAME,                 // COMP-NAME is component to render, when this typecode matches with [cxComponentWrapper]
+        FLEX-TYPE_OR_TYPE-CODE: {               // FLEX-TYPE_OR_TYPE-CODE is same value as given to  [cxComponentWrapper]  flexType or typeCode in COMP.HTML
+          component: COMP-NAME,                 // COMP-NAME is component to render, when this flexType or typecode matches with [cxComponentWrapper]
         },
       },
     }),
@@ -486,9 +488,9 @@ import {PageComponentModule} from '@spartacus/storefront';
 3. COMP.HTML
 ---------------
 <ng-container *ngIf="component.data$ | async as compData">
- <!-- A. add component using typecode / uid -->
-  <ng-container                                // `[cxComponentWrapper]` provides a position for component to render, using `typeCode` value of comp in /pages API
-   [cxComponentWrapper]="{                     // this is same as using `slots: ['SLOT-NAME']` in `layout.config.TS`, using `position` value of slot in /pages API
+ <!-- A. add component using flexType / typecode / uid -->
+  <ng-container                  // `[cxComponentWrapper]` provides a position for component to render, using `flexType` or `typeCode` value of comp in /pages API
+   [cxComponentWrapper]="{       // this is same as using `slots: ['SLOT-NAME']` in `layout.config.TS`, using `position` value of slot in /pages API
      flexType: compData?.productBrochure?.typeCode,
      typeCode: compData?.productBrochure?.typeCode,
      uid: compData?.productBrochure?.uid
