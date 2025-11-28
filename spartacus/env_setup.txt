@@ -2337,3 +2337,43 @@ export class ResponsiveService extends BreakpointService {
   isMobile$: Observable<boolean> = this.isDown(BREAKPOINT.sm);  // when referring DOWN, it picks up limit of next breakpoint, here sm < 768px
   isDesktop$: Observable<boolean> = this.isUp(BREAKPOINT.lg);   // when referring UP, it picks up limit of same breakpoint, here lg >= 992px
 }
+
+B.1. OVERRIDE BREAKPOINTS
+----------------------------------
+To override default breakpoint values of xs, sm, md, lg, xl
+NOTE: BREAKPOINT VALUES IN .TS FILE and .SCSS FILE MUST BE IN SYNC, AS SHOWN IN EXAMPLE BELOW
+a. In layout-config.TS file,
+   add breakpoints object with ALL values ( xs, sm, md, lg, xl )
+   Eg:
+   import { LayoutConfig } from '@spartacus/storefront';
+   export const CSLayoutConfig: LayoutConfig = {
+     layoutSlots: { },
+     breakpoints: {
+      xs: 576,
+      sm: 668,
+      md: 856,
+      lg: 1100,
+      xl: 1300,
+     }
+   }
+b. In src/styles.SCSS file,
+   add variable `$grid-breakpoints` with first value as 0
+   $grid-breakpoints: (
+     xs: 0,
+     sm: 576px,
+     md: 668px,
+     lg: 856px,
+     xl: 1100px,
+   );
+c. In comp.TS file
+   It will refer layout-config.TS values
+   - this.breakPointService.isUp(BREAKPOINT.md).pipe(takeUntil(this.unsubscribe$)).subscribe((isDesktop) => {});
+     // isUp will pick 668px i.e. one previous value of breakpoint
+   - this.breakPointService.isDown(BREAKPOINT.md).pipe(takeUntil(this.unsubscribe$)).subscribe((isMobile) => {})
+     // isDown will pick 856px i.e. self value of breakpoint
+d. In comp.SCSS file
+   It will refer src/styles.SCSS values
+   - @include media-breakpoint-up(md) {}
+     // up will pick 668px i.e. self value of breakpoint
+   - @include media-breakpoint-down(md) {}
+     // down will pick 856px i.e. one next value of breakpoint
