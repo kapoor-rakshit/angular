@@ -1948,13 +1948,13 @@ This concept is used when we have a common class for data that can be used by mu
    
    Built-in transformations
    Angular includes two built-in transform functions for the two most common scenarios: coercing values to boolean and numbers.
-   booleanAttribute makes the presence of the attribute a "true" value. However, literal string "false" is treated as the boolean false.
-   numberAttribute attempts to parse the given value to a number, producing NaN if parsing fails.
+   - booleanAttribute makes the presence of the attribute a "true" value. However, literal string "false" is treated as the boolean false.
+   - numberAttribute attempts to parse the given value to a number, producing NaN if parsing fails.
    Eg:   
    import {booleanAttribute, numberAttribute} from '@angular/core';
    export class CHILD-COMP {
-     disabled = input(false, {transform: booleanAttribute});
-     value = input(0, {transform: numberAttribute});
+     @Input({transform: booleanAttribute}) disabled: boolean = false;
+     @Input({transform: numberAttribute}) value: number = 0;
    }
    
 NOTE: use of @Attribute(), when any child comp properties value is static and it will never change
