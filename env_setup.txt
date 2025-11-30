@@ -1848,24 +1848,25 @@ NOTE: Signals may be either writable OR read-only.
    You can use the set() method to change a writable signal’s value, or the update() method to modify it based on a specific function.
    Eg:
    our_first_signal = signal<number>(0);				// definition of a signal with initial value 0
-   this.our_first_signal.set(8);					// set the value
-   this.our_first_signal.update((val) => val + 2);			// update the value
-   console.log(this.our_first_signal());      		                // expected results: 10
+   this.our_first_signal.set(8);					    // set the value
+   this.our_first_signal.update((val) => val + 2);	    // update the value
+   console.log(this.our_first_signal());      		    // expected results: 10
 2. Computed Signals
    These signals get their value from other signals.
    You set up a computed signal using the computed() function and telling it how to derive its value.
    When any of the signals it depends on changes, the computed signal updates accordingly.
    Eg:
-   const price = signal(10);						// Create two signals: price and quantity
+   const price = signal(10);									// Create two signals: price and quantity
    const quantity = signal(5);
    const totalCost = computed(() => price() * quantity());		// Create a computed signal for total cost based on price and quantity
-   console.log(totalCost()); 						// Output: 50
+   console.log(totalCost()); 									// Output: 50
 3. Effects
-   An effect is a process that is triggered whenever there is a change in one or more signal values.
+   An effect is a process that is triggered whenever it is using that signal ( eg: this.isAuthenticated() ) and 
+   there is a change in that signal value ( eg: this.isAuthenticated.set(true) OR this.isAuthenticated.update((currVAL) => currVAL + 2) )
    This functionality is implemented using the effect() function.
    Eg:
    isAuthenticated = signal(false);					// Create a signal for user authentication status
-   effect(() => {							// Create an effect to perform actions based on authentication status
+   effect(() => {									// Create an effect to perform actions based on authentication status
     if (this.isAuthenticated()) {
       console.log('User is authenticated. Redirecting to dashboard…');
     } else {
@@ -1873,8 +1874,28 @@ NOTE: Signals may be either writable OR read-only.
     }
    });
    this.isAuthenticated.set(true);
+4. Input Signals
+   @Input() childVAR: string = 'DEFAULT_VALUE';
+   @Input('ALIAS_FROM_PARENT_HTML') childVAR: string = 'DEFAULT_VALUE';
+   @Input({required: true, alias: 'ALIAS_FROM_PARENT_HTML'}) childVAR: string = 'DEFAULT_VALUE';
+   properties can be rewritten/refactored in SIGNALS syntax
+   Eg:
+   A- inputSignalVAR = input<string>('DEFAULT_VALUE');
+      // no alias for input property
+   B- inputSignalVAR = input<string>('DEFAULT_VALUE', { alias: 'ALIAS_FROM_PARENT_HTML' });
+      // when aliasVAR(ALIAS_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are same,
+         single type can be passed to input<>
+   C- inputSignalVAR = input<string, number>('DEFAULT_VALUE', {alias: 'ALIAS_FROM_PARENT_HTML', transform: (val: number) => `transformed ${val}`});
+      // when aliasVAR(ALIAS_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are different,
+         two types are passed to input<CHILD_VAR_TYPE, ALIAS_VAR_TYPE>
+         and
+         transform method is passed, which has arg of ALIAS_VAR_TYPE and return type is CHILD_VAR_TYPE
+   D- inputSignalVAR = input.required<number>();
+      // if input is marked as REQUIRED, then DEFAULT_VALUE is not passed
+   E- inputSignalVAR = input.required<number, string>({alias: 'ALIAS_FROM_PARENT_HTML', transform: (val: string) => +val});
+      // if input is marked as REQUIRED, then DEFAULT_VALUE is not passed
+  
  
-
 PASSING VARIABLES/VALUES TO and FROM COMPONENTS
 =================================================
 This concept is used when we have a common class for data that can be used by multiple components (child components)
