@@ -1876,25 +1876,48 @@ NOTE: Signals may be either writable OR read-only.
    this.isAuthenticated.set(true);
 4. Input Signals
    @Input() childVAR: string = 'DEFAULT_VALUE';
-   @Input('ALIAS_FROM_PARENT_HTML') childVAR: string = 'DEFAULT_VALUE';
-   @Input({required: true, alias: 'ALIAS_FROM_PARENT_HTML'}) childVAR: string = 'DEFAULT_VALUE';
+   @Input('ALIAS_VAR_FROM_PARENT_HTML') childVAR: string = 'DEFAULT_VALUE';
+   @Input({required: true, alias: 'ALIAS_VAR_FROM_PARENT_HTML', transform: (val: string) => val.toUpperCase()}) childVAR: string = 'DEFAULT_VALUE';
    properties can be rewritten/refactored in SIGNALS syntax
    Eg:
    A- inputSignalVAR = input<string>('DEFAULT_VALUE');
       // no alias for input property
-   B- inputSignalVAR = input<string>('DEFAULT_VALUE', { alias: 'ALIAS_FROM_PARENT_HTML' });
-      // when aliasVAR(ALIAS_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are same,
+   B- inputSignalVAR = input<string>('DEFAULT_VALUE', { alias: 'ALIAS_VAR_FROM_PARENT_HTML' });
+      // when aliasVAR(ALIAS_VAR_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are same,
          single type can be passed to input<>
-   C- inputSignalVAR = input<string, number>('DEFAULT_VALUE', {alias: 'ALIAS_FROM_PARENT_HTML', transform: (val: number) => `transformed ${val}`});
-      // when aliasVAR(ALIAS_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are different,
+   C- inputSignalVAR = input<string, number>('DEFAULT_VALUE', { alias: 'ALIAS_VAR_FROM_PARENT_HTML', transform: (val: number) => `transformed ${val}` });
+      // when aliasVAR(ALIAS_VAR_FROM_PARENT_HTML) type and childVAR(inputSignalVAR()) type are different,
          two types are passed to input<CHILD_VAR_TYPE, ALIAS_VAR_TYPE>
          and
-         transform method is passed, which has arg of ALIAS_VAR_TYPE and return type is CHILD_VAR_TYPE
+         a transform method is passed, which has arg of ALIAS_VAR_TYPE and return type is CHILD_VAR_TYPE
    D- inputSignalVAR = input.required<number>();
       // if input is marked as REQUIRED, then DEFAULT_VALUE is not passed
-   E- inputSignalVAR = input.required<number, string>({alias: 'ALIAS_FROM_PARENT_HTML', transform: (val: string) => +val});
+   E- inputSignalVAR = input.required<number, string>({ alias: 'ALIAS_VAR_FROM_PARENT_HTML', transform: (val: string) => +val });
       // if input is marked as REQUIRED, then DEFAULT_VALUE is not passed
-  
+5. Model Input Signals
+   Model inputs enable component to propagate new values back to its parent component.
+   Using the two-way binding syntax means that any changes to the CHILD_COMP's
+   CHILD_VAR automatically propagate back to the `PARENT_VAR` signal.
+   This binding keeps the values of CHILD_VAR and PARENT_VAR in sync.
+   NOTE: that this binding uses the signal *instance*, not the signal value.
+   Eg:
+   A. child.COMP.TS
+      export class CHILD-COMP {
+        CHILD_VAR = model(0);         // Define a model input named "CHILD_VAR".
+        
+        public increment() {
+          this.CHILD_VAR.update(oldValue => oldValue + 10);
+        }
+      }
+   B. parent.COMP.HTML
+      <child-component [(CHILD_VAR)]="PARENT_VAR" />
+   C. parent.COMP.TS
+      export class PARENT-COMP {
+        PARENT_VAR = signal(0);        // Create a writable signal for the `PARENT_VAR` local state.
+        							   // OR
+        PARENT_VAR = 0;                // Plain JavaScript property
+      }
+
  
 PASSING VARIABLES/VALUES TO and FROM COMPONENTS
 =================================================
@@ -1913,7 +1936,8 @@ This concept is used when we have a common class for data that can be used by mu
      return this.VAR;
    }
   OR
-   @Input({ required: true, alias: 'EXTERNAL_VAR_NAME' }) INTERNAL_VAR_NAME: string = "DefaultValue";   // v16, @Input() values can be made required
+   // v16, @Input() values can be made required
+   @Input({ required: true, alias: 'EXTERNAL_VAR_NAME', transform: (val: string) => val.toUpperCase() }) INTERNAL_VAR_NAME: string = "DefaultValue";
    In child-comp.html
    ------------------------
    {{ INTERNAL_VAR_NAME }}
@@ -1921,6 +1945,17 @@ This concept is used when we have a common class for data that can be used by mu
    -------------------------
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"> default text if child component not available </child-selector-tag>
    <child-selector-tag  [EXTERNAL_VAR_NAME] = "varFromParent.ts"/>     // v16, SELF-CLOSING tags
+   
+   Built-in transformations
+   Angular includes two built-in transform functions for the two most common scenarios: coercing values to boolean and numbers.
+   booleanAttribute makes the presence of the attribute a "true" value. However, literal string "false" is treated as the boolean false.
+   numberAttribute attempts to parse the given value to a number, producing NaN if parsing fails.
+   Eg:   
+   import {booleanAttribute, numberAttribute} from '@angular/core';
+   export class CHILD-COMP {
+     disabled = input(false, {transform: booleanAttribute});
+     value = input(0, {transform: numberAttribute});
+   }
    
 NOTE: use of @Attribute(), when any child comp properties value is static and it will never change
       Accessing property using @Attribute() means, the value will be evaluated only once (during the first change detection) and
