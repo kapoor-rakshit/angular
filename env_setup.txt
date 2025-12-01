@@ -4200,9 +4200,21 @@ Angular TDD
 MISC. TESTING SAMPLE CODES/NOTES
 ---------------------------------------
     - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)      // To have a report of only a specific component
-    - karma.conf.js : browsers:['ChromeHeadless'],				  // `ChromeHeadless` to prevent browser popup | `Chrome` to allow browser popup
-    		    : singleRun:false,                                            // To rerun test report on any change of file(s)
-    		    : captureTimeout:150000					  // To set timeout for browser while running test cases on machine
+    - karma.conf.js 
+      To customize Karma, create a `karma.conf.js` by running:
+      > ng generate config karma
+      It will create configuration file and update `angular.json` with
+      ARCHITECT -> TEST -> OPTIONS -> "karmaConfig": "karma.conf.js"
+      Inside `karma.conf.js` file we can configure following:
+        - coverageReporter: { 										  // enforce a minimum code coverage level
+			check: {                                                  // It will cause test run to fail if specified coverage thresholds are not met
+        		global: { statements: 80, branches: 80, functions: 80, lines: 80 }
+      		}
+		  }
+		- browsers:['ChromeHeadless'],				  				  // `ChromeHeadless` to prevent browser popup | `Chrome` to allow browser popup
+    	- singleRun:false,                                            // To rerun test report on any change of file(s)
+        - restartOnFileChange: true,
+    	- captureTimeout:150000					  					  // To set timeout for browser while running test cases on machine
     
     - {provide: Store, useValue: {select: () => of({}) , dispatch: () => {}}}     // When working with Store test cases,add to providers array of TestBed config
     
