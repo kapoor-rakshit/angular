@@ -4199,7 +4199,16 @@ Angular TDD
     
 MISC. TESTING SAMPLE CODES/NOTES
 ---------------------------------------
-    - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)      // To have a report of only a specific component
+    - test.TS       : require.context(/COMPONENT-NAME.component\.spec\.ts$/)   
+      To have a report of only a specific component, prior to angular v15 we can use context.
+      For angular v15 and later, we can use  "include": []  key in `angular.json` file
+      include accepts Globs of files to include, relative to project root. 
+	  There are 2 special cases:
+      when a path to directory is provided, all spec files ending ".spec.@(ts|tsx)" will be included
+      when a path to a file is provided, and a matching spec file exists it will be included instead.
+      Eg:
+      "include": ["src/app/coveo/**/*.spec.ts"]
+    
     - karma.conf.js 
       To customize Karma, create a `karma.conf.js` by running:
       > ng generate config karma
