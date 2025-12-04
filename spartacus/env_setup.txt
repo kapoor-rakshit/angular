@@ -2,21 +2,26 @@ Spartacus is Angular-based JavaScript storefront for SAP Commerce Cloud.
 Spartacus talks to SAP Commerce Cloud exclusively through the Commerce REST API.
 Starting with version 5.0, “SAP Commerce Cloud, Composable Storefront” is name for official release of project “Spartacus” libraries published by SAP.
 
-Spartacus Code Repo, must be cloned on development machine, to have reference for builtin core features like cart, search etc.
+Spartacus Code Repo
+============================
+Must be cloned on development machine, to have reference for builtin core features like cart, search etc.
 GITHUB REPO: https://github.com/SAP/spartacus
 REFERENCE  : https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/cfcf687ce2544bba9799aa6c8314ecd0/e38d45609de04412920a7fc9c13d41e3.html
 
 Storefront Version
+=========================
 REFERENCE: https://github.com/SAP/spartacus#requirements
 For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Composable Storefront) version, refer above website
 
 Storefront Update
+=======================
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/10a8bc7f635b4e3db6f6bb7880e58a7d/7266f6f01edb4328b4e09df299ea09be.html
 NOTE: When update has finished running, inspect your code for comments that begin with // TODO:Spartacus
 NOTE: Also update `manifest.json` file , present in 'js-storefront' directory
       So that CCv2 can pick correct version of NodeJS as per storefront version
 
 SmartEdit
+=====================
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/e1391e5265574bfbb56ca4c0573ba1dc/a4b1ea8d8a7249d28ec4aa0e58ff5518.html
            https://sap.github.io/spartacus-docs/smartEdit-setup-instructions-for-spartacus/
 Available via @spartacus/smartedit, it allows for creating new pages on website via an interactive GUI.
@@ -45,12 +50,10 @@ To access SmartEdit : https://backoffice.HOST-ENV-public.model-t.cc.commerce.ond
          })
 
 ASM (Assisted Service Mode)
+==================================
 Available via @spartacus/asm, it allows for a Super-User functionality where an agent can login to any customer account and check their cart etc.
 `AsmFeatureModule` module is imported in `spartacus-features.module.ts`.
 To access ASM : append `?asm=true` to website. Eg: https://HOSTNAME.com?asm=true
-A. 
-
-B.
 Login with credentials and custom backend API will let you know that logged in user is AGENT or NORMAL user.
 If AGENT, then it will redirect to /selectCustomer component screen, to choose customer to emulate as.
 We will set userId to as selected customer id and it is then available for entire application, to be passed in API calls.
@@ -211,13 +214,14 @@ export class UpdateUserIdInterceptor implements HttpInterceptor {
   }
 }
 
-
 HAC (Hybris Administrative Console or BackOffice Admin Console)
+=====================================================================
 It is for administrator to handle entire functions and operations in website like:
 ImpEx (Import-Export), Groovy Script, Configuration, Cache, Cron Job
 Use-Case-1: CORS issue: Check property 'allowedHeaders' through HAC , delete web application services for CORS , rerun CORS impex
 
 RBSC (Repository Based Shipment Channel)
+===============================================
 To install composable storefront, need to set up access to composable storefront libraries.
 RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
 - Create an S-user for RBSC that has the appropriate licenses to download the composable storefront libraries.
@@ -227,9 +231,59 @@ RBSC website: https://ui.repositories.cloud.sap/www/webapp/users/
 - In User Management tab of RBSC website, select the technical user and copy the generated NPM Base64 Credentials, required for .npmrc file in project
 
 CCv2 (Commerce Cloud Version 2)
+===============================================
 https://portal.commerce.ondemand.com
 - Here we need to login with S-user ID.
 - It allows to make a BUILD from configured repository's branch and then deploy to specific ENVIRONMENT.
+
+SPARTACUS CDN
+========================
+If we want to use Spartacus CDN, rather than Spartacus BASE, following files require changes:
+A. .npmrc
+-------------------
+Update all occurrences of `npmsrv.base` to `npmsrv.cdn`
+Eg:
+@spartacus:registry=https://73554900100900004337.npmsrv.cdn.repositories.cloud.sap/
+//73554900100900004337.npmsrv.cdn.repositories.cloud.sap/:_auth=NPM-CREDENTIALS-FROM-RBSC
+always-auth=true
+B. yarn.lock
+--------------------
+Update all occurrences of `npmsrv.base` to `npmsrv.cdn`
+This can be done MANUALLY or AUTOMATED (by generating new yarn.lock file)
+NOTE: For AUTOMATED process, When generating new yarn.lock file
+- Delete node_modules
+- Delete yarn.lock
+- Run command for clearing cache  i.e.  `yarn cache clean`
+- Run command for installing deps i.e.  `yarn install`
+Eg:
+"@spartacus/cart@~2211.37.0":
+  version "2211.37.0"
+  resolved "https://73554900100900004337.npmsrv.cdn.repositories.cloud.sap/nexus3/repository/npm73554900100900004337/@spartacus/cart/-/cart-2211.37.0.tgz#c634e0901854374"
+  integrity sha512-p1L8n6vF2lyVGXN16DAiAB3RQ==
+  dependencies:
+    tslib "^2.8.1"
+C. manifest.json
+----------------------
+Add CDN repository to "enabledRepositories": ["spartacus-6-cdn"]
+Eg:
+{
+  "applications": [
+    {
+      "name": "APP_NAME",
+      "path": "APP_NAME",
+      "nodeVersion": "22",
+      "ssr": {
+        "enabled": false,
+        "path": "dist/APP_NAME/server/server.mjs"
+      },
+      "csr": {
+        "webroot": "dist/APP_NAME/browser/"
+      },
+      "enabledRepositories": ["spartacus-6-cdn"]
+    }
+  ],
+  "nodeVersion": "22"
+}
 
 SETUP
 =============
