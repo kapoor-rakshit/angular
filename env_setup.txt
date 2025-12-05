@@ -2940,9 +2940,10 @@ NOTES:
 1. Adding `?` operator makes that prop as optional.
    OR
    Use `Partial<INTERFACE>`, to specify that ALL properties within INTERFACE are optional, regardless of use of '?' operator against each prop.
-2. Use `Pick<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
-3. Use `Omit<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by excluding a set of properties specified as KEYS from INTERFACE.
-4. Extend an interface by declaring it again, it will have all properties within it's same name.
+2. Use `Required<INTERFACE>`, to make all properties of INTERFACE required (removes optional modifiers).
+3. Use `Pick<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
+4. Use `Omit<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by excluding a set of properties specified as KEYS from INTERFACE.
+5. Extend an interface by declaring it again, it will have all properties within it's same name.
    OR
    Use `extends` keyword to inherit from parent INTERFACE props.
 Eg:
