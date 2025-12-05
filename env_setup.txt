@@ -25,6 +25,16 @@ Why TypeScript ?
 2. Errors related to typeof args, return type can be detected at compile time, which otherwise would be possible at runtime only.
 3. Auto suggestions while writing TS code is provided by most tools (VScode).
 4. No need to write unit test cases related to type of args, return type.
+TypeScript Compiler (tsc)
+----------------------------------
+The TypeScript compiler (tsc) converts TypeScript code to JavaScript
+Special Types in TypeScript
+----------------------------------
+Apart from "string", "number", "boolean", "object", "undefined". There are other types too.
+- any: Disables type checking completely. Use sparingly, only when necessary.
+- unknown: Safer alternative to any. Requires type checking before use.
+- never: Represents values that never occur (e.g., functions that always throw).
+- void: Absence of a return value (functions that don't return anything).
 
 
 Angular Versioning
@@ -741,7 +751,16 @@ angular.json      : CLI configuration defaults
             			     }
 		    3. To configure optimization strategy for production SERVER
 		       "production": { "outputHashing": "media", "optimization": true, "sourceMap": false }
-tsconfig.json     : typescript configuration
+tsconfig.json     : configuration file for TypeScript projects.
+                    When you run tsc (TypeScript compiler) in a directory, it looks for a tsconfig.json file. 
+                    It tells the TypeScript compiler how to:
+                    - compilerOptions: Control which TypeScript features to enable or disable
+                    - target: Specify the target JavaScript version (ES5, ES2020, etc.)
+                    - module: Configure module system (CommonJS, ES modules, etc.) for bundlers
+                    - strict: Set up strict type checking rules
+                    - include/exclude: Define which files to include or exclude from compilation
+                    - outDir: Configure output directory and file structure
+                    - lib: Specifies which library files TypeScript should include. Include "DOM" for browser projects.
 package.json      : configures the npm package dependencies ie which libraries will be installed into node_modules plus script rules.
                     1. ~version : “tilde: freezes major version and minor version(if minor exists, else update minor also), updates bug fixes i.e. 8.3.X”
 				  Eg: ~2.3.5 = 2.3.X | ~2.3 = 2.3.X | ~2 = 2.X.X | ~0.3.5 = 0.3.X | ~0.3 = 0.3.X | ~0 = 0.X.X
