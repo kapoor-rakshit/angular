@@ -3047,6 +3047,17 @@ B.3.) To keep service only to a certain module, add metadata providedIn: MODULE_
 C) declare this service class in "providers"/"viewProviders" array of COMPONENT metadata to have different instance, but same within component & it's child components only.
    eg: if service provided in both providers array of ROOT module and component, we will have two instances of that service
 
+INJECTOR for DI
+-------------------------
+Using constructor for DI, causes injection before component lifecycle hook.
+This may result in circular dependency issues.
+So, using injector we can inject service only at required place in our component.
+Eg:
+import {Injector} from '@angular/core';
+constructor(private injector: Injector) { }
+const serviceVAR = this.injector.get(SERVICE_NAME);
+serviceVAR.METHOD();
+
 PROVIDERS ARRAY
 --------------------------
 Dependency providers can be configured in following ways:
