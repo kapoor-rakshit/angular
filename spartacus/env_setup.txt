@@ -15,7 +15,14 @@ For which version of    Node, Angular, Yarn, NPM    to use with Spartacus(Compos
 
 Storefront Update
 =======================
+1.
+Before updating Composable Storefront to a newer version,
+check compatability of that Composable Storefront version with CCv2 (Commerce Cloud) version
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/10a8bc7f635b4e3db6f6bb7880e58a7d/ba62c2c708ec4751a2612a512177419b.html
+2.
+Update Spartacus/Composable Storefront
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/10a8bc7f635b4e3db6f6bb7880e58a7d/7266f6f01edb4328b4e09df299ea09be.html
+3.
 NOTE: When update has finished running, inspect your code for comments that begin with // TODO:Spartacus
 NOTE: Also update `manifest.json` file , present in 'js-storefront' directory
       So that CCv2 can pick correct version of NodeJS as per storefront version
