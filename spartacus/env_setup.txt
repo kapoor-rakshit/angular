@@ -242,6 +242,15 @@ CCv2 (Commerce Cloud Version 2)
 https://portal.commerce.ondemand.com
 - Here we need to login with S-user ID.
 - It allows to make a BUILD from configured repository's branch and then deploy to specific ENVIRONMENT.
+- In DEPLOYMENTS -> BUILDS
+  Create New Build
+  Enter branch name (since repository is already configured in REPOSITORIES section)
+  Once BUILD is successful, click on it from list of BUILDs
+  Choose target environment, migration mode, deployment type and click DEPLOY.
+- In DEPLOYMENTS -> ENVIRONMENTS
+  we can see list of all available environments in that particular CCv2 instance.
+  each environment has set of PUBLIC ENDPOINTS / URLs that we can configure.
+  It allows to access our application using different hostnames like uat1NAME-1.com, jsappsNAME-1.com    etc..
 
 SPARTACUS CDN
 ========================
