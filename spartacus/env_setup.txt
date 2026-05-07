@@ -2029,6 +2029,145 @@ export class CUSTOM-LogoutGuard extends LogoutGuard {
     return this.router.parseUrl('login');
   }
 }
+IMPORTANT NOTE
+-----------------------------
+AFTER UPGRADING TO SPARTACUS VERSION 221121.1 or later AND related HYBRIS COMMERCE CLOUD VERSION 2211-jdk21.1 or later,
+ABOVE METHOD TO LOGIN WILL NOT WORK.
+SAP Commerce Cloud now uses Authorization Code Grant with Proof Key for Code Exchange (PKCE).
+It follows an API sequence for login process:
+      1. /authorizationserver/csrf
+      2. /authorizationserver/login
+      3. /authorizationserver/oauth/authorize
+      4. ?code
+      5. /authorizationserver/oauth/token
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
+A.
+If composable storefront is generated at version 221121.1 or newer, these toggles are enabled by default.
+If you are updating composable storefront from version 2211.43 or older to version 221121.1 or newer, you need to manually enable these toggles.
+src\app\spartacus\spartacus-features.module.ts
+=======================================================
+import { provideFeatureToggles } from '@spartacus/core';
+@NgModule({
+  declarations: [],
+  imports: [],
+  providers: [
+    provideFeatureToggles({
+      authorizationCodeFlowByDefault: true,
+      incrementProcessesCountForMergeCart: true,
+      dispatchLoginActionOnlyWhenTokenReceived: true,
+      cdsLoginEventsToken: true,
+    }),
+  ],
+})
+export class SpartacusFeaturesModule {}
+B.
+src/app/spartacus/spartacus-configuration.module.ts
+=========================================================
+import { AuthConfig, provideConfig } from '@spartacus/core';
+@NgModule({
+  declarations: [],
+  imports: [],
+  providers: [
+    provideConfig(<AuthConfig>{
+      authentication: {
+        client_id: 'mobile_android_public',
+        // Disable CustomLoginGuard (which fetches CSRF on every /login navigation and
+        // fails with 403 on first load before a hybris session exists). We fetch the
+        // CSRF token ourselves in the login component just before the form POST, at
+        // which point the session is already established by loginWithRedirect().
+        customLoginPage: undefined,
+        OAuthLibConfig: {
+          saveNoncesInLocalStorage: true,
+          scope: 'basic',
+          oidc: false,
+        },
+      },
+    }),
+  ],
+})
+export class SpartacusConfigurationModule {}
+C.
+Note use of METHOD, ACTION, NAME attributes and CSRF HIDDEN INPUT
+LOGIN.component.HTML
+==================================
+<form [formGroup]="loginForm" (ngSubmit)="submit()" [attr.method]="method" [attr.action]="action" #loginFormRef>
+  <input type="email" inputmode="email" formControlName="email" name="username"/>
+  <input type="password" formControlName="passw" name="password"/>
+  <input type="hidden" formControlName="csrf"  name="_csrf" />
+  <button type="submit" [disabled]="loginForm.invalid">SUBMIT</button>
+</form>
+D.
+LOGIN.component.TS
+==================================
+import { inject } from '@angular/core';
+import { CSRFResponse, CsrfStateService, AuthConfigService, AuthMultisiteIsolationService, AuthService } from '@spartacus/core';
+export class CUSTOM_LOGIN_COMPONENT {
+  @ViewChild('loginFormRef') loginFormRef?: ElementRef<HTMLElementTagNameMap['form']>;
+  protected csrfStateService = inject(CsrfStateService);
+  protected authConfigService = inject(AuthConfigService);
+  public csrf?: CSRFResponse;
+  public action: string = '';
+  public method: string = '';
+
+  constructor(private authMultisiteIsolationService: AuthMultisiteIsolationService, private authService: AuthService) {}
+
+  ngOnInit() {
+    const pkceVerifier = this.winRef?.localStorage?.getItem('PKCE_verifier');
+    if (!pkceVerifier) {
+      this.authService.loginWithRedirect();
+    }
+
+    this.action = `${this.authConfigService?.getBaseUrl() ?? ''}/login`;
+    this.method = 'POST';
+
+    this.loginForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+      passw: ['', [Validators.required]],
+      csrf: [this.csrf?.token],
+    });
+
+    this.cd.markForCheck();
+  }
+ 
+  submit() {
+    this.csAgentAuthService
+      .getIGACSRFToken(
+        `${this.authConfigService?.getBaseUrl() ?? ''}/csrf`,
+        this.authConfigService?.getClientId() ?? ''
+      )
+      .pipe(take(1))
+      .subscribe(
+        (csrfData) => {
+          this.csrf = csrfData;
+          this.cd.markForCheck();
+
+          this.loginForm?.get('csrf')?.setValue(this.csrf?.token);
+          const csrfInputElem = this.winRef?.document?.getElementsByName('_csrf')?.[0];
+          if (csrfInputElem) {
+            (csrfInputElem as HTMLInputElement).value = this.csrf?.token ?? '';
+          }
+
+          this.csAgentAuthService.setOauthRedirectFlowFlag();
+
+          const email = this.loginForm.get('email')?.value?.toLowerCase();
+          this.authMultisiteIsolationService.decorateUserId(email).pipe(take(1)).subscribe((decoratedEmail) => {
+                this.loginForm?.get('email')?.setValue(decoratedEmail);
+                const userNameInputElem = this.winRef?.document?.getElementsByName('username')?.[0];
+                if (userNameInputElem) {
+                  (userNameInputElem as HTMLInputElement).value = decoratedEmail;
+                }
+
+                this.loginFormRef?.nativeElement?.submit();
+          });
+      }, 
+      () => {
+          // 403 means no hybris session — stale PKCE_verifier. Clear it and restart the flow.
+          this.winRef?.localStorage?.removeItem('PKCE_verifier');
+          this.winRef?.localStorage?.removeItem('nonce');
+          this.authService.loginWithRedirect();
+      });
+  }
+}
 
 
 USER SERVICES
