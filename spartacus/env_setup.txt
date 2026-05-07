@@ -2109,7 +2109,9 @@ export class CUSTOM_LOGIN_COMPONENT {
   public action: string = '';
   public method: string = '';
 
-  constructor(private authMultisiteIsolationService: AuthMultisiteIsolationService, private authService: AuthService) {}
+  constructor(private authMultisiteIsolationService: AuthMultisiteIsolationService, 
+              private authService: AuthService,
+              private customAuthService: CUSTOMAuthService) {}
 
   ngOnInit() {
     const pkceVerifier = this.winRef?.localStorage?.getItem('PKCE_verifier');
@@ -2130,8 +2132,8 @@ export class CUSTOM_LOGIN_COMPONENT {
   }
  
   submit() {
-    this.csAgentAuthService
-      .getIGACSRFToken(
+    this.customAuthService
+      .getAPPCSRFToken(
         `${this.authConfigService?.getBaseUrl() ?? ''}/csrf`,
         this.authConfigService?.getClientId() ?? ''
       )
@@ -2147,7 +2149,7 @@ export class CUSTOM_LOGIN_COMPONENT {
             (csrfInputElem as HTMLInputElement).value = this.csrf?.token ?? '';
           }
 
-          this.csAgentAuthService.setOauthRedirectFlowFlag();
+          this.customAuthService.setOauthRedirectFlowFlag();
 
           const email = this.loginForm.get('email')?.value?.toLowerCase();
           this.authMultisiteIsolationService.decorateUserId(email).pipe(take(1)).subscribe((decoratedEmail) => {
@@ -2166,6 +2168,31 @@ export class CUSTOM_LOGIN_COMPONENT {
           this.winRef?.localStorage?.removeItem('nonce');
           this.authService.loginWithRedirect();
       });
+  }
+}
+E.
+CUSTOMAuthService.service.TS
+===================================
+import { OAUTH_REDIRECT_FLOW_KEY } from '@spartacus/core';
+@Injectable({providedIn: 'root'})
+export class CUSTOMAuthService {
+  public setOauthRedirectFlowFlag(): void {
+    if (this.winRef.isBrowser()) {
+      this.winRef.localStorage?.setItem(OAUTH_REDIRECT_FLOW_KEY, 'true');
+    }
+  }
+
+  public clearOauthRedirectFlowFlag(): void {
+    if (this.winRef.isBrowser()) {
+      this.winRef.localStorage?.removeItem(OAUTH_REDIRECT_FLOW_KEY);
+    }
+  }
+
+  public getAPPCSRFToken(csrfEndpoint: string, client_id: string): Observable<any> {
+    const qParams = { client_id };
+    return this.http
+      .get(csrfEndpoint, { withCredentials: true, params: new HttpParams({ fromObject: qParams }) })
+      .pipe(catchError((err) => throwError(err)));
   }
 }
 
