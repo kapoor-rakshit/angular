@@ -32,7 +32,7 @@ Once done with updating hosts file, to run project on HTTPS use following comman
 A.
 with certificates
 > ng serve --host cstore.local --disable-host-check --ssl --ssl-key .\\certs\\localhost.key --ssl-cert .\\certs\\localhost.crt
-OR
+B.
 without certificates
 > ng serve --host cstore.local --allowed-hosts=all --ssl
 
