@@ -162,9 +162,11 @@ is updated with following configuration:
 127.0.0.1       supermarkets.local
 NOTE: You might need ADMIN RIGHTS on your machine for updating this file.
 Once done with updating hosts file, to run project use following command:
+NOTE use of --disable-host-check OR --allowed-hosts=all
 > ng serve --host cstore.local --disable-host-check
+> ng serve --host campbells.local --allowed-hosts=all
 NOTE:
-To run localhost or any local domain on HTTPS, REFER  `misc/localhost-https.txt`  notes
+To run localhost or any other local domain on HTTPS, REFER  `misc/localhost-https.txt`  notes
 
 NOTE:
 If while running on local, compiler throws some error like SSL/SOCKET etc,
@@ -2940,7 +2942,7 @@ NOTES:
 1. Adding `?` operator makes that prop as optional.
    OR
    Use `Partial<INTERFACE>`, to specify that ALL properties within INTERFACE are optional, regardless of use of '?' operator against each prop.
-2. Use `Required<INTERFACE>`, to make all properties of INTERFACE required (removes optional modifiers).
+2. Use `Required<INTERFACE>`, to make ALL properties of INTERFACE required (irrespective of optional modifiers (?) added to individual keys).
 3. Use `Pick<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by picking a set of properties specified as KEYS from INTERFACE.
 4. Use `Omit<INTERFACE, 'KEY-1' | 'KEY-2'>` constructs interface by excluding a set of properties specified as KEYS from INTERFACE.
 5. Extend an interface by declaring it again, it will have all properties within it's same name.
