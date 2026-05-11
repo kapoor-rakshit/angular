@@ -1,4 +1,4 @@
-// This setup will guide to run localhost:4200 on https
+// This setup will guide to run localhost:4200 on https://
 
 1. cd <PROJECT_NAME> and create a new folder `certs` where we have `package.json` file for this directory.
 2. Inside `certs` directory, create a new file `certificate.config`
@@ -28,5 +28,11 @@ is updated with following configuration:
 127.0.0.1       cstore.local
 127.0.0.1       supermarkets.local
 NOTE: You might need ADMIN RIGHTS on your machine for updating this file.
-Once done with updating hosts file, to run project use following command:
+Once done with updating hosts file, to run project on HTTPS use following command:
+A.
+with certificates
 > ng serve --host cstore.local --disable-host-check --ssl --ssl-key .\\certs\\localhost.key --ssl-cert .\\certs\\localhost.crt
+OR
+without certificates
+> ng serve --host cstore.local --allowed-hosts=all --ssl
+
