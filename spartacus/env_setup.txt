@@ -2032,15 +2032,15 @@ export class CUSTOM-LogoutGuard extends LogoutGuard {
 IMPORTANT NOTE
 -----------------------------
 AFTER UPGRADING TO SPARTACUS VERSION 221121.1 or later AND related HYBRIS COMMERCE CLOUD VERSION 2211-jdk21.1 or later,
-ABOVE METHOD TO LOGIN WILL NOT WORK.
+ABOVE METHOD TO LOGIN WILL NOT WORK, AS IT NOW REQUIRES A NATIVE HTML FORM SUBMISSION.
 SAP Commerce Cloud now uses Authorization Code Grant with Proof Key for Code Exchange (PKCE).
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
 It follows an API sequence for login process:
       1. /authorizationserver/csrf
       2. /authorizationserver/login
       3. /authorizationserver/oauth/authorize
       4. ?code
       5. /authorizationserver/oauth/token
-REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
 A.
 If composable storefront is generated at version 221121.1 or newer, these toggles are enabled by default.
 If you are updating composable storefront from version 2211.43 or older to version 221121.1 or newer, you need to manually enable these toggles.
