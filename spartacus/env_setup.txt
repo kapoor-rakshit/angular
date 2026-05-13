@@ -2119,6 +2119,7 @@ export class CUSTOM_LOGIN_COMPONENT {
     const pkceVerifier = this.winRef?.localStorage?.getItem('PKCE_verifier');
     if (!pkceVerifier) {
       this.authService.loginWithRedirect();
+      return;
     }
 
     this.action = `${this.authConfigService?.getBaseUrl() ?? ''}/login`;
