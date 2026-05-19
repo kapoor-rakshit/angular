@@ -2093,7 +2093,9 @@ LOGIN.component.HTML
 <form [formGroup]="loginForm" (ngSubmit)="submit()" [attr.method]="method" [attr.action]="action" #loginFormRef>
   <input type="email" inputmode="email" formControlName="email" name="username"/>
   <input type="password" formControlName="passw" name="password"/>
+  <!-- OAuth SPECIFIC CSRF FIELD --><!-- DO NOT CHANGE -->
   <input type="hidden" formControlName="csrf"  name="_csrf" />
+  <!-- OAuth SPECIFIC CSRF FIELD --><!-- DO NOT CHANGE -->
   <button type="submit" [disabled]="loginForm.invalid">SUBMIT</button>
 </form>
 D.
@@ -2116,6 +2118,9 @@ export class CUSTOM_LOGIN_COMPONENT {
   ngOnInit() {
     this.handleCustomLoginError();
 
+    // PKCE_verifier is absent on the very first visit (nothing preserved).
+    // Once loginWithRedirect() fires and the browser returns from hybris,
+    // the verifier is in localStorage — skip redirect and show the form.
     const pkceVerifier = this.winRef?.localStorage?.getItem('PKCE_verifier');
     if (!pkceVerifier) {
       this.authService.loginWithRedirect();
@@ -2166,10 +2171,7 @@ export class CUSTOM_LOGIN_COMPONENT {
  
   submit() {
     this.customAuthService
-      .getAPPCSRFToken(
-        `${this.authConfigService?.getBaseUrl() ?? ''}/csrf`,
-        this.authConfigService?.getClientId() ?? ''
-      )
+      .getAPPCSRFToken(`${this.authConfigService?.getBaseUrl() ?? ''}/csrf`)
       .pipe(take(1))
       .subscribe(
         (csrfData) => {
@@ -2197,8 +2199,7 @@ export class CUSTOM_LOGIN_COMPONENT {
       }, 
       () => {
           // 403 means no hybris session — stale PKCE_verifier. Clear it and restart the flow.
-          this.winRef?.localStorage?.removeItem('PKCE_verifier');
-          this.winRef?.localStorage?.removeItem('nonce');
+          this.customAuthService.clearOauthRedirectFlowFlag();
           this.authService.loginWithRedirect();
       });
   }
@@ -2223,11 +2224,8 @@ export class CUSTOMAuthService {
     }
   }
 
-  public getAPPCSRFToken(csrfEndpoint: string, client_id: string): Observable<any> {
-    const qParams = { client_id };
-    return this.http
-      .get(csrfEndpoint, { withCredentials: true, params: new HttpParams({ fromObject: qParams }) })
-      .pipe(catchError((err) => throwError(err)));
+  public getAPPCSRFToken(csrfEndpoint: string): Observable<any> {
+    return this.http.get(csrfEndpoint, { withCredentials: true }).pipe(catchError((err) => throwError(err)));
   }
 }
 
