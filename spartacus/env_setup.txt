@@ -2036,11 +2036,15 @@ ABOVE METHOD TO LOGIN WILL NOT WORK, AS IT NOW REQUIRES A NATIVE HTML FORM SUBMI
 SAP Commerce Cloud now uses Authorization Code Grant with Proof Key for Code Exchange (PKCE).
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
 It follows an API sequence for login process:
+      0. /authorizationserver/oauth/authorize (to get initial PKCE_verifier, nonce, JSESSION_ID etc... saved in LOCALSTORAGE)
       1. /authorizationserver/csrf
       2. /authorizationserver/login
       3. /authorizationserver/oauth/authorize
       4. ?code
       5. /authorizationserver/oauth/token
+To change validity timeout of PKCE_verifier, nonce, JSESSION_ID etc... that are saved in LOCALSTORAGE, change below property in CCv2
+      authorizationserver.session.timeout=300
+To change validity timeout of access_token, refresh_token etc... that is returned on success `/token`, change in BackOffice for that `client_id`
 A.
 If composable storefront is generated at version 221121.1 or newer, these toggles are enabled by default.
 If you are updating composable storefront from version 2211.43 or older to version 221121.1 or newer, you need to manually enable these toggles.
