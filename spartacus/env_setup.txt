@@ -2036,7 +2036,7 @@ ABOVE METHOD TO LOGIN WILL NOT WORK, AS IT NOW REQUIRES A NATIVE HTML FORM SUBMI
 SAP Commerce Cloud now uses Authorization Code Grant with Proof Key for Code Exchange (PKCE).
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
 It follows an API sequence for login process:
-      0. /authorizationserver/oauth/authorize (to get initial PKCE_verifier, nonce, JSESSION_ID etc... saved in LOCALSTORAGE)
+      0. /authorizationserver/oauth/authorize     (to get initial PKCE_verifier, nonce, JSESSION_ID etc... saved in LOCALSTORAGE)
       1. /authorizationserver/csrf
       2. /authorizationserver/login
       3. /authorizationserver/oauth/authorize
@@ -2049,7 +2049,7 @@ A.
 If composable storefront is generated at version 221121.1 or newer, these toggles are enabled by default.
 If you are updating composable storefront from version 2211.43 or older to version 221121.1 or newer, you need to manually enable these toggles.
 src\app\spartacus\spartacus-features.module.ts
-=======================================================
+-------------------------------------------------------------
 import { provideFeatureToggles } from '@spartacus/core';
 @NgModule({
   declarations: [],
@@ -2066,7 +2066,7 @@ import { provideFeatureToggles } from '@spartacus/core';
 export class SpartacusFeaturesModule {}
 B.
 src/app/spartacus/spartacus-configuration.module.ts
-=========================================================
+-------------------------------------------------------------
 import { AuthConfig, provideConfig } from '@spartacus/core';
 @NgModule({
   declarations: [],
@@ -2093,7 +2093,7 @@ export class SpartacusConfigurationModule {}
 C.
 Note use of METHOD, ACTION, NAME attributes and CSRF HIDDEN INPUT
 LOGIN.component.HTML
-==================================
+------------------------------------
 <form [formGroup]="loginForm" (ngSubmit)="submit()" [attr.method]="method" [attr.action]="action" #loginFormRef>
   <input type="email" inputmode="email" formControlName="email" name="username"/>
   <input type="password" formControlName="passw" name="password"/>
@@ -2104,7 +2104,7 @@ LOGIN.component.HTML
 </form>
 D.
 LOGIN.component.TS
-==================================
+------------------------------------
 import { inject } from '@angular/core';
 import { CSRFResponse, CsrfStateService, AuthConfigService, AuthMultisiteIsolationService, AuthService } from '@spartacus/core';
 export class CUSTOM_LOGIN_COMPONENT {
@@ -2208,12 +2208,15 @@ export class CUSTOM_LOGIN_COMPONENT {
       });
   }
 }
-E.
+E.1.
+in APP.MODULE.TS, add to providers array to override builtin OAuth methods if required
+{ provide: AuthService, useExisting: CUSTOMAuthService }
+E.2.
 CUSTOMAuthService.service.TS
-===================================
+------------------------------------------
 import { OAUTH_REDIRECT_FLOW_KEY } from '@spartacus/core';
 @Injectable({providedIn: 'root'})
-export class CUSTOMAuthService {
+export class CUSTOMAuthService extends AuthService {
   public setOauthRedirectFlowFlag(): void {
     if (this.winRef.isBrowser()) {
       this.winRef.localStorage?.setItem(OAUTH_REDIRECT_FLOW_KEY, 'true');
@@ -2230,6 +2233,29 @@ export class CUSTOMAuthService {
 
   public getAPPCSRFToken(csrfEndpoint: string): Observable<any> {
     return this.http.get(csrfEndpoint, { withCredentials: true }).pipe(catchError((err) => throwError(err)));
+  }
+
+  // OVERRIDE METHOD TO PREVENT DEFAULT OAuth FLOW
+  override async checkOAuthParamsInUrl(): Promise<void> {
+    // Skip Spartacus OAuth handling for custom SSO callback
+    if (this.winRef?.nativeWindow?.location?.pathname?.includes('/sso/gettoken')) {
+      return;
+    }
+
+    return super.checkOAuthParamsInUrl();
+  }
+
+  // OVERRIDE METHOD TO ADD ANY CUSTOM CLIENT_ID IN OAuth FLOW
+  override refreshAuthConfig() {
+    const ASMLoginInFlight = this.winRef?.localStorage?.getItem(LOCALSTORAGE_KEYS.USER_LOGIN_TYPE) === LOGIN_TYPES.ASM;
+
+    if ((!!this.featureToggles.authorizationCodeFlowByDefault && this.isAsmEnabled()) || ASMLoginInFlight) {
+      this.oAuthLibWrapperService.changeAuthConfigClientId(CUSTOM_ASM_CLIENT_ID);
+      this.updateIsUsingASMClient(true);
+    } else {
+      this.oAuthLibWrapperService.refreshAuthConfig();
+      this.updateIsUsingASMClient(false);
+    }
   }
 }
 
