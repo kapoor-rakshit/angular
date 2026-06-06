@@ -9,7 +9,6 @@ import { NgExpressEngineDecorator } from '@spartacus/setup/ssr';
 import * as express from 'express';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { checkCategoryPageUrl, checkPDPPageUrl, checkSearchAndContentPageUrl } from 'server/server-api';
 import { AppServerModule } from './src/main.server';
 
 const ngExpressEngine = NgExpressEngineDecorator.get(engine, { timeout: 3000 });
@@ -41,9 +40,6 @@ export function app() {
     })
   );
 
-  checkCategoryPageUrl(server, indexHtml);
-  checkPDPPageUrl(server, indexHtml);
-  checkSearchAndContentPageUrl(server, indexHtml);
   return server;
 }
 
