@@ -42,12 +42,12 @@ js-storefront/manifest.json
 Configure JS Apps hostnames on CCv2 / HAC
 PROJECT_NAME_1_FOR_CCv2 / PROJECT_NAME_2_FOR_CCv2 are values from `<application.name>` key in `js-storefront/manifest.json`
 =======================================================
-jsapps.PROJECT_NAME_1_FOR_CCv2.servername.0=uat3campbells.x.sorted.au
-jsapps.PROJECT_NAME_2_FOR_CCv2.servername.0=uat3cstore.x.sorted.au
+jsapps.PROJECT_NAME_1_FOR_CCv2.servername.0=uat1.x.au
+jsapps.PROJECT_NAME_2_FOR_CCv2.servername.0=uat2.x.au
 
 3.
 Configure OCC endpoints on CCv2 / HAC
 PROJECT_NAME_1_FOR_CCv2 / PROJECT_NAME_2_FOR_CCv2 are values from `<application.name>` key in `js-storefront/manifest.json`
 =======================================================
-ccv2.occ.backend.base.url.PROJECT_NAME_1_FOR_CCv2.value=https://uat3apicampbells.x.sorted.au
-ccv2.occ.backend.base.url.PROJECT_NAME_2_FOR_CCv2.value=https://uat3apicstore.x.sorted.au
+ccv2.occ.backend.base.url.PROJECT_NAME_1_FOR_CCv2.value=https://uat1_API.x.au
+ccv2.occ.backend.base.url.PROJECT_NAME_2_FOR_CCv2.value=https://uat2_API.x.au
