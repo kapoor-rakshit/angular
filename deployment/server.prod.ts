@@ -11,7 +11,6 @@ import { join } from 'path';
 
 import { AppServerModule } from './src/main.server';
 import { existsSync } from 'fs';
-import { checkCategoryPageUrl, checkPDPPageUrl, checkSearchAndContentPageUrl } from 'server/server-api';
 
 const ngExpressEngine = NgExpressEngineDecorator.get(engine);
 
@@ -47,10 +46,6 @@ export function app() {
   //     providers: [{ provide: APP_BASE_HREF, useValue: req.baseUrl }],
   //   });
   // });
-
-  checkCategoryPageUrl(server, indexHtml);
-  checkPDPPageUrl(server, indexHtml);
-  checkSearchAndContentPageUrl(server, indexHtml);
 
   return server;
 }
