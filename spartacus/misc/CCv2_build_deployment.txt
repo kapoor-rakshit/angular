@@ -1,0 +1,53 @@
+1.
+`manifest.json` file is placed outside <ANGULAR_PROJECT_NAME> dir, but inside `js-storefront` REPOSITORY i.e.
+<ANGULAR_PROJECT_NAME> directory and this JSON file are at same level.
+For each application defined here in `manifest.json`, build process checks if `<application.path>/dist` dir exists. 
+If it doesn’t exist, build process runs commands,
+For Client-Side Rendering (CSR) => yarn install && yarn build   |   For Server Side Rendering (SSR) => yarn install && yarn build:ssr
+js-storefront/manifest.json
+===============================================
+{
+  "applications": [
+    {
+      "name": "PROJECT_NAME_1_FOR_CCv2",
+      "path": "ANGULAR_PROJECT_NAME_1",
+      "nodeVersion": "18",
+      "ssr": {
+        "enabled": false,
+        "path": "dist/ANGULAR_PROJECT_NAME_1/server/server.mjs"
+      },
+      "csr": {
+        "webroot": "dist/ANGULAR_PROJECT_NAME_1/browser/"
+      },
+      "enabledRepositories": ["spartacus-6-cdn"]
+    },
+    {
+      "name": "PROJECT_NAME_2_FOR_CCv2",
+      "path": "ANGULAR_PROJECT_NAME_2",
+      "nodeVersion": "18",
+      "ssr": {
+        "enabled": false,
+        "path": "dist/ANGULAR_PROJECT_NAME_2/server/server.mjs"
+      },
+      "csr": {
+        "webroot": "dist/ANGULAR_PROJECT_NAME_2/browser/"
+      },
+      "enabledRepositories": ["spartacus-6-cdn"]
+    }
+  ],
+  "nodeVersion": "18"
+}
+
+2.
+Configure JS Apps hostnames on CCv2 / HAC
+PROJECT_NAME_1_FOR_CCv2 / PROJECT_NAME_2_FOR_CCv2 are values from `<application.name>` key in `js-storefront/manifest.json`
+=======================================================
+jsapps.PROJECT_NAME_1_FOR_CCv2.servername.0=uat3campbells.x.sorted.au
+jsapps.PROJECT_NAME_2_FOR_CCv2.servername.0=uat3cstore.x.sorted.au
+
+3.
+Configure OCC endpoints on CCv2 / HAC
+PROJECT_NAME_1_FOR_CCv2 / PROJECT_NAME_2_FOR_CCv2 are values from `<application.name>` key in `js-storefront/manifest.json`
+=======================================================
+ccv2.occ.backend.base.url.PROJECT_NAME_1_FOR_CCv2.value=https://uat3apicampbells.x.sorted.au
+ccv2.occ.backend.base.url.PROJECT_NAME_2_FOR_CCv2.value=https://uat3apicstore.x.sorted.au
