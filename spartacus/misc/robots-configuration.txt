@@ -29,14 +29,16 @@ export class CUSTOM-BasePageMetaResolver extends BasePageMetaResolver {
   ) {
     super(cmsService, translation, routingPageMetaResolver, router, pageLinkService);
   }
-  protected override robots$: Observable<PageRobotsMeta[]> = this.page$.pipe(
-    map((page) => {
-      if (environment.production && page.template === 'ProductListPageTemplate') {
-        return [PageRobotsMeta.FOLLOW, PageRobotsMeta.INDEX];
-      }
-      return [PageRobotsMeta.NOFOLLOW, PageRobotsMeta.NOINDEX];
-    })
-  );
+  override resolveRobots(): Observable<PageRobotsMeta[]> {
+    return this.page$.pipe(
+      switchMap((page) => {
+        if (environment.production && page.template === 'ProductListPageTemplate') {
+          return of([PageRobotsMeta.FOLLOW, PageRobotsMeta.INDEX]);
+        }
+        return super.resolveRobots();
+      })
+    );
+  }
 }
 0.B. APP.MODULE.TS
 =======================================================
