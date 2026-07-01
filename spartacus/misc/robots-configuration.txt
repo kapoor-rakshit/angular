@@ -13,6 +13,36 @@ nofollow
 Do not follow the links on this page.
 If you don't specify this rule, Search Engine may use the links on the page to discover those linked pages.
 
+NOTE: IF BACKEND IS UNABLE TO CHANGE `/pages` APIs `robotTag` KEY, USE CUSTOM RESOLVER IN FRONTEND TO OVERRIDE
+0.A. CUSTOM-BasePageMetaResolver.TS
+=================================================
+import {BasePageMetaResolver, CmsService, PageLinkService, PageRobotsMeta, RoutingPageMetaResolver, TranslationService} from '@spartacus/core';
+import { environment } from '../../../environments/environment';
+@Injectable({providedIn: 'root'})
+export class CUSTOM-BasePageMetaResolver extends BasePageMetaResolver {
+  constructor(
+    protected override cmsService: CmsService,
+    protected override translation: TranslationService,
+    protected override routingPageMetaResolver: RoutingPageMetaResolver,
+    protected override router: Router,
+    protected override pageLinkService: PageLinkService
+  ) {
+    super(cmsService, translation, routingPageMetaResolver, router, pageLinkService);
+  }
+  protected override robots$: Observable<PageRobotsMeta[]> = this.page$.pipe(
+    map((page) => {
+      if (environment.production && page.template === 'ProductListPageTemplate') {
+        return [PageRobotsMeta.FOLLOW, PageRobotsMeta.INDEX];
+      }
+      return [PageRobotsMeta.NOFOLLOW, PageRobotsMeta.NOINDEX];
+    })
+  );
+}
+0.B. APP.MODULE.TS
+=======================================================
+import {BasePageMetaResolver} from '@spartacus/core';
+providers: [ {provide: BasePageMetaResolver, useExisting: CUSTOM-BasePageMetaResolver} ]
+
 
 1. src\robots.txt
 NOTE: THIS FILE IS UPLOADED TO CCv2 PORTAL IN STATIC FILES
@@ -56,6 +86,7 @@ User-agent: MJ12bot
 Disallow: /
 
 Sitemap: https://YOUR-APP-SITE/sitemap.xml
+
 
 2. angular.json
 ===========================================
