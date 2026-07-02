@@ -46,10 +46,31 @@ import {BasePageMetaResolver} from '@spartacus/core';
 providers: [ {provide: BasePageMetaResolver, useExisting: CUSTOM-BasePageMetaResolver} ]
 
 
-1. src\robots.txt
-NOTE: THIS FILE IS UPLOADED TO CCv2 PORTAL IN STATIC FILES
-      AND IS ALSO KEPT IN FRONTEND CODE SO THAT IT IS ACCESSIBLE VIA https://YOUR-APP-SITE/robots.txt
-=============================================================================================================
+1.A. UPLOAD STATIC FILES TO CCv2
+========================================
+REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/0fa6bcf4736c46f78c248512391eb467/f5f8f622e9ac4f49a04cada647cdcb92.html?locale=en-US
+           https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/0fa6bcf4736c46f78c248512391eb467/2c29807b8f6a4115a3117fa6088199ed.html?locale=en-US
+- Create a single folder containing all static files and ZIP it, so that it is less than 1 MB in size.
+  This includes maintenancePage.html(s), robots.txt, sitemap.xml   etc...
+- On CCv2, from the navigation menu, select `Static Files`  >  `Create`
+  Add name, description, browse & upload .ZIP
+- To add this static file set to an endpoint of an environment, select `Environments` from navigation menu.
+- Select an environment  >  `Public Endpoints` panel
+  click the name of an endpoint in that environment  eg: `YOUR-APP-SITE`
+- Scroll to `Static Files` panel and
+  select a static file set to apply from the option(s), SAVE your changes.
+- To check where a static file set is applied,
+  open the `Static Files` page from the navigation menu and find the column for Connected Endpoints.
+  the label in that column identifies the `<environment_name:endpoint_name>` where the static file set was applied.
+Eg:
+robots.txt         > https://YOUR-APP-SITE/robots.txt 
+error/503.html     > https://YOUR-APP-SITE/error/503.html
+static/health.html > https://YOUR-APP-SITE/static/health.html 
+
+1.B. src\robots.txt
+NOTE: THIS FILE IS UPLOADED TO CCv2 PORTAL IN STATIC FILES SO THAT IT IS ACCESSIBLE VIA https://YOUR-APP-SITE/robots.txt
+      AND IS ALSO KEPT IN FRONTEND CODE AS FALLBACK, INCASE CCv2 ENV DOES NOT HAVE IT, THIS FILE FROM FRONTEND WILL BE USED
+============================================================================================================================
 # For all robots
 User-agent: *
 
