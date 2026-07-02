@@ -1,0 +1,27 @@
+Creation of maintenance page
+=====================================================
+Create a folder with the name `error` and store the HTML file `503.html` there.
+NOTE: The Apache server only pulls files from the path `error/503.html` 
+
+If the customised maintenance page contains images, add the images to the error folder and use the /error/<name>.jpg file path.
+Eg: <img src="/error/logo.svg" alt="Logo">
+
+Add this `error` folder having 503.html and assets(if any) to another folder that will be .ZIPed,
+as it already has other static files or folders like `robots.txt` , `sitemap.xml` , `static/health.html`   etc...
+Add the ZIP file as a static file set on CCv2 to your environment
+REFER: 1.A. UPLOAD STATIC FILES TO CCv2   in   `misc/robots-sitemap-configuration.txt`
+Eg:
+robots.txt         > https://YOUR-APP-SITE/robots.txt 
+error/503.html     > https://YOUR-APP-SITE/error/503.html
+static/health.html > https://YOUR-APP-SITE/static/health.html
+
+
+Activating / Deactivating Maintenance Mode for an endpoint
+===============================================================
+From the navigation menu, click `Environments`. 
+Select the environment where you want to activate / deactivate maintenance mode. 
+
+In the `Public Endpoints` panel, find the endpoint where you want to activate / deactivate maintenance mode. 
+Click the options icon at the end of the endpoint row and select Activate / Deactivate maintenance mode. 
+
+Click Activate / Deactivate to confirm the action.  
