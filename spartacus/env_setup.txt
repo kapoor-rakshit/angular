@@ -2049,7 +2049,6 @@ ImpEx
 ------------------------------------
 $client_id = mobile_android_public
 $commonRedirectUrls = https://localhost:4200, https://uat.com.au
-
 INSERT_UPDATE OAuthClientDetails; clientId[unique = true]; scope ; authorizedGrantTypes             ; authorities ; loginPageUri            ; registeredRedirectUri; public; requireProofKey; requireAuthorizationConsent; authorizationCodeValiditySeconds; oidcTokenValiditySeconds; accessTokenValiditySeconds; refreshTokenValiditySeconds
                                 ; $client_id             ; basic ; authorization_code,refresh_token ; ROLE_CLIENT ; {redirectUriHost}/login ; $commonRedirectUrls  ; true  ; true           ; false                      ; 300                             ; 1800                    ; 14400                     ; 14400
 
