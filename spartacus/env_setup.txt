@@ -2035,6 +2035,49 @@ AFTER UPGRADING TO SPARTACUS VERSION 221121.1 or later AND related HYBRIS COMMER
 ABOVE METHOD TO LOGIN WILL NOT WORK, AS IT NOW REQUIRES A NATIVE HTML FORM SUBMISSION.
 SAP Commerce Cloud now uses Authorization Code Grant with Proof Key for Code Exchange (PKCE).
 REFERENCE: https://help.sap.com/docs/SAP_COMMERCE_COMPOSABLE_STOREFRONT/eaef8c61b6d9477daf75bff9ac1b7eb4/7e237cc1245c43219e0a957a2cfa81c2.html?locale=en-US
+           https://help.sap.com/docs/SAP_COMMERCE_CLOUD_PUBLIC_CLOUD/aa417173fe4a4ba5a473c93eb730a417/ca1176a372b242a6abd75a39fe803eea.html
+ANOTHER REQUIREMENT IS THAT NOW STOREFRONT AND API NODE SHOULD RUN ON SAME DOMAIN / SUB-DOMAIN
+Eg: 
+STOREFRONT    : https://dev1.x.com.au
+API_BASE_URL  : https://dev1api.x.com.au
+ALSO, MINIMUM JDK VERSION REQUIRED FOR BACKEND / HYBRIS IS   `2211-jdk21.11`
+BECAUSE IT SUPPORTS DYNAMIC LOGIN PAGE REDIRECTION_URI AND IS NECESSARY FOR A MULTI-SITE STOREFRONT.
+TWO IMPORTANT PARAMETERS IN ImpEx FILE ARE
+- registeredRedirectUri  : COMMA SEPARATED VALUES OF AVAILABLE / ALLOWED DOMAINS FOR THIS CLIENT_ID
+- loginPageUri           : {redirectUriHost}/login
+ImpEx
+------------------------------------
+$client_id = mobile_android_public
+$commonRedirectUrls = https://localhost:4200, https://uat.com.au
+
+INSERT_UPDATE OAuthClientDetails; clientId[unique = true]; scope ; authorizedGrantTypes             ; authorities ; loginPageUri            ; registeredRedirectUri; public; requireProofKey; requireAuthorizationConsent; authorizationCodeValiditySeconds; oidcTokenValiditySeconds; accessTokenValiditySeconds; refreshTokenValiditySeconds
+                                ; $client_id             ; basic ; authorization_code,refresh_token ; ROLE_CLIENT ; {redirectUriHost}/login ; $commonRedirectUrls  ; true  ; true           ; false                      ; 300                             ; 1800                    ; 14400                     ; 14400
+
+Hybris FILE / METHOD TO OVERRIDE REDIRECTION LOGIC
+THAT CAN SUPPORT
+- LOCAL       (WITH PORT ':4200')  i.e  localhost:4200
+  AND 
+- ENVIRONMENT (WITHOUT PORT)       i.e. uat.com.au
+---------------------------------------------------------
+import org.apache.commons.lang3.StringUtils;
+import com.sap.cx.commerce.platform.oauth2.authorizationserver.customlogin.PlaceholderProviderContext;
+import com.sap.cx.commerce.platform.oauth2.authorizationserver.customlogin.PlaceholderResolutionException;
+import com.sap.cx.commerce.platform.oauth2.authorizationserver.customlogin.impl.RedirectUriHostPlaceholderProvider;
+public class CustomRedirectUriHostPlaceholderProvider extends RedirectUriHostPlaceholderProvider {
+    @Override
+    public String resolveValue(PlaceholderProviderContext context) throws PlaceholderResolutionException {
+        String redirectUri = context.getRedirectUri();
+        if (StringUtils.isBlank(redirectUri)) {
+            throw new PlaceholderResolutionException("redirect_uri is not available");
+        }
+        return redirectUri;
+    }
+    @Override
+    public String getSampleValue() {
+        return "https://example.com";
+    }
+}
+
 It follows an API sequence for login process:
       0. /authorizationserver/oauth/authorize     (to get initial PKCE_verifier, nonce, JSESSION_ID etc... saved in LOCALSTORAGE)
       1. /authorizationserver/csrf
