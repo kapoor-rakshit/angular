@@ -2042,11 +2042,11 @@ STOREFRONT    : https://dev1.x.com.au
 API_BASE_URL  : https://dev1_API.x.com.au
 ALSO, MINIMUM JDK VERSION REQUIRED FOR BACKEND / HYBRIS IS   `2211-jdk21.11`
 BECAUSE IT SUPPORTS DYNAMIC LOGIN PAGE REDIRECTION_URI AND IS NECESSARY FOR A MULTI-SITE STOREFRONT.
+ImpEx
 TWO IMPORTANT PARAMETERS IN ImpEx FILE ARE
 - registeredRedirectUri  : COMMA SEPARATED VALUES OF AVAILABLE / ALLOWED DOMAINS FOR THIS CLIENT_ID
 - loginPageUri           : {redirectUriHost}/login
-ImpEx
-------------------------------------
+-----------------------------------------------------------
 $client_id = mobile_android_public
 $commonRedirectUrls = https://localhost:4200, https://uat.com.au
 INSERT_UPDATE OAuthClientDetails; clientId[unique = true]; scope ; authorizedGrantTypes             ; authorities ; loginPageUri            ; registeredRedirectUri; public; requireProofKey; requireAuthorizationConsent; authorizationCodeValiditySeconds; oidcTokenValiditySeconds; accessTokenValiditySeconds; refreshTokenValiditySeconds
