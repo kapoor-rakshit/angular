@@ -223,6 +223,43 @@ export class UpdateUserIdInterceptor implements HttpInterceptor {
   }
 }
 
+MISC. IMPORTANT NOTES
+=================================
+If we want to modify some functionality that is builtin / provided out-of-box, then:
+- OVERRIDE THAT SERVICE's METHOD BY INHERITING BUILT-IN CLASS
+  Eg:
+  APP.MODULE.TS
+  ------------------------------
+  providers: [{ provide: AuthService, useExisting: CUSTOM-AuthService }]
+  CUSTOM-AuthService.TS
+  -------------------------------
+  @Injectable({providedIn: 'root'})
+  export class CUSTOM-AuthService extends AuthService {
+      override async coreLogout() { super.coreLogout().then(() => this.performPostLogoutActions()); }
+
+      override refreshAuthConfig() { }
+  }
+
+  OR
+
+- CHANGE API ENDPOINT FOR THAT KEY IN `api-endpoints.ts` FILE THAT IS CONFIGURED IN `src\app\spartacus\spartacus-configuration.module.ts`
+  Eg:
+  export const CUSTOMApiEndpoints = {
+  backend: {
+    occ: {
+      endpoints: {
+            pages: '/cms/pages',
+            components: '/cms/components',
+            cart: 'users/${userId}/carts/${cartId}?fields=FULL',
+            carts: 'users/${userId}/carts?fields=FULL'
+      }
+  }}}
+
+  OR
+
+- USE ANGULAR HTTP INTERCEPTORS TO MODIFY REQUEST / RESPONSE and DISPATCH RELEVANT ACTIONS TO ngRx STORE
+
+
 HAC (Hybris Administrative Console or BackOffice Admin Console)
 =====================================================================
 It is for administrator to handle entire functions and operations in website like:
